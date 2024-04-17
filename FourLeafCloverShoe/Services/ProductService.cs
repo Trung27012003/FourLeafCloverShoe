@@ -1,0 +1,133 @@
+﻿using FourLeafCloverShoe.Data;
+using FourLeafCloverShoe.IServices;
+using FourLeafCloverShoe.Share.Models;
+using Microsoft.EntityFrameworkCore;
+
+namespace FourLeafCloverShoe.Services
+{
+    public class ProductService : IProductService
+    {
+        private readonly MyDbContext _myDbContext;
+
+        public ProductService(MyDbContext myDbContext)
+        {
+            _myDbContext = myDbContext;
+        }
+        public async Task<bool> Add(Product obj)
+        {
+            try
+            {
+                obj.CreateAt = DateTime.Now;
+                await _myDbContext.Products.AddAsync(obj);
+                await _myDbContext.SaveChangesAsync();
+                return true;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                return false;
+            }
+        }
+
+        public async Task<bool> AddMany(List<Product> lstobj)
+        {
+            try
+            {
+                await _myDbContext.Products.AddRangeAsync(lstobj);
+                await _myDbContext.SaveChangesAsync();
+                return true;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                return false;
+            }
+        }
+
+        public async Task<bool> Delete(Guid Id)
+        {
+            try
+            {
+                var obj = await GetById(Id);
+                if (obj != null)
+                {
+                    _myDbContext.Products.Remove(obj);
+                    await _myDbContext.SaveChangesAsync();
+                    return true;
+                }
+                return false;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                return false;
+            }
+        }
+
+        public async Task<Product> GetById(Guid Id)
+        {
+            try
+            {
+                var obj = await _myDbContext.Products.FindAsync(Id);
+                if (obj != null)
+                {
+
+                    return obj;
+                }
+                return new Product();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                return new Product();
+            }
+        }
+
+        public async Task<List<Product>> Gets()
+        {
+            try
+            {
+                var obj = await _myDbContext.Products.ToListAsync();
+                if (obj != null)
+                {
+
+                    return obj;
+                }
+                return new List<Product>();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                return new List<Product>();
+            }
+        }
+
+        public async Task<bool> Update(Product obj)
+        {
+            try
+            {
+                var objFromDb = await GetById(obj.Id);
+                if (obj != null)
+                {
+                    objFromDb.CategoryId = obj.CategoryId;
+                    objFromDb.BrandId = obj.BrandId;
+                    objFromDb.ProductCode = obj.ProductCode;
+                    objFromDb.ProductName = obj.ProductName;
+                    objFromDb.AvailableQuantity = obj.AvailableQuantity;
+                    objFromDb.UpdateAt = DateTime.Now;
+                    objFromDb.Description = obj.Description;
+                    objFromDb.Status = obj.Status;
+                    _myDbContext.Products.Update(objFromDb);
+                    await _myDbContext.SaveChangesAsync();
+                    return true;
+                }
+                return false;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                return false;
+            }
+        }
+    }
+}

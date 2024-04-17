@@ -1,0 +1,34 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    @Html.Partial("~/Areas/Admin/Shared/TitleMeta.cshtml")
+
+    @RenderSection("styles", required: false)
+
+    @Html.Partial("~/Areas/Admin/Shared/HeadCSS.cshtml")
+</head>
+<body data-pc-preset="preset-1" data-pc-sidebar-theme="light" data-pc-sidebar-caption="true" data-pc-direction="ltr" data-pc-theme="light">
+
+    @Html.Partial("~/Areas/Admin/Shared/LayoutVertical.cshtml")
+
+    <div class="pc-container">
+        <div class="pc-content">
+
+            @Html.Partial("~/Areas/Admin/Shared/Breadcrumb.cshtml")
+
+            @RenderBody()
+
+        </div>
+    </div>
+
+    @RenderSection("externalhtml", required: false)
+
+    @Html.Partial("~/Areas/Admin/Shared/Footer.cshtml")
+
+    @Html.Partial("~/Areas/Admin/Shared/Customizer.cshtml")
+
+    @Html.Partial("~/Areas/Admin/Shared/VendorScripts.cshtml")
+
+    @RenderSection("scripts", required: false)
+</body>
+</html>
