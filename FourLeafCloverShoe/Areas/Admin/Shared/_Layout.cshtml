@@ -21,7 +21,6 @@
         </div>
     </div>
 
-    @RenderSection("externalhtml", required: false)
 
     @Html.Partial("~/Areas/Admin/Shared/Footer.cshtml")
 
@@ -29,6 +28,6 @@
 
     @Html.Partial("~/Areas/Admin/Shared/VendorScripts.cshtml")
 
-    @RenderSection("scripts", required: false)
+    @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
