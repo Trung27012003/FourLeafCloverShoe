@@ -1,4 +1,5 @@
-﻿using FourLeafCloverShoe.Data;
+﻿
+using FourLeafCloverShoe.Data;
 using FourLeafCloverShoe.Helper;
 using FourLeafCloverShoe.IServices;
 using FourLeafCloverShoe.Services;
@@ -8,6 +9,7 @@ using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -44,6 +46,7 @@ builder.Services.AddScoped<IRateService, RateService>();
 builder.Services.AddScoped<ISizeService, SizeService>();
 builder.Services.AddScoped<IUserVoucherService, UserVoucherService>();
 builder.Services.AddScoped<IVoucherService, VoucherService>();
+
 
 
 // add authorization
