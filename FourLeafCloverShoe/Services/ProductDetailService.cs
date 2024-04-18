@@ -68,7 +68,11 @@ namespace FourLeafCloverShoe.Services
         {
             try
             {
-                var obj = await _myDbContext.ProductDetails.FindAsync(Id);
+                var lstobj = await _myDbContext.ProductDetails
+                   .Include(c => c.Products)
+                   .Include(c => c.Size)
+                   .ToListAsync();
+                var obj =  lstobj.FirstOrDefault(c=>c.Id==Id);
                 if (obj != null)
                 {
 
@@ -83,11 +87,37 @@ namespace FourLeafCloverShoe.Services
             }
         }
 
+        public async Task<List<ProductDetail>> GetByProductId(Guid ProductId)
+        {
+            try
+            {
+                var lstobj = await _myDbContext.ProductDetails
+                   .Include(c => c.Products)
+                   .Include(c => c.Size)
+                   .ToListAsync();
+                var obj =  lstobj.Where(c=>c.ProductId== ProductId).ToList();
+                if (obj != null)
+                {
+
+                    return obj;
+                }
+                return new List<ProductDetail>();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                return new List<ProductDetail>();
+            }
+        }
+
         public async Task<List<ProductDetail>> Gets()
         {
             try
             {
-                var obj = await _myDbContext.ProductDetails.ToListAsync();
+                var obj = await _myDbContext.ProductDetails
+                    .Include(c=>c.Products)
+                    .Include(c=>c.Size)
+                    .ToListAsync();
                 if (obj != null)
                 {
 

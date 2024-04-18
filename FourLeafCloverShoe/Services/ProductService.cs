@@ -1,6 +1,7 @@
 ﻿using FourLeafCloverShoe.Data;
 using FourLeafCloverShoe.IServices;
 using FourLeafCloverShoe.Share.Models;
+using Microsoft.CodeAnalysis;
 using Microsoft.EntityFrameworkCore;
 
 namespace FourLeafCloverShoe.Services
@@ -68,7 +69,16 @@ namespace FourLeafCloverShoe.Services
         {
             try
             {
-                var obj = await _myDbContext.Products.FindAsync(Id);
+
+                var lstObj = await _myDbContext.Products
+                   .Include(c => c.ProductDetails)
+                     .Include(c => c.ProductDetails)
+                       .ThenInclude(c => c.Size)
+                   .Include(c => c.Categories)
+                   .Include(c => c.Brands)
+                   .Include(c => c.ProductImages)
+                   .ToListAsync();
+                var obj = lstObj.FirstOrDefault(c => c.Id == Id);
                 if (obj != null)
                 {
 
@@ -87,10 +97,18 @@ namespace FourLeafCloverShoe.Services
         {
             try
             {
-                var obj = await _myDbContext.Products.ToListAsync();
+
+                var obj = await _myDbContext.Products
+                   .Include(c => c.ProductDetails)
+                     .Include(c => c.ProductDetails)
+                     .Include(c => c.ProductDetails)
+                       .ThenInclude(c => c.Size)
+                   .Include(c => c.Categories)
+                   .Include(c => c.Brands)
+                   .Include(c => c.ProductImages)
+                   .ToListAsync();
                 if (obj != null)
                 {
-
                     return obj;
                 }
                 return new List<Product>();
@@ -127,6 +145,47 @@ namespace FourLeafCloverShoe.Services
             {
                 Console.WriteLine(e.Message);
                 return false;
+            }
+        }
+
+        public async Task UpdateStatusQuantity()
+        {
+            try
+            {
+                var products = await _myDbContext.Products.ToListAsync();
+
+                foreach (var product in products)
+                {
+                    var productDetails = await _myDbContext.ProductDetails
+                        .Where(pd => pd.ProductId == product.Id && pd.Status == 1)
+                        .ToListAsync();
+
+                    // Tính tổng số lượng của tất cả sản phẩm chi tiết
+                    int? totalQuantity = productDetails.Sum(pd => pd.Quantity);
+                    //if (totalQuantity>0)
+                    //{
+                    //    product.Status = true;
+                    //}
+                    //else
+                    //{
+                    //product.Status = false;
+                    //}
+
+                    // Cập nhật số lượng sản phẩm chính
+                    product.AvailableQuantity = totalQuantity;
+
+                    // Cập nhật vào cơ sở dữ liệu
+                    _myDbContext.Products.Update(product);
+                }
+
+                // Lưu thay đổi vào cơ sở dữ liệu
+                await _myDbContext.SaveChangesAsync();
+
+
+            }
+            catch (Exception ex)
+            {
+                // Xử lý exception tại đây (log, throw, ...)
             }
         }
     }

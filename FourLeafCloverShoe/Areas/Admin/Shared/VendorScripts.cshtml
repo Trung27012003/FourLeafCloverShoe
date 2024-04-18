@@ -5,9 +5,23 @@
 <script src="~/fileadmin/assets/js/fonts/custom-font.js"></script>
 <script src="~/fileadmin/assets/js/pcoded.js"></script>
 <script src="~/fileadmin/assets/js/plugins/feather.min.js"></script>
-<script src="~/fileadmin/assets/js/plugins/clipboard.min.js"></script>
-<script src="~/fileadmin/assets/js/component.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="~/fileadmin/assets/js/plugins/dropzone-amd-module.min.js"></script>
+<script src="~/fileadmin/assets/js/plugins/ckeditor/classic/ckeditor.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="~/fileadmin/assets/js/plugins/simple-datatables.js"></script>
+<script>
+    const dataTable = new simpleDatatables.DataTable('#pc-dt-simple', {
+        sortable: false,
+        perPage: 5
+    });
+</script>
+<script>
+    (function () {
+        ClassicEditor.create(document.querySelector('#classic-editor')).catch((error) => {
+            console.error(error);
+        });
+    })();
+</script>
 
 <script>
     if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {

@@ -324,7 +324,7 @@ jQuery(window).resize(function () {
 
 jQuery(window).scroll(function () {
     var posScroll = jQuery(window).scrollTop();
-    if (parseInt(posScroll) > 10) {
+    if (parseInt(posScroll) > 150) {
         jQuery("#site-header").addClass("affix-mobile");
     } else {
         jQuery("#site-header").removeClass("affix-mobile");

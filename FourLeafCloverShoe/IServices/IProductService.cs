@@ -10,5 +10,6 @@ namespace FourLeafCloverShoe.IServices
         public Task<bool> Delete(Guid Id);
         public Task<Product> GetById(Guid Id);
         public Task<List<Product>> Gets();
+        public Task UpdateStatusQuantity();
     }
 }
