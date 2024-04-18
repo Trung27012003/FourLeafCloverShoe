@@ -1,0 +1,32 @@
+﻿@model IEnumerable<FourLeafCloverShoe.Share.Models.Size>
+
+@{
+    ViewData["Title"] = "Danh sách size";
+    Layout = "~/Areas/Admin/Shared/_Layout.cshtml";
+}
+@Html.Partial("~/Areas/Admin/Shared/SuccessMessage.cshtml")
+<button type="submit" class="btn btn-success"><a style="color:black" asp-action="Create">Thêm mới</a></button>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                Kích cỡ
+            </th>
+            <th>Chức năng</th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Name)
+            </td>
+            <td>
+                @Html.ActionLink("Cập nhật", "Edit", new { id = item.Id }, new { @class = "btn btn-warning" })
+                @Html.ActionLink("Xoá", "Delete", new { id = item.Id }, new { @class = "btn btn-danger" })
+               
+            </td>
+        </tr>
+}
+    </tbody>
+</table>
