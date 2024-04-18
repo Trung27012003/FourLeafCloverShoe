@@ -1,4 +1,5 @@
-﻿<div class="container-fluid">
+﻿@model IEnumerable<FourLeafCloverShoe.Share.Models.Product>
+<div class="container-fluid">
     <div class="section-padding">
         <div class="row">
             <div class="col-12">
@@ -59,40 +60,61 @@
                 </div>
                 <div class="category-product-list">
                     <div class="row">
-                        <div class="col-12 col-xs-custom-6 col-sm-4 col-lg-3 mb-32px">
-                            <div class="product-grid-item">
-                                <div class="product-grid-thumb">
+                        @foreach (var item in Model)
+                        {
+                            <div class="col-12 col-xs-custom-6 col-sm-4 col-lg-3 mb-32px">
+                                <div class="product-grid-item">
+                                    <div class="product-grid-thumb">
 
 
-                                    <div class="product-grid-sale-wishlist" id="wishlist-id-4198">
-                                        <i class="mwc-icon-heart" onclick="likeFunction(4198, 4198)"></i>
+                                        <div class="product-grid-sale-wishlist" id="wishlist-id-4198">
+                                            <i class="mwc-icon-heart" onclick="likeFunction(4198, 4198)"></i>
+                                        </div>
+
+                                        <a asp-action="ProductDetail" asp-route-productId="@item.Id"  class="product-grid-image pl-id-4198" title="@item.ProductName">
+                                            <img class="mcl-id-4198" src="@item.ProductImages.First().ImageUrl" alt="@item.ProductName">
+                                        </a>
+
                                     </div>
 
-                                    <a href="/products/giay-cao-got-mwc-nucg--g019?&amp;c=den" class="product-grid-image pl-id-4198" title="Giày cao gót MWC NUCG- G019">
-                                        <img class="mcl-id-4198" src="https://img.mwc.com.vn/giay-thoi-trang?w=640&amp;h=640&amp;FileInput=/Resources/Product/2024/01/11/z5061564178533_0a740dc0d122f959dbaec48e471b9a76.jpg" alt="Giày cao gót MWC NUCG- G019">
-                                    </a>
+                                    <a class="product-grid-info pl-id-4198" asp-action="ProductDetail" asp-route-productId="@item.Id" title="@item.ProductName">
+                                        <div class="product-grid-info-top">
+                                            <p class="product-grid-title">
+                                                @item.ProductName
+                                            </p>
+                                            <p class="product-grid-price">
+                                                <span class="product-grid-price-new">
+                                                    <span class="product-grid-price-new-text">
+                                                        @{
+                                                            int count = item.ProductDetails.Count();
+                                                            decimal? minprice = 0;
+                                                            decimal? maxprice = 0;
+                                                            if (count != 0)
+                                                            {
+                                                                minprice = item.ProductDetails.Min(c => c.PriceSale);
+                                                                maxprice = item.ProductDetails.Max(c => c.PriceSale);
 
-                                </div>
-
-                                <a class="product-grid-info pl-id-4198" href="/products/giay-cao-got-mwc-nucg--g019?&amp;c=den" title="Giày cao gót MWC NUCG- G019">
-                                    <div class="product-grid-info-top">
-                                        <p class="product-grid-title">
-                                            Giày cao gót MWC NUCG- G019
-                                        </p>
-                                        <p class="product-grid-price">
-                                            <span class="product-grid-price-new">
-                                                <span class="product-grid-price-new-text">
-                                                    235.000 đ
+                                                            }
+                                                        }
+                                                       
+                                                             @if (minprice == maxprice)
+                                                            {
+                                                                <span>@minprice đ</span>
+                                                            }
+                                                            else
+                                                            {
+                                                                <span>@minprice đ - <span>@maxprice đ</span></span>
+                                                            }
+                                                    </span>
                                                 </span>
-                                            </span>
 
-                                        </p>
-                                    </div>
-                                </a>
+                                            </p>
+                                        </div>
+                                    </a>
+                                </div>
                             </div>
-                        </div>
-
-
+                        }
+                        
                     </div>
                 </div>
                 <div class="section-view-more">

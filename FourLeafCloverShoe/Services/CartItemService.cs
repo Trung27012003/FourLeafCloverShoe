@@ -63,11 +63,45 @@ namespace FourLeafCloverShoe.Services
             }
         }
 
+        public async Task<bool> DeleteByProductDetailId(Guid productDetailId)
+        {
+            try
+            {
+                var obj = await Gets();
+                if (obj != null)
+                {
+                    _myDbContext.CartItems.Remove(obj.FirstOrDefault(c=>c.ProductDetailId==productDetailId));
+                    await _myDbContext.SaveChangesAsync();
+                    return true;
+                }
+                return false;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                return false;
+            }
+        }
+
         public async Task<CartItem> GetById(Guid Id)
         {
             try
             {
-                var obj = await _myDbContext.CartItems.FindAsync(Id);
+                var lstobj = await _myDbContext.CartItems
+                    .Include(c=>c.ProductDetails)
+                        .ThenInclude(c=>c.Products)
+                            .ThenInclude(c=>c.ProductImages)
+                     .Include(c => c.ProductDetails)
+                        .ThenInclude(c=>c.Size)
+                    .Include(c => c.ProductDetails)
+                        .ThenInclude(c => c.Products)
+                            .ThenInclude(c=>c.Brands)
+                     .Include(c => c.ProductDetails)
+                        .ThenInclude(c => c.Products)
+                            .ThenInclude(c=>c.Categories)
+                            .ToListAsync();
+
+                var obj =  lstobj.FirstOrDefault(c=>c.Id==Id);
                 if (obj != null)
                 {
 
@@ -86,13 +120,43 @@ namespace FourLeafCloverShoe.Services
         {
             try
             {
-                var obj = await _myDbContext.CartItems.ToListAsync();
-                if (obj != null)
+                var lstobj = await _myDbContext.CartItems
+                    .Include(c => c.ProductDetails)
+                        .ThenInclude(c => c.Products)
+                            .ThenInclude(c => c.ProductImages)
+                     .Include(c => c.ProductDetails)
+                        .ThenInclude(c => c.Size)
+                    .Include(c => c.ProductDetails)
+                        .ThenInclude(c => c.Products)
+                            .ThenInclude(c => c.Brands)
+                     .Include(c => c.ProductDetails)
+                        .ThenInclude(c => c.Products)
+                            .ThenInclude(c => c.Categories)
+                            .ToListAsync();
+                if (lstobj != null)
                 {
 
-                    return obj;
+                    return lstobj;
                 }
                 return new List<CartItem>();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                return new List<CartItem>();
+            }
+        }
+
+        public async Task<List<CartItem>> GetsByUserId(string userId)
+        {
+            
+            try
+            {
+                var carts = await _myDbContext.Carts.ToListAsync();
+                var cartId = carts.FirstOrDefault(c => c.UserId == userId).Id;
+                var lstCartItems = await Gets();
+                var cartItems = lstCartItems.Where(c => c.CartId == cartId).ToList();
+                return cartItems;
             }
             catch (Exception e)
             {

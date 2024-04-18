@@ -70,9 +70,11 @@ namespace FourLeafCloverShoe.Services
             {
                 var lstobj = await _myDbContext.ProductDetails
                    .Include(c => c.Products)
+                        .ThenInclude(c => c.ProductImages)
                    .Include(c => c.Size)
+
                    .ToListAsync();
-                var obj =  lstobj.FirstOrDefault(c=>c.Id==Id);
+                var obj = lstobj.FirstOrDefault(c => c.Id == Id);
                 if (obj != null)
                 {
 
@@ -93,9 +95,10 @@ namespace FourLeafCloverShoe.Services
             {
                 var lstobj = await _myDbContext.ProductDetails
                    .Include(c => c.Products)
+                   .ThenInclude(c => c.ProductImages)
                    .Include(c => c.Size)
                    .ToListAsync();
-                var obj =  lstobj.Where(c=>c.ProductId== ProductId).ToList();
+                var obj = lstobj.Where(c => c.ProductId == ProductId).ToList();
                 if (obj != null)
                 {
 
@@ -115,8 +118,9 @@ namespace FourLeafCloverShoe.Services
             try
             {
                 var obj = await _myDbContext.ProductDetails
-                    .Include(c=>c.Products)
-                    .Include(c=>c.Size)
+                    .Include(c => c.Products)
+                    .ThenInclude(c => c.ProductImages)
+                    .Include(c => c.Size)
                     .ToListAsync();
                 if (obj != null)
                 {

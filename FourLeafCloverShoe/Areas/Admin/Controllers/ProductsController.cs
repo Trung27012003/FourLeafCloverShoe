@@ -108,7 +108,7 @@ namespace FourLeafCloverShoe.Areas.Admin.Controllers
                 product.Description = product.Description;
                 product.ProductCode = GetInitials(product.ProductName) + DateTime.Now.ToString("yyMMddHHmmss");
                 product.AvailableQuantity = 0;
-                product.Status = false;
+                product.Status = product.Status;
                 var result = await _productService.Add(product);
                 if (result)
                 {
@@ -191,7 +191,7 @@ namespace FourLeafCloverShoe.Areas.Admin.Controllers
                 productDb.BrandId = product.BrandId;
                 productDb.Description = product.Description;
                 productDb.UpdateAt = DateTime.Now;
-                productDb.Status = false;
+                productDb.Status = product.Status;
                 if (imageList == null && productDb.ProductImages.Count() == 0) // check ảnh
                 {
                     // Trả về view với thông báo lỗi nếu ModelState không hợp lệ hoặc không có tệp nào được tải lên

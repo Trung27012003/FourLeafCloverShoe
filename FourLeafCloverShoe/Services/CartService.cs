@@ -82,6 +82,26 @@ namespace FourLeafCloverShoe.Services
             }
         }
 
+        public async Task<Cart> GetByUserId(string userId)
+        {
+            try
+            {
+                var lstobj = await _myDbContext.Carts.ToListAsync();
+                var cart = lstobj.FirstOrDefault(c=>c.UserId==userId);  
+                if (cart != null)
+                {
+
+                    return cart;
+                }
+                return new Cart();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                return new Cart();
+            }
+        }
+
         public async Task<List<Cart>> Gets()
         {
             try
