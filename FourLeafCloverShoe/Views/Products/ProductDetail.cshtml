@@ -824,21 +824,7 @@
         sizeOptions.removeClass('active').attr('aria-checked', 'false');
     }
 
-    function addToCart() {
-        var quantity = $('#quantity-input').val();
-        $.ajax({
-            url: '/cart/addToCart',
-            type: 'POST',
-            data: { quantity: quantity, productDetailId: productDetailId },
-            success: function (response) {
-                // Lấy giá trị quantity từ kết quả Ajax
-                console.log(response);
-            },
-            error: function (error) {
-                console.log(error);
-            }
-        });
-    }
+
 </script>
 <script>
 

@@ -321,12 +321,13 @@ jQuery(window).resize(function () {
 });
 
 //window on scroll
-
 jQuery(window).scroll(function () {
     var posScroll = jQuery(window).scrollTop();
-    if (parseInt(posScroll) > 150) {
+    if (posScroll > 0) {
         jQuery("#site-header").addClass("affix-mobile");
+        jQuery("#site-header").removeClass("transparent");
     } else {
         jQuery("#site-header").removeClass("affix-mobile");
+        jQuery("#site-header").addClass("transparent");
     }
 });

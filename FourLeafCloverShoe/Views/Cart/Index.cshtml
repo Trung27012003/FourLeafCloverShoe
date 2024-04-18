@@ -1,4 +1,5 @@
 ﻿@model IEnumerable<FourLeafCloverShoe.Share.Models.CartItem>
+
 <style>
     .error {
         color: #ee4d2d !important
@@ -114,7 +115,7 @@
                             </div>
                             <div class="cart-item--total"><span>@item.Quantity*@item.Price đ </span></div>
                             <div class="cart-item--actions cart-item--actions-column">
-                                <button class="cart-item--action-item" onclick="removeMiniCartItem("@item.ProductDetailId")">Xóa</button>
+                                <button class="cart-item--action-item" onclick="removeCartItem('@item.ProductDetailId')">Xóa</button>
                             </div>
                         </div>
                     </div>

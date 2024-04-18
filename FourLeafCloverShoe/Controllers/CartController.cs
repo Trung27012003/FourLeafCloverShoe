@@ -142,6 +142,35 @@ cartItems.FirstOrDefault(c => c.ProductDetailId == productDetail.Id)?.Quantity *
             return Json(new { message = "Chưa đăng nhập!", isSuccess = false });
 
         }
+        public async Task<IActionResult> removeCartItem(Guid productDetailId)
+        {
+            if (User.Identity.IsAuthenticated)
+            {
+                var result = await _cartItemItemService.DeleteByProductDetailId(productDetailId);
+                if (result)
+                {
+                    return Json(new { message = "Xoá thành công!", isSuccess = true });
+                }
+
+                return Json(new { message = "Có lỗi xảy ra!", isSuccess = false });
+            }
+            return Json(new { message = "Chưa đăng nhập!", isSuccess = false });
+
+        }
+
+        public async Task<IActionResult> getCountCart()
+        {
+            if (User.Identity.IsAuthenticated)
+            {
+                var user = await _userManager.GetUserAsync(HttpContext.User);
+                var cartItems = await _cartItemItemService.GetsByUserId(user.Id);
+                var count = cartItems.Count();
+                return Json(new { message = "Lấy thành công!", isSuccess = true , count = count });
+            }
+            return Json(new { message = "Chưa đăng nhập!", isSuccess = false,count=0 });
+
+        }
+
 
 
     }
