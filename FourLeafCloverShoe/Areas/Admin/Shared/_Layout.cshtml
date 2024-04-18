@@ -6,6 +6,7 @@
     @RenderSection("styles", required: false)
 
     @Html.Partial("~/Areas/Admin/Shared/HeadCSS.cshtml")
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css">
 </head>
 <body data-pc-preset="preset-1" data-pc-sidebar-theme="light" data-pc-sidebar-caption="true" data-pc-direction="ltr" data-pc-theme="light">
 
@@ -20,7 +21,6 @@
 
         </div>
     </div>
-
     @RenderSection("externalhtml", required: false)
 
     @Html.Partial("~/Areas/Admin/Shared/Footer.cshtml")
@@ -30,5 +30,6 @@
     @Html.Partial("~/Areas/Admin/Shared/VendorScripts.cshtml")
 
     @RenderSection("scripts", required: false)
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
 </body>
 </html>
