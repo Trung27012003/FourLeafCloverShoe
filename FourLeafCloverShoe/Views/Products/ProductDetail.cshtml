@@ -405,7 +405,8 @@
                 </div>
 
                 <div class="product-detail-main">
-                    <h1 class="product-name">Vớ nam nữ MWC - AT59</h1>
+                    <h1 style="font-size: x-large;">@Model.ProductName</h1>
+                    <p class="product-code">@Model.ProductCode</p>
                     <div class="product-top-info">
                         <div class="product-grid-rating">
                             <div class="product-grid-star product-grid-star-active">
@@ -420,7 +421,7 @@
                             <div class="product-grid-star product-grid-star-active">
                                 <i class="mwc-icon-mwc-star"></i>
                             </div>
-                            <div class="product-grid-star">
+                            <div class="product-grid-star product-grid-star-active">
                                 <i class="mwc-icon-mwc-star"></i>
                             </div>
                         </div>
@@ -428,13 +429,24 @@
                             <span class="product-top-review-count">1</span> Đánh giá
                         </div>
                         <div class="product-top-like">
-                            <span class="product-top-like-count">1</span> Số lượng thích
+                            @{
+                                decimal priceMax = ViewBag.priceMax;
+                                decimal priceMin = ViewBag.priceMin;
+                                int availibleQuantity = ViewBag.availibleQuantity;
+                            }
+                            Còn lại <span id="availibleQuantity">@availibleQuantity </span> sản phẩm
                         </div>
                     </div>
                     <p class="product-grid-price">
                         <span class="product-grid-price-new">
                             <span class="product-grid-price-new-text is-flash-sale">
-                                30.000 đ
+                                @if (priceMin == priceMax)
+                                {
+                                    <span>@priceMin đ</span>
+                                 }else
+                                {
+                                    <span>@priceMin đ  -  @priceMax đ</span>
+                                }
                             </span>
                         </span>
                     </p>
@@ -775,12 +787,47 @@
 
 </section>
 <script type="text/javascript">
-    var productDetailId = "";
 
+
+    var quantityInput = document.getElementById('quantity-input');
+    var availableQuantity = document.getElementById('availibleQuantity');
+    quantityInput.onchange = function () { // nếu <=1 gán =1
+        if (this.value <= 0) {
+            this.value = 1;
+        }
+    };
+    quantityInput.max = parseInt(availableQuantity.textContent);
+    // Lấy phần tử nút + và - bằng id
+    var buttonPlus = document.getElementById('button-plus');
+    var buttonMinus = document.getElementById('button-minus');
+    // Thiết lập sự kiện click cho nút +
+    buttonPlus.addEventListener('click', function () {
+        // Tăng giá trị của input số lượng khi nút + được click
+        if (parseInt(quantityInput.value) < parseInt(availableQuantity.textContent)) {
+            quantityInput.value = parseInt(quantityInput.value) + 1;
+        }
+    });
+    // Thiết lập sự kiện click cho nút -
+    buttonMinus.addEventListener('click', function () {
+        // Giảm giá trị của input số lượng khi nút - được click, nhưng không được nhỏ hơn 1
+        if (parseInt(quantityInput.value) > 1) {
+            quantityInput.value = parseInt(quantityInput.value) - 1;
+        }
+    });
+    // Thiết lập sự kiện input cho input số lượng để kiểm tra giá trị nhập vào
+    quantityInput.addEventListener('input', function () {
+        // Nếu giá trị nhập vào lớn hơn giá trị max, cập nhật lại giá trị của input
+        if (parseInt(quantityInput.value) > parseInt(availableQuantity.textContent)) {
+            quantityInput.value = parseInt(availableQuantity.textContent);
+        }
+    });
+
+
+    var productDetailId = "";
     $("#sizeOptions > .product-option-item").on("click", function () {
+        quantityInput.value = 1;
         clearActiveSize();
         $(this).addClass('active').attr('aria-checked', 'true');
-
         var sizeId = $(this).attr('id'); // Lấy ID của kích thước được chọn
         var productId = "@Model.Id";
         $("#sizeOptions > .product-option-item").not(this).removeClass('active').attr('aria-checked', 'false');
@@ -793,9 +840,11 @@
             success: function (response) {
                 // Lấy giá trị quantity từ kết quả Ajax
                 var priceValue = response.priceSale;
+                var quantityValue = response.quantity;
                 productDetailId = response.productDetailId;
                 // Sử dụng jQuery để tìm phần tử có class "product-grid-price-new-text" và gán giá trị quantity vào nội dung của nó
                 $('.product-grid-price-new-text').text(priceValue + ' đ');
+                $('#availibleQuantity').text(quantityValue);
             },
             error: function (error) {
                 console.log(error);
@@ -803,21 +852,6 @@
         });
     });
 
-    $(document).ready(function () {
-        var quantityInput = $('#quantity-input');
-
-        $('#button-minus').click(function () {
-            var currentValue = parseInt(quantityInput.val());
-            if (currentValue > 1) {
-                quantityInput.val(currentValue - 1);
-            }
-        });
-
-        $('#button-plus').click(function () {
-            var currentValue = parseInt(quantityInput.val());
-            quantityInput.val(currentValue + 1);
-        });
-    });
 
     function clearActiveSize() {
         let sizeOptions = $("#sizeOptions > .product-option-item");

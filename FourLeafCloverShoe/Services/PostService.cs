@@ -68,7 +68,10 @@ namespace FourLeafCloverShoe.Services
         {
             try
             {
-                var obj = await _myDbContext.Posts.FindAsync(Id);
+                var lstobj = await _myDbContext.Posts
+                    .Include(c => c.Users)
+                    .ToListAsync();
+                var obj =  lstobj.FirstOrDefault(c=>c.Id==Id);
                 if (obj != null)
                 {
 
@@ -87,7 +90,9 @@ namespace FourLeafCloverShoe.Services
         {
             try
             {
-                var obj = await _myDbContext.Posts.ToListAsync();
+                var obj = await _myDbContext.Posts
+                    .Include(c => c.Users)
+                    .ToListAsync();
                 if (obj != null)
                 {
 

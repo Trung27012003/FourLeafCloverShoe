@@ -300,9 +300,9 @@ namespace FourLeafCloverShoe.Areas.Admin.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateProductDetail(ProductDetail productDetail)
         {
-            List<SelectListItem> ListSizeitems = new List<SelectListItem>();
-            foreach (var obj in (await _sizeService.Gets()))
-            {
+                List<SelectListItem> ListSizeitems = new List<SelectListItem>();
+            foreach (var obj in ((await _sizeService.Gets()).OrderBy(c => c.Name)))
+                {
                 ListSizeitems.Add(new SelectListItem()
                 {
                     Text = obj.Name,
@@ -329,8 +329,8 @@ namespace FourLeafCloverShoe.Areas.Admin.Controllers
         public async Task<IActionResult> EditProductDetail(Guid productDetailId)
         {
             List<SelectListItem> ListSizeitems = new List<SelectListItem>();
-            foreach (var obj in (await _sizeService.Gets()))
-            {
+            foreach (var obj in ((await _sizeService.Gets()).OrderBy(c => c.Name)))
+                {
                 ListSizeitems.Add(new SelectListItem()
                 {
                     Text = obj.Name,
@@ -347,9 +347,10 @@ namespace FourLeafCloverShoe.Areas.Admin.Controllers
         public async Task<IActionResult> EditProductDetail(ProductDetail productDetail)
         {
             List<SelectListItem> ListSizeitems = new List<SelectListItem>();
-            foreach (var obj in (await _sizeService.Gets()))
-            {
-                ListSizeitems.Add(new SelectListItem()
+           foreach (var obj in ((await _sizeService.Gets()).OrderBy(c => c.Name)))
+
+                {
+                    ListSizeitems.Add(new SelectListItem()
                 {
                     Text = obj.Name,
                     Value = obj.Id.ToString()

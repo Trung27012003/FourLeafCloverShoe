@@ -30,14 +30,20 @@ namespace FourLeafCloverShoe.Controllers
         }
         public async Task<IActionResult> ProductDetail(Guid productId)
         {
-                            await _hubContext.Clients.All.SendAsync("alertToAdmin", $"Trung Trương vừa mua hàng",true);
+            //await _hubContext.Clients.All.SendAsync("alertToAdmin", $"Trung Trương vừa mua hàng",true);
             var product = await _productService.GetById(productId);
             var lstProductDetail = await _productDetailService.GetByProductId(product.Id);
             var sizes = await _sizeService.Gets();
 
             var lstSize = sizes.Where(size => lstProductDetail.Any(detail => detail.SizeId == size.Id)).OrderBy(c=>c.Name).ToList();
 
+            var priceMin = lstProductDetail.Where(c => c.Status == 1).Min(c=>c.PriceSale);
+            var priceMax = lstProductDetail.Where(c => c.Status == 1).Max(c=>c.PriceSale);
+            var availibleQuantity = lstProductDetail.Where(c => c.Status == 1).Sum(c=>c.Quantity);
             ViewBag.lstSize = lstSize;
+            ViewBag.priceMin = priceMin;
+            ViewBag.priceMax = priceMax;
+            ViewBag.availibleQuantity = availibleQuantity;
 
             return View(product);
         }

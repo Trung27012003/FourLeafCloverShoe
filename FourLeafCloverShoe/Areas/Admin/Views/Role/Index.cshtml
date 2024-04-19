@@ -19,17 +19,26 @@
                     <table class="table table-hover tbl-product" id="pc-dt-simple">
                         <thead>
                             <tr>
-                                <th >#</th>
-                                <th>Tên Chức vụ</th>
-                                <th>Quyền</th>
-                                <th>Chức năng</th>
+                                <th data-sortable="true"><button class="datatable-sorter">STT</button></th>
+                                <th data-sortable="true"><button class="datatable-sorter">Tên chức vụ</button></th>
+                                <th data-sortable="true"><button class="datatable-sorter">Quyền</button></th>
+                                <th data-sortable="true"><button class="datatable-sorter">Chức năng</button></th>
+
                             </tr>
                         </thead>
                         <tbody>
+                            @{
+                                int stt = 0;
+                            }
                             @foreach (var item in Model)
                             {
                                 <tr>
-                                    <td >#</td>
+                                    <td>
+                                        @{
+                                            stt++;
+                                            <span>@stt</span>
+                                        }
+                                    </td>
                                     <td >@item.Name</td>
                                     <td >
                                         @if (item.Claims.Count() == 0)
@@ -43,15 +52,13 @@
 
                                         }
                                     </td>
-                                    <form asp-action="Delete" asp-route-roleId="@item.Id">
                                     <td class="text-center">
-                                        <span >#</span>
-                                        <div class="prod-action-links">
+                                        <div>
                                             <ul class="list-inline me-auto mb-0">
                                                 <li class="list-inline-item align-bottom" data-bs-toggle="tooltip" title="Quản lí quyền">
                                                     <a asp-action="ManageRoleClaims" asp-route-roleId="@item.Id"
                                                        class="avtar avtar-xs btn-link-secondary btn-pc-default">
-                                                        <i class="ti ti-eye f-18"></i>
+                                                        <i class="ti ti-adjustments"></i>
                                                     </a>
                                                 </li>
                                                 <li class="list-inline-item align-bottom" data-bs-toggle="tooltip" title="Chỉnh sửa">
@@ -60,14 +67,11 @@
                                                     </a>
                                                 </li>
                                                 <li class="list-inline-item align-bottom" data-bs-toggle="tooltip" title="Xoá">
-                                                    <button type="submit" class="avtar avtar-xs btn-link-danger btn-pc-default">
-                                                        <i class="ti ti-trash f-18"></i>
-                                                    </button>
+                                                        @Html.ActionLink("", "Delete", new { Id = item.Id }, new { @class = "avtar avtar-xs btn-link-danger btn-pc-default ti ti-trash f-18" })
                                                 </li>
                                             </ul>
                                         </div>
                                     </td>
-                                    </form>
                                 </tr>
                             }
                                 

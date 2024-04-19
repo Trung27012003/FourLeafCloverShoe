@@ -24,12 +24,12 @@ namespace FourLeafCloverShoe.Areas.Identity.Pages.Account
             _logger = logger;
         }
 
-        public async Task<IActionResult> OnPostAsync()
+        public async Task<IActionResult> OnGetAsync()
         {
             await _signInManager.SignOutAsync();
             _logger.LogInformation("User logged out.");
+            return RedirectToAction("Index", "Home", new { area = "" });
 
-            return new JsonResult(new { redirectToUrl = "/Index" });
         }
 
     }

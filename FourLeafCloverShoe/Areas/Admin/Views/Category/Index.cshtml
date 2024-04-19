@@ -18,22 +18,30 @@
                 <div class="table-responsive">
                     <table class="table table-hover tbl-product" id="pc-dt-simple">
                         <thead>
+
                             <tr>
-                                <th>#</th>
-                                <th>Tên</th>
-                                <th>Chức năng</th>
+                                <th data-sortable="true"><button class="datatable-sorter">STT</button></th>
+                                <th data-sortable="true"><button class="datatable-sorter">Tên</button></th>
+                                <th data-sortable="true"><button class="datatable-sorter">Chức năng</button></th>
+
                             </tr>
                         </thead>
                         <tbody>
+                            @{
+                                int stt = 0;
+                            }
                             @foreach (var item in Model)
                             {
                                 <tr>
                                     <td>
-                                      #
+                                        @{
+                                            stt++;
+                                            <span>@stt</span>
+                                        }
                                     </td>
                                     <td>@item.Name</td>
                                     <td class="text-center">
-                                        <div class="prod-action-links">
+                                        <div>
                                             <ul class="list-inline me-auto mb-0">
                                                 <li class="list-inline-item align-bottom" data-bs-toggle="tooltip" title="Chỉnh sửa">
                                                     <a asp-action="Edit" asp-route-Id="@item.Id" class="avtar avtar-xs btn-link-success btn-pc-default">

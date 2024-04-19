@@ -1,7 +1,7 @@
 ﻿@model FourLeafCloverShoe.Share.Models.ProductDetail
 @{
-    ViewBag.Title = "Add New Product Detail";
-    ViewBag.pTitle = "E-commerce";
+    ViewBag.Title = "Thêm mới sản phẩm chi tiết";
+    ViewBag.pTitle = "Sản phâm chi tiết";
 }
 
 
@@ -9,9 +9,7 @@
     <!-- [ sample-page ] start -->
     <div class="col-xl-12">
         <div class="card">
-            <div class="card-header">
-                <h5>Thông tin sản phẩm</h5>
-            </div>
+
             <form asp-action="CreateProductDetail">
                 <div class="card-body">
                     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
@@ -23,7 +21,7 @@
                                 @foreach (var item in ViewBag.ListSizeitems as List<SelectListItem>)
                                 {
                                     <div class="col-auto">
-                                        <input asp-for="SizeId" type="radio" class="btn-check" id="@item.Text" value="@item.Value" checked="">
+                                        <input asp-for="SizeId" type="radio" class="btn-check" id="@item.Text" value="@item.Value">
                                         <label class="btn btn-sm btn-light-primary" for="@item.Text">@item.Text</label>
                                     </div>
                                 }
@@ -53,7 +51,7 @@
                                     <label class="btn btn-sm btn-light-success" for="btnrdolite11">Bán ngay</label>
                                 </div>
                                 <div class="col-auto">
-                                    <input type="radio" asp-for="Status" class="btn-check" id="btnrdolite13" value="0" checked="checked">
+                                    <input type="radio" asp-for="Status" class="btn-check" id="btnrdolite13" value="0">
                                     <label class="btn btn-sm btn-light-danger" for="btnrdolite13">Không bán</label>
                                 </div>
                             </div>
@@ -62,11 +60,9 @@
                     </div>
                 </div>
                 <div class="col-sm-12">
-                    <div class="card">
                         <div class="card-body text-end btn-page">
                             <button type="submit" class="btn btn-primary mb-0">Save product</button>
                             <button class="btn btn-outline-secondary mb-0">Reset</button>
-                        </div>
                     </div>
                 </div>
             </form>

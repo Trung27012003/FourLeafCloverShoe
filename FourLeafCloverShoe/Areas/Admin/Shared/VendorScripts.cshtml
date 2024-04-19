@@ -10,6 +10,12 @@
 <script src="~/fileadmin/assets/js/plugins/ckeditor/classic/ckeditor.js"></script>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="~/fileadmin/assets/js/plugins/simple-datatables.js"></script>
+<script src="~/fileadmin/assets/js/plugins/flatpickr.min.js"></script>
+<script>
+    document.querySelector('#pc-date_range_picker-2').flatpickr({
+        mode: 'range'
+    });
+</script>
 <script>
     const dataTable = new simpleDatatables.DataTable('#pc-dt-simple', {
         sortable: false,
@@ -19,7 +25,7 @@
 <script>
     (function () {
         ClassicEditor.create(document.querySelector('#classic-editor')).catch((error) => {
-            console.error(error);
+            console.log(error);
         });
     })();
 </script>

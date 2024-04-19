@@ -26,19 +26,29 @@
                     <table class="table table-hover tbl-product" id="pc-dt-simple">
                         <thead>
                             <tr>
-                                <th>#</th>
-                                <th>Tên</th>
-                                <th>Tên đăng nhập</th>
-                                <th>Email</th>
-                                <th>Vai trò</th>
-                                <th>Trạng thái</th>
-                                <th>Chức năng</th>
+                                <th data-sortable="true"><button class="datatable-sorter">STT</button></th>
+                                <th data-sortable="true"><button class="datatable-sorter">Tên</button></th>
+                                <th data-sortable="true"><button class="datatable-sorter">Tên đăng nhập</button></th>
+                                <th data-sortable="true"><button class="datatable-sorter">Email</button></th>
+                                <th data-sortable="true"><button class="datatable-sorter">Chức vụ</button></th>
+                                <th data-sortable="true"><button class="datatable-sorter">Trạng thái</button></th>
+                                <th data-sortable="true"><button class="datatable-sorter">Chức năng</button></th>
+
                             </tr>
                         </thead>
                         <tbody>
+                            @{
+                                int stt = 0;
+                            }
                             @foreach (var item in Model)
                             {
                                 <tr>
+                                    <td>
+                                        @{
+                                            stt++;
+                                            <span>@stt</span>
+                                        }
+                                    </td>
                                     <td>
                                         @if (item.ProfilePicture != null && item.ProfilePicture.Length > 0)
                                         {
@@ -48,8 +58,7 @@
                                         {
                                             <img class="user-avtar wid-45 rounded-circle" alt="profile" src="~/fileadmin/assets/images/user/avatar-1.jpg" />
                                         }
-                                    </td>
-                                    <td>@item.FullName</td>
+                                    @item.FullName</td>
                                     <td>@item.UserName</td>
                                     <td>@item.Email</td>
                                     <td>
@@ -79,30 +88,38 @@
 
                                     </td>
                                     <td>
-                                        <div style="display: flex; justify-content: space-between; align-items: center;">
-                                            <a asp-action="Edit" asp-route-userId="@item.Id" class="btn btn-info text-white" style="cursor:pointer"><i class="fas fa-user-edit text-secondary"></i>Sửa</a>
-                                            <form asp-action="LockUnlock" asp-route-userId="@item.Id" method="post">
-
-                                            @if (item.LockoutEnd == null || item.LockoutEnd < DateTime.Now)
-                                            {
-                                                    <button type="submit" class="btn btn-success text-white" style="cursor:pointer">
-                                                        <span>Khoá</span>
-                                                    </button>
-                                            }
-                                            else
-                                            {
-                                                    <button type="submit" class="btn btn-warning text-white" style="cursor:pointer">
-                                                        <span>Mở khoá</span>
-                                                    </button>
-                                            }
-                                            </form>
-                                            <form asp-action="Delete" asp-route-userId="@item.Id" method="post">
-                                                <button type="submit" id="deleteButton" class="btn btn-danger">
-                                                    <span> <i class="fas fa-trash text-secondary"></i> Xoá</span>
-                                                </button>
-                                            </form>
+                                        <div >
+                                            <ul class="list-inline me-auto mb-0">
+                                                <li class="list-inline-item align-bottom" data-bs-toggle="tooltip" title="Cập nhật">
+                                                    <a asp-action="Edit" asp-route-userId="@item.Id"
+                                                       class="avtar avtar-xs btn-link-secondary btn-pc-default">
+                                                        <i class="ti ti-edit-circle f-18"></i>
+                                                    </a>
+                                                </li>
+                                                @if (item.LockoutEnd == null || item.LockoutEnd < DateTime.Now)
+                                                {
+                                                    <li class="list-inline-item align-bottom" data-bs-toggle="tooltip" title="Khoá tài khoản">
+                                                        <a asp-action="LockUnlock" asp-route-userId="@item.Id" class="avtar avtar-xs btn-link-success btn-pc-default">
+                                                            <i class="ti ti-lock"></i>
+                                                        </a>
+                                                    </li>
+                                                }
+                                                else
+                                                {
+                                                    <li class="list-inline-item align-bottom" data-bs-toggle="tooltip" title="Mở khoá tài khoản">
+                                                        <a asp-action="LockUnlock" asp-route-userId="@item.Id" class="avtar avtar-xs btn-link-success btn-pc-default">
+                                                            <i class="ti ti-lock-open"></i>
+                                                        </a>
+                                                    </li>
+                                                }
+                                               
+                                                <li class="list-inline-item align-bottom" data-bs-toggle="tooltip" title="Xoá">
+                                                    <a asp-action="Delete" asp-route-userId="@item.Id" class="avtar avtar-xs btn-link-danger btn-pc-default">
+                                                        <i class="ti ti-trash f-18"></i>
+                                                    </a>
+                                                </li>
+                                            </ul>
                                         </div>
-
                                     </td>
                                </tr>
 
