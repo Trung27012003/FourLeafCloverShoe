@@ -12571,9 +12571,8 @@ input[type=number] {
     position: sticky;
     top: 0;
     left: 0;
-    width: 100%;
+    width: 101%;
     z-index: 999;
-    transform: translateY(0);
     transition: transform 0.3s ease, top 0.3s ease, background-color 0.3s ease, margin-right 0.3s ease;
     background-color: transparent;
     margin-right: 0;
@@ -12582,16 +12581,19 @@ input[type=number] {
 
     #site-header.affix-mobile {
         position: fixed;
+        z-index: 999;
         transform: translateY(0%);
         background-color: rgba(255, 255, 255, 0.9);
         margin-right: 0;
     }
+        #site-header.affix-mobile .sub_menu {
+            z-index: 1001; /* Đảm bảo z-index của dropdown lớn hơn z-index của Nav (998) */
+            top: 60px; /* Điều chỉnh giá trị top cho phù hợp với chiều cao của Nav khi affix-mobile được kích hoạt */
+        }
 
-.main-header.affix-mobile .wrap-logo,
-.main-header.affix-mobile .col-header-mid {
+.main-header.affix-mobile .col-header-mid .element-to-hide {
     display: none !important;
 }
-
 .main-header.affix-mobile .col-header-right {
     text-align: right;
 }

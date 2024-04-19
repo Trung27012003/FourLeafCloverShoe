@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using System.Security.Claims;
 using Newtonsoft.Json.Linq;
+using Microsoft.AspNetCore.SignalR;
+using FourLeafCloverShoe.Helper;
 
 namespace FourLeafCloverShoe.Controllers
 {
@@ -11,12 +13,15 @@ namespace FourLeafCloverShoe.Controllers
         private readonly IProductService _productService;
         private readonly IProductDetailService _productDetailService;
         private readonly ISizeService _sizeService;
+        private readonly IHubContext<Hubs> _hubContext;
 
-        public ProductsController(IProductService productService,IProductDetailService productDetailService,ISizeService sizeService)
+        public ProductsController(IHubContext<Hubs> hubContext, IProductService productService,IProductDetailService productDetailService,ISizeService sizeService)
         {
             _productService = productService;
             _productDetailService = productDetailService;
             _sizeService = sizeService;
+            _hubContext = hubContext;
+
         }
         public async Task<IActionResult> Index()
         {
@@ -25,6 +30,7 @@ namespace FourLeafCloverShoe.Controllers
         }
         public async Task<IActionResult> ProductDetail(Guid productId)
         {
+                            await _hubContext.Clients.All.SendAsync("alertToAdmin", $"Trung Trương vừa mua hàng",true);
             var product = await _productService.GetById(productId);
             var lstProductDetail = await _productDetailService.GetByProductId(product.Id);
             var sizes = await _sizeService.Gets();

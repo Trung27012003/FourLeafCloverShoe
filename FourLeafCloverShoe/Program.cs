@@ -22,6 +22,10 @@ builder.Services.AddDbContext<MyDbContext>(options =>
              options.UseSqlServer(
                  builder.Configuration.GetConnectionString("DefaultConnection")));
 
+
+
+
+
 // add identity
 builder.Services.AddIdentity<User, IdentityRole>(options => options.SignIn.RequireConfirmedAccount = true)
     .AddEntityFrameworkStores<MyDbContext>()
@@ -87,12 +91,18 @@ builder.Services.AddAuthentication(options =>
 
 // add razor page
 builder.Services.AddRazorPages();
+//add AddSignalR
+builder.Services.AddSignalR();
 // add session
 builder.Services.AddSession();
 
 
 var app = builder.Build();
-
+app.UseCors(builder => builder
+    .WithOrigins("https://localhost:7116")
+    .AllowAnyMethod()
+    .AllowAnyHeader()
+    .AllowCredentials());
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
@@ -123,6 +133,8 @@ app.UseEndpoints(endpoints =>
     endpoints.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
+
+    endpoints.MapHub<Hubs>("/Hubs");
 });
 app.MapRazorPages();
 app.Run();
