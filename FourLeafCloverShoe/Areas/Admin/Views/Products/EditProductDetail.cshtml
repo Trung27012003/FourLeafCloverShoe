@@ -25,7 +25,7 @@
                                     <div class="col-auto">
                                         @if (Model.SizeId == Guid.Parse(item.Value))
                                         {
-                                            <input asp-for="SizeId" type="radio" class="btn-check" id="@item.Text" value="@item.Value" checked="checked">
+                                            <input asp-for="SizeId" type="radio" class="btn-check" id="@item.Text" value="@item.Value">
 
                                         }
                                         else

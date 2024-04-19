@@ -13,6 +13,8 @@
         <div class="card table-card">
             <div class="card-body">
                 <div class="text-end p-sm-4 pb-sm-2">
+                    <p>Xoá chưa được</p>
+
                     <a asp-action="Create" asp-controller="Role" class="btn btn-primary"> <i class="ti ti-plus f-18"></i> Thêm mới </a>
                 </div>
                 <div class="table-responsive">
@@ -43,7 +45,6 @@
 
                                         }
                                     </td>
-                                    <form asp-action="Delete" asp-route-roleId="@item.Id">
                                     <td class="text-center">
                                         <span >#</span>
                                         <div class="prod-action-links">
@@ -60,14 +61,11 @@
                                                     </a>
                                                 </li>
                                                 <li class="list-inline-item align-bottom" data-bs-toggle="tooltip" title="Xoá">
-                                                    <button type="submit" class="avtar avtar-xs btn-link-danger btn-pc-default">
-                                                        <i class="ti ti-trash f-18"></i>
-                                                    </button>
+                                                        @Html.ActionLink("", "Delete", new { Id = item.Id }, new { @class = "avtar avtar-xs btn-link-danger btn-pc-default ti ti-trash f-18" })
                                                 </li>
                                             </ul>
                                         </div>
                                     </td>
-                                    </form>
                                 </tr>
                             }
                                 

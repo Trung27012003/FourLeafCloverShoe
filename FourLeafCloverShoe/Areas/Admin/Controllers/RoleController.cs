@@ -84,9 +84,9 @@ namespace FourLeafCloverShoe.Areas.Admin.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Delete(string roleId)
+        public async Task<IActionResult> Delete(string Id)
         {
-            var objFromDb = await _roleManager.FindByIdAsync(roleId);
+            var objFromDb = await _roleManager.FindByIdAsync(Id);
             await _roleManager.DeleteAsync(objFromDb);
             return RedirectToAction(nameof(Index));
         }
