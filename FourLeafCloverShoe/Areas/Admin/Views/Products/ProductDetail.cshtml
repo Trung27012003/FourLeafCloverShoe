@@ -1,8 +1,8 @@
 ﻿@model IEnumerable<FourLeafCloverShoe.Share.Models.ProductDetail>
 
 @{
-    ViewBag.Title = "Product Detail List";
-    ViewBag.pTitle = "E-commerce";
+    ViewBag.Title = "Danh sách";
+    ViewBag.pTitle = "Sản phẩm chi tiết";
 }
 
 
@@ -18,19 +18,28 @@
                     <table class="table table-hover tbl-product" id="pc-dt-simple">
                         <thead>
                             <tr>
-                                <th class="text-end">#</th>
-                                <th>Tên Sản phẩm</th>
-                                <th>Kích cỡ</th>
-                                <th>Số lượng</th>
-                                <th>Giá bán</th>
-                                <th class="text-end">Trạng thái</th>
+                                <th data-sortable="true"><button class="datatable-sorter">STT</button></th>
+                                <th data-sortable="true"><button class="datatable-sorter">Tên Sản phẩm</button></th>
+                                <th data-sortable="true"><button class="datatable-sorter">Kích cỡ</button></th>
+                                <th data-sortable="true"><button class="datatable-sorter">Số lượng</button></th>
+                                <th data-sortable="true"><button class="datatable-sorter">Giá bán</button></th>
+                                <th data-sortable="true"><button class="datatable-sorter">Trạng thái</button></th>
+
                             </tr>
                         </thead>
                         <tbody>
+                            @{
+                                int stt = 0;
+                            }
                             @foreach (var item in Model)
                             {
                                 <tr>
-                                    <td class="text-end">#</td>
+                                    <td>
+                                        @{
+                                            stt++;
+                                            <span>@stt</span>
+                                        }
+                                    </td>
                                     <td>@item.Products.ProductName</td>
                                     <td>@item.Size.Name</td>
                                     <td>@item.Quantity</td>

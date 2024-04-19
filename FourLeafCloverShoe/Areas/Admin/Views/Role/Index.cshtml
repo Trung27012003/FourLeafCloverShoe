@@ -13,25 +13,32 @@
         <div class="card table-card">
             <div class="card-body">
                 <div class="text-end p-sm-4 pb-sm-2">
-                    <p>Xoá chưa được</p>
-
                     <a asp-action="Create" asp-controller="Role" class="btn btn-primary"> <i class="ti ti-plus f-18"></i> Thêm mới </a>
                 </div>
                 <div class="table-responsive">
                     <table class="table table-hover tbl-product" id="pc-dt-simple">
                         <thead>
                             <tr>
-                                <th >#</th>
-                                <th>Tên Chức vụ</th>
-                                <th>Quyền</th>
-                                <th>Chức năng</th>
+                                <th data-sortable="true"><button class="datatable-sorter">STT</button></th>
+                                <th data-sortable="true"><button class="datatable-sorter">Tên chức vụ</button></th>
+                                <th data-sortable="true"><button class="datatable-sorter">Quyền</button></th>
+                                <th data-sortable="true"><button class="datatable-sorter">Chức năng</button></th>
+
                             </tr>
                         </thead>
                         <tbody>
+                            @{
+                                int stt = 0;
+                            }
                             @foreach (var item in Model)
                             {
                                 <tr>
-                                    <td >#</td>
+                                    <td>
+                                        @{
+                                            stt++;
+                                            <span>@stt</span>
+                                        }
+                                    </td>
                                     <td >@item.Name</td>
                                     <td >
                                         @if (item.Claims.Count() == 0)
@@ -46,13 +53,12 @@
                                         }
                                     </td>
                                     <td class="text-center">
-                                        <span >#</span>
-                                        <div class="prod-action-links">
+                                        <div>
                                             <ul class="list-inline me-auto mb-0">
                                                 <li class="list-inline-item align-bottom" data-bs-toggle="tooltip" title="Quản lí quyền">
                                                     <a asp-action="ManageRoleClaims" asp-route-roleId="@item.Id"
                                                        class="avtar avtar-xs btn-link-secondary btn-pc-default">
-                                                        <i class="ti ti-eye f-18"></i>
+                                                        <i class="ti ti-adjustments"></i>
                                                     </a>
                                                 </li>
                                                 <li class="list-inline-item align-bottom" data-bs-toggle="tooltip" title="Chỉnh sửa">

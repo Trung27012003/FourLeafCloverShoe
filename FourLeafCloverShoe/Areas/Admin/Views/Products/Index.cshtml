@@ -1,8 +1,8 @@
 ﻿@model IEnumerable<FourLeafCloverShoe.Share.Models.Product>
 
 @{
-    ViewBag.Title = "Product List";
-    ViewBag.pTitle = "E-commerce";
+    ViewBag.Title = "Danh sách";
+    ViewBag.pTitle = "Sản phẩm";
 }
 
 
@@ -18,20 +18,28 @@
                     <table class="table table-hover tbl-product" id="pc-dt-simple">
                         <thead>
                             <tr>
-                                <th class="text-end">#</th>
-                                <th>Sản phẩm</th>
-                                <th>Loại</th>
-                                <th>Hãng sản xuất</th>
-                                <th>Giá bán (VNĐ)</th>
-                                <th >Số lượng tồn</th>
-                                <th class="text-end">Trạng thái</th>
+                                <th data-sortable="true"><button class="datatable-sorter">STT</button></th>
+                                <th data-sortable="true"><button class="datatable-sorter">Sản phẩm</button></th>
+                                <th data-sortable="true"><button class="datatable-sorter">Loại</button></th>
+                                <th data-sortable="true"><button class="datatable-sorter">Hãng sản xuất</button></th>
+                                <th data-sortable="true"><button class="datatable-sorter">Giá bán (VNĐ)</button></th>
+                                <th data-sortable="true"><button class="datatable-sorter">Số lượng tồn</button></th>
+                                <th data-sortable="true"><button class="datatable-sorter">Trạng thái</button></th>
                             </tr>
                         </thead>
                         <tbody>
+                            @{
+                                int stt = 0;
+                            }
                             @foreach (var item in Model)
                             {
                                 <tr>
-                                    <td class="text-end">1</td>
+                                    <td>
+                                        @{
+                                            stt++;
+                                            <span>@stt</span>
+                                        }
+                                    </td>
                                     <td>
                                         <div class="row">
                                             <div class="col-auto pe-0">

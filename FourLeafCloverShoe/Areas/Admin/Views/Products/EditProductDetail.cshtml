@@ -1,7 +1,7 @@
 ﻿@model FourLeafCloverShoe.Share.Models.ProductDetail
 @{
-    ViewBag.Title = "Update Product Detail";
-    ViewBag.pTitle = "E-commerce";
+    ViewBag.Title = "Cập nhật";
+    ViewBag.pTitle = "Sản phẩm chi tiết";
 }
 
 
@@ -9,9 +9,6 @@
     <!-- [ sample-page ] start -->
     <div class="col-xl-12">
         <div class="card">
-            <div class="card-header">
-                <h5>Thông tin sản phẩm</h5>
-            </div>
             <form asp-action="EditProductDetail">
                 <div class="card-body">
                     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
@@ -73,12 +70,10 @@
                     </div>
                 </div>
                 <div class="col-sm-12">
-                    <div class="card">
                         <div class="card-body text-end btn-page">
-                            <button type="submit" class="btn btn-primary mb-0">Save product</button>
+                            <button type="submit" class="btn btn-primary mb-0">Lưu thay đổi</button>
                             <button class="btn btn-outline-secondary mb-0">Reset</button>
                         </div>
-                    </div>
                 </div>
             </form>
         </div>
