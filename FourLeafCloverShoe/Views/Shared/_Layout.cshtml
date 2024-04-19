@@ -83,6 +83,8 @@
 
     <link rel="icon" href="~/fileuser/Assets/App/images/brand/favicon.png" type="image/x-icon" />
 
+@*    <script src="~/lib/signalr/dist/browser/signalr.min.js</script>*@
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/3.1.7/signalr.min.js"></script>
     <link href="~/fileuser/Assets/App/fonts/mwc-icon-v1.0/style.css" rel="stylesheet" type="text/css" />
     <link href="~/fileuser/Assets/App/fonts/Roboto/css/Roboto.css" rel="stylesheet" type="text/css" />
     <link href="~/fileuser/Assets/Lib/bootstrap/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
@@ -92,7 +94,6 @@
     <link href="~/fileuser/Assets/Lib/slick-1.8.1/slick/slick.css" rel="stylesheet" type="text/css" />
     <link href="~/fileuser/Assets/Lib/slick-1.8.1/slick/slick-theme.css" rel="stylesheet" type="text/css" />
     <link href="~/fileuser/Assets/Lib/fancybox/fancybox.css" rel="stylesheet" />
-    <link href="~/fileuser/Assets/App/css/style.css" rel="stylesheet" type="text/css" />
     <script src="~/fileuser/js/sitea975.js?v=T-tjfFLO8FtPWjOEpfxYRm6vmM9AX2icbps9TXlBFxg"></script>
     <script src="~/fileuser/lib/knockoutjs/knockout-3.5.1.js" type="text/javascript"></script>
     <script src="~/fileuser/Assets/Lib/jquery-2.2.4.min.js" type="text/javascript"></script>
@@ -105,8 +106,7 @@
     <script src="~/fileuser/Assets/App/js/main.js" type="text/javascript"></script>
 
 
-    <link href="~/fileuser/lib/toast/jquery.toast.css" rel="stylesheet" />
-    <script src="~/fileuser/lib/toast/jquery.toast.js"></script>
+ 
     <script src="~/fileuser/lib/sweet-alert/sweetalert2%4011.js"></script>
 </head>
 @{
@@ -622,8 +622,10 @@
         </div>
    
     </div>
+    <div>
 
 
+    </div>
     <div id="mm-blocker" class="mm-slideout"></div>
     <div id="loading-ico"></div>
     <div id="bttop" style="display: none;">

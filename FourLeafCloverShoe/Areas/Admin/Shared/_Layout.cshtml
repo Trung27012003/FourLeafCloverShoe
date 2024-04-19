@@ -15,7 +15,9 @@
         <div class="pc-content">
 
             @Html.Partial("~/Areas/Admin/Shared/Breadcrumb.cshtml")
-
+            <div data-pc-direction="ltr"> @*THÔNG BÁO*@
+                <div class="toast-container position-fixed top-0 end-0 p-3 " style="z-index: 99999"></div>
+            </div>
             @RenderBody()
 
         </div>

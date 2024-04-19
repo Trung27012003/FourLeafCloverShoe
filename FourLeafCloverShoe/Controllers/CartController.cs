@@ -1,7 +1,9 @@
-﻿using FourLeafCloverShoe.IServices;
+﻿using FourLeafCloverShoe.Helper;
+using FourLeafCloverShoe.IServices;
 using FourLeafCloverShoe.Share.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using Newtonsoft.Json;
 using System;
 
@@ -76,7 +78,6 @@ namespace FourLeafCloverShoe.Controllers
                         var result = await _cartItemItemService.Add(item);
                         if (result)
                         {
-
                             return Json(new { message = "Thêm sản phẩm thành công!", isSuccess = true }); // Done
 
                         }

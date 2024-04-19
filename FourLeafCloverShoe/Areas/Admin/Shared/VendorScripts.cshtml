@@ -1,4 +1,5 @@
 ﻿<!-- Required Js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/3.1.7/signalr.min.js"></script>
 <script src="~/fileadmin/assets/js/plugins/popper.min.js"></script>
 <script src="~/fileadmin/assets/js/plugins/simplebar.min.js"></script>
 <script src="~/fileadmin/assets/js/plugins/bootstrap.min.js"></script>
@@ -34,5 +35,55 @@
         layout_change('dark');
     } else {
         layout_change('light');
+    }
+</script>
+<script>
+
+    var connection = new signalR.HubConnectionBuilder().withUrl("/Hubs").build(); //
+    connection.on("alertToAdmin", (message, status) => {
+        showToast(message,status);
+    });
+
+    connection.start().catch(err => console.error(err));
+    function showToast(message, status) {
+        var statusmessage = "";
+        if (status == true) {
+            statusmessage = "bg-success";
+        } else {
+            statusmessage = "bg-danger"
+        }
+
+        var toastContainer = document.querySelector('.toast-container');
+
+        var toastEl = document.createElement('div');
+        toastEl.classList.add('toast');
+        toastEl.setAttribute('role', 'alert');
+        toastEl.setAttribute('aria-live', 'assertive');
+        toastEl.setAttribute('aria-atomic', 'true');
+
+        var toastHeader = document.createElement('div');
+        toastHeader.classList.add('toast-header');
+        toastHeader.classList.add('text-white');
+        toastHeader.classList.add(statusmessage);
+        toastHeader.innerHTML = `<strong class="me-auto"> <i class="mwc-icon-bell-o " style="width: 20px"></i> Thông báo</strong>
+                        <small>0 phút trước</small>
+                        <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>`;
+        var toastBody = document.createElement('div');
+
+        toastBody.classList.add('toast-body');
+        toastBody.style.display = 'flex';
+        toastBody.style.flexDirection = 'row';
+        toastBody.style.alignItems = 'center';
+        toastBody.style.textAlign = 'left';
+        if (status == true) {
+            toastBody.innerHTML = `<img class="img" src="/fileadmin/assets/images/notification/ok-48.png"> ${message}`;
+        } else {
+            toastBody.innerHTML = `<img class="img" src="/fileadmin/assets/images/notification/high_priority-48.png"> ${message}`;
+        }
+        toastEl.appendChild(toastHeader);
+        toastEl.appendChild(toastBody);
+        toastContainer.appendChild(toastEl);
+        var toast = new bootstrap.Toast(toastEl);
+        toast.show();
     }
 </script>

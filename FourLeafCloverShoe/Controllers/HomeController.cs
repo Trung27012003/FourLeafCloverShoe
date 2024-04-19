@@ -17,5 +17,10 @@ namespace FourLeafCloverShoe.Controllers
         {
             return View();
         }
+         public IActionResult Icon()
+        {
+            return View();
+        }
+
     }
 }

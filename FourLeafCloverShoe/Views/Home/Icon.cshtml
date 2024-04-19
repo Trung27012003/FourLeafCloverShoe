@@ -1,0 +1,21 @@
+﻿<div class="xinchao">
+
+</div>
+<script>
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', '/fileuser/Assets/App/fonts/mwc-icon-v1.0/style.css', true);
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState === 4 && xhr.status === 200) {
+            var cssContent = xhr.responseText;
+            var classNames = cssContent.match(/\.[\w-]+/g);
+            var containerDiv = document.querySelector('.xinchao');
+            classNames.forEach(function (className) {
+                var div = document.createElement('i');
+                div.classList.add(className.substring(1));
+                containerDiv.appendChild(div);
+            });
+        }
+    };
+    xhr.send();
+
+</script>
