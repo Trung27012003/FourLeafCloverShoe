@@ -3,7 +3,13 @@ using FourLeafCloverShoe.Share.ViewModels;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.EntityFrameworkCore;
+using System.Text.Encodings.Web;
+using System.Text;
+using FourLeafCloverShoe.IServices;
+using Microsoft.AspNetCore.Identity.UI.Services;
+using static Org.BouncyCastle.Crypto.Engines.SM2Engine;
 
 namespace FourLeafCloverShoe.Areas.Admin.Controllers
 {
@@ -13,11 +19,15 @@ namespace FourLeafCloverShoe.Areas.Admin.Controllers
     {
         private readonly UserManager<User> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
-
-        public UserController(UserManager<User> userManager, RoleManager<IdentityRole> roleManager)
+        private readonly IEmailSender _emailSender;
+        private readonly ICartService _cartService;
+        public UserController(UserManager<User> userManager, RoleManager<IdentityRole> roleManager, IEmailSender emailSender,
+            ICartService cartService)
         {
             _userManager = userManager;
             _roleManager = roleManager;
+            _emailSender = emailSender;
+            _cartService = cartService;
         }
 
         public async Task<IActionResult> IndexAsync()
@@ -60,6 +70,16 @@ namespace FourLeafCloverShoe.Areas.Admin.Controllers
         [HttpPost]
         public async Task<IActionResult> Create(UserViewModel user)
         {
+            var roles = await _roleManager.Roles.Select(r => new SelectListItem
+            {
+                Text = r.Name,
+                Value = r.Name
+            }).ToListAsync();
+
+
+
+            // Truyền danh sách role vào ViewBag hoặc ViewModel để sử dụng trong Razor view
+            ViewBag.Roles = roles;
             var usermodel = new User()
             {
                 UserName = user.UserName,
@@ -76,14 +96,38 @@ namespace FourLeafCloverShoe.Areas.Admin.Controllers
                 var role = await _roleManager.FindByNameAsync(user.Roles.First());
                 if (role != null)
                 {
-                    var roleResult = await _userManager.AddToRoleAsync(usermodel, role.Name);
+                    var roleResult = await _userManager.AddToRolesAsync(usermodel, user.Roles);
                     if (roleResult.Succeeded)
                     {
-                        return RedirectToAction("Index");
+                        var createCartResult = await _cartService.Add(new Cart() { Id = Guid.NewGuid(), UserId = usermodel.Id });
+
+                        if (createCartResult)
+                        {
+                    var code = await _userManager.GenerateEmailConfirmationTokenAsync(usermodel);
+                            code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
+
+                            // Construct callback URL for email confirmation
+                            var callbackUrl = Url.Action(
+                                "ConfirmEmail",                 // Action method for email confirmation
+                                "Account",                      // Controller name
+                                new
+                                {
+                                    area = "Identity",          // Area name
+                                    userId = usermodel.Id,      // User ID
+                                    code = code,                // Confirmation code           // Return URL after confirmation
+                                },
+                                protocol: Request.Scheme      // Protocol (http or https)
+                            );
+                            // Send email confirmation email
+                            await _emailSender.SendEmailAsync(user.Email, "Confirm your email",
+                                $"Please confirm your account by <a href='{callbackUrl}'>clicking here</a>.");
+
+                            return RedirectToAction("Index");
+                        }
                     }
                 }
             }
-            return View();
+            return View(user);
         }
 
 
@@ -154,7 +198,6 @@ namespace FourLeafCloverShoe.Areas.Admin.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        [HttpPost]
         public async Task<IActionResult> LockUnlockAsync(string userId)
 
         {
@@ -183,7 +226,6 @@ namespace FourLeafCloverShoe.Areas.Admin.Controllers
             }
             return RedirectToAction(nameof(Index));
         }
-        [HttpPost]
         public async Task<IActionResult> Delete(string userId)
         {
             var user = await _userManager.FindByIdAsync(userId);
@@ -199,6 +241,39 @@ namespace FourLeafCloverShoe.Areas.Admin.Controllers
             }
 
             return RedirectToAction(nameof(Index));
+        }
+        public async Task<IActionResult> ResendMail(string userId)
+        {
+            var usermodel = await _userManager.FindByIdAsync(userId);
+            if (usermodel == null)
+            {
+                return NotFound();
+            }
+
+            else
+            {
+                var code = await _userManager.GenerateEmailConfirmationTokenAsync(usermodel);
+                code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
+
+                // Construct callback URL for email confirmation
+                var callbackUrl = Url.Action(
+                    "ConfirmEmail",                 // Action method for email confirmation
+                    "Account",                      // Controller name
+                    new
+                    {
+                        area = "Identity",          // Area name
+                        userId = usermodel.Id,      // User ID
+                        code = code,                // Confirmation code           // Return URL after confirmation
+                    },
+                    protocol: Request.Scheme      // Protocol (http or https)
+                );
+                // Send email confirmation email 
+                await _emailSender.SendEmailAsync(usermodel.Email, "Confirm your email",
+                    $"Please confirm your account by <a href='{callbackUrl}'>clicking here</a>.");
+
+            return RedirectToAction(nameof(Index));
+            }
+
         }
 
     }

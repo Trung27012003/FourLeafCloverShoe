@@ -19,15 +19,15 @@
                 </div>
 
                 <div class="table-responsive">
-                    <table class="table table-hover tbl-product" id="pc-dt-simple">
+                    <table class="table table-hover tbl-product" id="tb-sorting">
                         <thead>
                             <tr>
-                                <th data-sortable="true"><button class="datatable-sorter">STT</button></th>
-                                <th data-sortable="true"><button class="datatable-sorter">Tiêu đề</button></th>
-                                <th data-sortable="true"><button class="datatable-sorter">Tác giả</button></th>
-                                <th data-sortable="true"><button class="datatable-sorter">Ngày đăng</button></th>
-                                <th data-sortable="true"><button class="datatable-sorter">Ngày cập nhật</button></th>
-                                <th data-sortable="true"><button class="datatable-sorter">Trạng thái</button></th>
+                                <th>STT</th>
+                                <th>Tiêu đề</th>
+                                <th>Tác giả</th>
+                                <th>Ngày đăng</th>
+                                <th>Ngày cập nhật</th>
+                                <th>Trạng thái</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -87,7 +87,9 @@
                                                     </a>
                                                 </li>
                                                 <li class="list-inline-item align-bottom" data-bs-toggle="tooltip" title="Xoá">
-                                                    @Html.ActionLink("", "Delete", new { Id = item.Id }, new { @class = "avtar avtar-xs btn-link-danger btn-pc-default ti ti-trash f-18" })
+                                                    <a asp-action="Delete" asp-route-Id="@item.Id" class="avtar avtar-xs btn-link-danger btn-pc-default">
+                                                        <i class="ti ti-trash f-18"></i>
+                                                    </a>
                                                 </li>
                                             </ul>
                                         </div>

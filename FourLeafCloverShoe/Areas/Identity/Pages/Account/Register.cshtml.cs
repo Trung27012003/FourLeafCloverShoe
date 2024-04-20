@@ -109,12 +109,13 @@ namespace FourLeafCloverShoe.Areas.Identity.Pages.Account
 
                     var userId = await _userManager.GetUserIdAsync(user);
 
-                    // tạo cart
-                    var createCartResult = await _cartService.Add(new Cart() { Id = Guid.NewGuid(), UserId = userId });
-
+                   
 
                     // set role
                     await _userManager.AddToRoleAsync(user, "User");
+                    // tạo cart
+                    var createCartResult = await _cartService.Add(new Cart() { Id = Guid.NewGuid(), UserId = userId });
+
                     if (createCartResult)
                     {
                         var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);

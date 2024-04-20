@@ -6,11 +6,14 @@ using FourLeafCloverShoe.Share.Models;
 namespace FourLeafCloverShoe.Areas.Admin.Controllers
 {
         [Area("Admin")]
+
+    //[AdminAreaAuthorization] // check admin or staff
+
+    [Authorize(Roles ="Admin")]    
     
-    [AdminAreaAuthorization] // check admin or staff
     public class DashboardController : Controller
     {
-    [Authorize("Create")]    //action được làm
+    //[Authorize("Create")]    //action được làm
         public IActionResult Index()
         {
             return View();
