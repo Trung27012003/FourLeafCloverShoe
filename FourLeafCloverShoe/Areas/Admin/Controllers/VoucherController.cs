@@ -18,5 +18,10 @@ namespace FourLeafCloverShoe.Areas.Admin.Controllers
         {
             return View((await _voucherService.Gets()).OrderByDescending(c=>c.CreateDate));
         }
+        public async Task<IActionResult> Create()
+        {
+            return View((await _voucherService.Gets()).OrderByDescending(c=>c.CreateDate));
+        }
+
     }
 }

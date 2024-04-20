@@ -20,20 +20,18 @@
         <div class="card table-card">
             <div class="card-body">
                 <div class="text-end p-sm-4 pb-sm-2">
-                    <a asp-action="Create" asp-controller="Role" class="btn btn-primary"> <i class="ti ti-plus f-18"></i> Thêm mới </a>
+                    <a asp-action="Create" class="btn btn-primary"> <i class="ti ti-plus f-18"></i> Thêm mới </a>
                 </div>
                 <div class="table-responsive">
-                    <table class="table table-hover tbl-product" id="pc-dt-simple">
+                    <table class="table table-hover tbl-product" id="tb-sorting">
                         <thead>
                             <tr>
-                                <th data-sortable="true"><button class="datatable-sorter">STT</button></th>
-                                <th data-sortable="true"><button class="datatable-sorter">Tên</button></th>
-                                <th data-sortable="true"><button class="datatable-sorter">Tên đăng nhập</button></th>
-                                <th data-sortable="true"><button class="datatable-sorter">Email</button></th>
-                                <th data-sortable="true"><button class="datatable-sorter">Chức vụ</button></th>
-                                <th data-sortable="true"><button class="datatable-sorter">Trạng thái</button></th>
-                                <th data-sortable="true"><button class="datatable-sorter">Chức năng</button></th>
-
+                                <th>STT</th>
+                                <th>Tên</th>
+                                <th>Tên đăng nhập</th>
+                                <th>Email</th>
+                                <th>Chức vụ</th>
+                                <th>Trạng thái</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -58,37 +56,32 @@
                                         {
                                             <img class="user-avtar wid-45 rounded-circle" alt="profile" src="~/fileadmin/assets/images/user/avatar-1.jpg" />
                                         }
-                                    @item.FullName</td>
+                                        @item.FullName
+                                    </td>
                                     <td>@item.UserName</td>
                                     <td>@item.Email</td>
                                     <td>
-                                    @if (item.Roles.Count() == 0)
-                                    {
-                                        <span>No role</span>
-                                    }
-                                    else
-                                    {
-                                        @string.Join(" , ", item.Roles.ToList())
-                                        ;
-
-                                    }
+                                     <span>role</span>
                                     </td>
                                     <td>
+                                        @if (item.EmailConfirmed)
+                                        {
+                                            @if (item.LockoutEnd == null || item.LockoutEnd < DateTime.Now)
+                                            {
+                                                <span class="badge rounded-pill text-bg-primary">Hoạt động</span>
 
-                                    @if (item.LockoutEnd == null || item.LockoutEnd < DateTime.Now)
-                                    {
-                                            <span class="badge rounded-pill text-bg-primary">Hoạt động</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge rounded-pill text-bg-danger">Đã khoá</span>
+                                            }
+                                        }
+                                        else
+                                        {
+                                            <span class="badge rounded-pill text-bg-warning">Chưa kích hoạt</span>
+                                        }
 
-                                    }
-                                    else
-                                    {
-                                            <span class="badge rounded-pill text-bg-danger">Khoá</span>
-                                    }
-
-
-                                    </td>
-                                    <td>
-                                        <div >
+                                        <div class="prod-action-links">
                                             <ul class="list-inline me-auto mb-0">
                                                 <li class="list-inline-item align-bottom" data-bs-toggle="tooltip" title="Cập nhật">
                                                     <a asp-action="Edit" asp-route-userId="@item.Id"
@@ -96,23 +89,35 @@
                                                         <i class="ti ti-edit-circle f-18"></i>
                                                     </a>
                                                 </li>
-                                                @if (item.LockoutEnd == null || item.LockoutEnd < DateTime.Now)
+                                                @if (item.EmailConfirmed)
                                                 {
-                                                    <li class="list-inline-item align-bottom" data-bs-toggle="tooltip" title="Khoá tài khoản">
-                                                        <a asp-action="LockUnlock" asp-route-userId="@item.Id" class="avtar avtar-xs btn-link-success btn-pc-default">
-                                                            <i class="ti ti-lock"></i>
-                                                        </a>
-                                                    </li>
+                                                    @if (item.LockoutEnd == null || item.LockoutEnd < DateTime.Now)
+                                                    {
+                                                        <li class="list-inline-item align-bottom" data-bs-toggle="tooltip" title="Khoá tài khoản">
+                                                            <a asp-action="LockUnlock" asp-route-userId="@item.Id" class="avtar avtar-xs btn-link-success btn-pc-default">
+                                                                <i class="ti ti-lock" style="font-size: 20px" ></i>
+                                                            </a>
+                                                        </li>
+                                                    }
+                                                    else
+                                                    {
+                                                        <li class="list-inline-item align-bottom" data-bs-toggle="tooltip" title="Mở khoá tài khoản">
+                                                            <a asp-action="LockUnlock" asp-route-userId="@item.Id" class="avtar avtar-xs btn-link-success btn-pc-default">
+                                                                <i class="ti ti-lock-open" style="font-size: 20px" ></i>
+                                                            </a>
+                                                        </li>
+                                                    }
                                                 }
                                                 else
                                                 {
-                                                    <li class="list-inline-item align-bottom" data-bs-toggle="tooltip" title="Mở khoá tài khoản">
-                                                        <a asp-action="LockUnlock" asp-route-userId="@item.Id" class="avtar avtar-xs btn-link-success btn-pc-default">
-                                                            <i class="ti ti-lock-open"></i>
+                                                    <li class="list-inline-item align-bottom" data-bs-toggle="tooltip" title="Gửi lại mail kích hoạt">
+                                                        <a asp-action="ResendMail" asp-route-userId="@item.Id" class="avtar avtar-xs btn-link-success btn-pc-default">
+                                                            <i class="fas fa-paper-plane" style="font-size: 20px" ></i>
+
                                                         </a>
                                                     </li>
                                                 }
-                                               
+
                                                 <li class="list-inline-item align-bottom" data-bs-toggle="tooltip" title="Xoá">
                                                     <a asp-action="Delete" asp-route-userId="@item.Id" class="avtar avtar-xs btn-link-danger btn-pc-default">
                                                         <i class="ti ti-trash f-18"></i>
@@ -121,9 +126,9 @@
                                             </ul>
                                         </div>
                                     </td>
-                               </tr>
-
+                                </tr>
                             }
+
                         </tbody>
                     </table>
                 </div>
