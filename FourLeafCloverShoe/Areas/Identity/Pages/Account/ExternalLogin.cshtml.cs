@@ -155,7 +155,7 @@ namespace FourLeafCloverShoe.Areas.Identity.Pages.Account
                 ErrorMessage = "Error loading external login information during confirmation.";
                 return RedirectToPage("./Login", new { ReturnUrl = returnUrl });
             }
-
+            
             if (ModelState.IsValid)
             {
                 var user = new User()
@@ -163,7 +163,7 @@ namespace FourLeafCloverShoe.Areas.Identity.Pages.Account
                     UserName = new MailAddress(Input.Email).User,
                     Email = Input.Email,
                     Coins = 0,
-                    FullName = info.ProviderDisplayName,
+                    FullName = info.Principal.FindFirstValue(ClaimTypes.Name),
                     RankId = Guid.Parse("2FA0118D-B530-421F-878E-CE4D54BFC6AB"),
                     Points = 0
                 };
