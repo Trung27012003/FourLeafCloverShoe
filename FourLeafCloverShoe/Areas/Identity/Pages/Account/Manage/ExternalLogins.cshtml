@@ -6,25 +6,71 @@
 }
 
 <partial name="_StatusMessage" for="StatusMessage" />
+<div class="account-forgot-password-form">
+    <div class="account-forgot-password-header">
+        <h1 class="account-forgot-password-header-title">Đổi mật khẩu</h1>
+        <div class="account-forgot-password-header-des">
+            Để bảo mật tài khoản,
+            vui lòng không chia sẻ mật khẩu cho người khác
+        </div>
+    </div>
+    <br />
 @if (Model.CurrentLogins?.Count > 0)
 {
-    <h3>Registered Logins</h3>
+        
+            <div class="social-network-login">
+            @foreach (var login in Model.CurrentLogins)
+            {
+                @if (login.ProviderDisplayName.ToLower() == "google")
+                {
+                    <a class="social-network-btn">
+                    <div class="social-buttton">
+                        <div class="social-white-background social-white-google-png"></div>
+                            <div class="">@login.ProviderDisplayName</div>
+                        </div>
+                    </a>
+                }
+                @if (login.ProviderDisplayName.ToLower() == "facebook")
+                {
+                    <a class="social-network-btn">
+                    <div class="social-buttton">
+                        <div class="social-white-background social-white-fb-blue-png"></div>
+                            <div class="">@login.ProviderDisplayName</div>
+                        </div>
+                    </a>
+                }
+                   
+               
+                }
+                
+            </div>
+        
     <table class="table">
         <tbody>
             @foreach (var login in Model.CurrentLogins)
             {
                 <tr>
-                    <td id="@($"login-provider-{login.LoginProvider}")">@login.ProviderDisplayName</td>
+                        
+
                     <td>
                         @if (Model.ShowRemoveButton)
                         {
-                            <form id="@($"remove-login-{login.LoginProvider}")" asp-page-handler="RemoveLogin" method="post">
-                                <div>
+                                <form asp-page-handler="RemoveLogin" method="post">
                                     <input asp-for="@login.LoginProvider" name="LoginProvider" type="hidden" />
                                     <input asp-for="@login.ProviderKey" name="ProviderKey" type="hidden" />
-                                    <button type="submit" class="btn btn-primary" title="Remove this @login.ProviderDisplayName login from your account">Remove</button>
-                                </div>
-                            </form>
+                                    <button type="submit" class="social-network-btn">
+                                        <div class=""> Gỡ bỏ kết nối với &ensp; </div>
+
+                                        @if (login.ProviderDisplayName.ToLower() == "google")
+                                        {
+                                            <div class="social-white-background social-white-google-png"></div>
+                                        }
+                                        @if (login.ProviderDisplayName.ToLower() == "facebook")
+                                        {
+                                            <div class="social-white-background social-white-fb-blue-png"></div>
+                                        }
+                                    </button>
+                                </form>
                         }
                         else
                         {
@@ -38,16 +84,24 @@
 }
 @if (Model.OtherLogins?.Count > 0)
 {
-    <h4>Add another service to log in.</h4>
-    <hr />
-    <form id="link-login-form" asp-page-handler="LinkLogin" method="post" class="form-horizontal">
-        <div id="socialLoginList">
-            <p>
-                @foreach (var provider in Model.OtherLogins)
-                {
-                    <button id="@($"link-login-button-{provider.Name}")" type="submit" class="btn btn-primary" name="provider" value="@provider.Name" title="Log in using your @provider.DisplayName account">@provider.DisplayName</button>
-                }
-            </p>
-        </div>
-    </form>
+
+        <form id="link-login-form" asp-page-handler="LinkLogin" method="post" class="form-horizontal">
+            @foreach (var provider in Model.OtherLogins)
+            {
+                <div id="socialLoginList">
+                    <button type="submit" id="@($"link-login-button-{provider.Name}")" name="provider" class="social-network-btn">
+                        <div class=""> Kết nối với &ensp; </div>
+                        @if (provider.Name.ToLower() == "google")
+                        {
+                            <div class="social-white-background social-white-google-png"></div>
+                        }
+                        @if (provider.Name.ToLower() == "facebook")
+                        {
+                            <div class="social-white-background social-white-fb-blue-png"></div>
+                        }
+                    </button>
+                </div>
+            }
+        </form>
 }
+</div>

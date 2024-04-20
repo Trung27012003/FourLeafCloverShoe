@@ -65,10 +65,15 @@ builder.Services.AddAuthorization(options =>
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-    options.DefaultChallengeScheme = GoogleDefaults.AuthenticationScheme;
 })
 
-  .AddCookie()
+  .AddCookie( options=>
+    {
+        options.LoginPath = "/Identity/Acount/Login";
+        options.LogoutPath = "/Identity/Acount/Logout";
+        options.AccessDeniedPath = $"/Identity/Account/AccessDenied";
+        
+    })
   .AddGoogle(options =>
   {     // Đọc thông tin Authentication:Google
       IConfigurationSection googleAuthNSection = builder.Configuration.GetSection("Authentication:Google");

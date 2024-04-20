@@ -26,7 +26,7 @@ namespace FourLeafCloverShoe.Controllers
         public async Task<IActionResult> Index()
         {
             var products =await _productService.Gets();
-            return View(products.Where(c => c.Status == true).ToList());
+            return View(products.Where(c => c.Status == true&&c.ProductDetails.Where(p=>p.Status==1).Count()>0).ToList());
         }
         public async Task<IActionResult> ProductDetail(Guid productId)
         {
@@ -54,9 +54,17 @@ namespace FourLeafCloverShoe.Controllers
             var product = await _productService.GetById(Guid.Parse(productId));
             var lstProductDetail = await _productDetailService.GetByProductId(product.Id);
             var productDetail = lstProductDetail.FirstOrDefault(c=>c.SizeId==Guid.Parse(sizeId));
+            var status = productDetail.Status;
+            if (productDetail.Products.Status==true&&status==1)
+            {
+                status = 1;
+            }
+            else
+            {
+                status = 0;
+            }
 
-
-            return Json(new { productDetailId = productDetail .Id,priceSale = productDetail.PriceSale,quantity=productDetail.Quantity});
+            return Json(new { productDetailId = productDetail .Id,priceSale = productDetail.PriceSale,quantity=productDetail.Quantity,status = status });
         }
 
 
