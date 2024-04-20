@@ -16,7 +16,7 @@ namespace FourLeafCloverShoe.Areas.Admin.Controllers
 
         public async Task<IActionResult> Index()
         {
-            return View(await _sizeService.Gets());
+            return View((await _sizeService.Gets()).OrderBy(c=>c.Name));
         }
         public async Task<IActionResult> Create()
         {

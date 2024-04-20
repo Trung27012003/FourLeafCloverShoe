@@ -285,7 +285,7 @@ namespace FourLeafCloverShoe.Areas.Admin.Controllers
         public async Task<IActionResult> CreateProductDetail(Guid productId)
         {
             List<SelectListItem> ListSizeitems = new List<SelectListItem>();
-            foreach (var obj in (await _sizeService.Gets()))
+            foreach (var obj in ((await _sizeService.Gets()).OrderBy(c=>c.Name)))
             {
                 ListSizeitems.Add(new SelectListItem()
                 {

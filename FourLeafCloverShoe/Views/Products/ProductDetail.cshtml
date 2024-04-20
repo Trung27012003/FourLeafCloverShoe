@@ -428,10 +428,10 @@
                         <div class="product-top-review">
                             <span class="product-top-review-count">1</span> Đánh giá
                         </div>
-                        <div class="product-top-like">
+                        <div class="product-availibleQuantity">
                             @{
-                                decimal priceMax = ViewBag.priceMax;
-                                decimal priceMin = ViewBag.priceMin;
+                                decimal priceMax = ViewBag.priceMax??0;
+                                decimal priceMin = ViewBag.priceMin??0;
                                 int availibleQuantity = ViewBag.availibleQuantity;
                             }
                             Còn lại <span id="availibleQuantity">@availibleQuantity </span> sản phẩm
@@ -844,7 +844,12 @@
                 productDetailId = response.productDetailId;
                 // Sử dụng jQuery để tìm phần tử có class "product-grid-price-new-text" và gán giá trị quantity vào nội dung của nó
                 $('.product-grid-price-new-text').text(priceValue + ' đ');
-                $('#availibleQuantity').text(quantityValue);
+                if(response.status==1){
+                    $('#availibleQuantity').text(quantityValue);
+
+                }else{
+                    $('.product-availibleQuantity').text("Sản phẩm ngừng kinh doanh");
+                }
             },
             error: function (error) {
                 console.log(error);

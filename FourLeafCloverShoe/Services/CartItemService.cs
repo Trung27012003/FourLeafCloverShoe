@@ -153,9 +153,14 @@ namespace FourLeafCloverShoe.Services
             try
             {
                 var carts = await _myDbContext.Carts.ToListAsync();
-                var cartId = carts.FirstOrDefault(c => c.UserId == userId).Id;
+                var cartId = carts.FirstOrDefault(c => c.UserId == userId)?.Id;
+                
                 var lstCartItems = await Gets();
                 var cartItems = lstCartItems.Where(c => c.CartId == cartId).ToList();
+                if (cartItems == null)
+                {
+                    return new List<CartItem>();
+                }
                 return cartItems;
             }
             catch (Exception e)

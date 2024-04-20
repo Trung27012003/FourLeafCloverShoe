@@ -37,7 +37,7 @@ namespace FourLeafCloverShoe.Controllers
         }
         public async Task<IActionResult> addToCart(int quantity, Guid productDetailId)
         {
-            var producDetailFromDb = await _productDetailService.GetById(productDetailId);
+            var productDetailFromDb = await _productDetailService.GetById(productDetailId);
             if (User.Identity.IsAuthenticated)
             {
                 var user = await _userManager.GetUserAsync(HttpContext.User);
@@ -45,64 +45,69 @@ namespace FourLeafCloverShoe.Controllers
                 var itemInCart = cartItems.Where(c => c.ProductDetailId == productDetailId);
                 if (quantity <= 0) // số lượng phải hợp lệ
                 {
-                    return Json(new { message = "Số lượng sản phẩm phải lớn hơn 0, vui lòng chọn lại!", isSuccess = false });
+                    return Json(new { message = "Số lượng sản phẩm phải lớn hơn 0!", isSuccess = false });
 
                 }
                 else if (productDetailId == Guid.Parse("00000000-0000-0000-0000-000000000000")) // sản phẩm chi tiết phải hợp lệ
                 {
-                    return Json(new { message = "Vui lòng chọn kích cỡ hợp lệ, vui lòng chọn lại!", isSuccess = false });
+                    return Json(new { message = "Vui lòng chọn kích cỡ hợp lệ!", isSuccess = false });
                 }
-                else if (producDetailFromDb.Status == 0) // sản phẩm chi tiết phải hợp lệ về status
+                else if (productDetailFromDb.Status == 0) // sản phẩm chi tiết phải hợp lệ về status
                 {
-                    return Json(new { message = "Sản phẩm ngừng bán, vui lòng chọn lại!", isSuccess = false });
+                    return Json(new { message = "Sản phẩm ngừng bán!", isSuccess = false });
                 }
-                else if (producDetailFromDb.Quantity <= 0) // sản phẩm chi tiết phải hợp lệ về số lượng
+                else if (productDetailFromDb.Quantity <= 0) // sản phẩm chi tiết phải hợp lệ về số lượng
                 {
-                    return Json(new { message = "Sản phẩm đã hết hàng, vui lòng chọn lại!", isSuccess = false }); // kho hết hàng
+                    return Json(new { message = "Sản phẩm đã hết hàng!", isSuccess = false }); // kho hết hàng
                 }
-                else if (producDetailFromDb.Quantity < quantity)
+                else if (productDetailFromDb.Quantity < quantity)
                 {
-                    return Json(new { message = "Kho không đủ số lượng yêu cầu, vui lòng chọn lại!", isSuccess = false }); // kho hết hàng
+                    return Json(new { message = "Kho không đủ số lượng yêu cầu!", isSuccess = false }); // kho hết hàng
                 }
+               
                 else
                 {
-                    if (itemInCart.Count() < 1)
+                    if (productDetailFromDb.Status==1&& productDetailFromDb.Products.Status==true)
                     {
-                        var item = new CartItem()
+                        if (itemInCart.Count() < 1)
                         {
-                            CartId = (await _cartService.GetByUserId(user.Id)).Id,
-                            ProductDetailId = productDetailId,
-                            Quantity = quantity,
-                            Price = producDetailFromDb.PriceSale
-                        };
-                        var result = await _cartItemItemService.Add(item);
-                        if (result)
-                        {
-                            return Json(new { message = "Thêm sản phẩm thành công!", isSuccess = true }); // Done
-
-                        }
-                        return Json(new { message = "Lỗi thêm mới sản phẩm!", isSuccess = false });
-                    }
-                    else
-                    {
-                        var productInCart = cartItems.FirstOrDefault(c => c.ProductDetailId == productDetailId);
-                        if (producDetailFromDb.Quantity < quantity + productInCart.Quantity)
-                        {
-                            return Json(new { message = "Số lượng sản phẩm trong giỏ hàng và số lượng muốn thêm vào vượt quá số lượng tồn kho. Vui lòng giảm số lượng!", isSuccess = false }); // tổng hàng vượt quá kho
-                        }
-                        else
-                        {
-                            productInCart.Quantity += quantity;
-                            var result = await _cartItemItemService.Update(productInCart);
+                            var item = new CartItem()
+                            {
+                                CartId = (await _cartService.GetByUserId(user.Id)).Id,
+                                ProductDetailId = productDetailId,
+                                Quantity = quantity,
+                                Price = productDetailFromDb.PriceSale
+                            };
+                            var result = await _cartItemItemService.Add(item);
                             if (result)
                             {
-
                                 return Json(new { message = "Thêm sản phẩm thành công!", isSuccess = true }); // Done
 
                             }
-                            return Json(new { message = "Thêm sản phẩm thành công!", isSuccess = true }); // Done
+                            return Json(new { message = "Lỗi thêm mới sản phẩm!", isSuccess = false });
+                        }
+                        else
+                        {
+                            var productInCart = cartItems.FirstOrDefault(c => c.ProductDetailId == productDetailId);
+                            if (productDetailFromDb.Quantity < quantity + productInCart.Quantity)
+                            {
+                                return Json(new { message = "Số lượng sản phẩm trong giỏ hàng và số lượng muốn thêm vào vượt quá số lượng tồn kho!", isSuccess = false }); // tổng hàng vượt quá kho
+                            }
+                            else
+                            {
+                                productInCart.Quantity += quantity;
+                                var result = await _cartItemItemService.Update(productInCart);
+                                if (result)
+                                {
+
+                                    return Json(new { message = "Thêm sản phẩm thành công!", isSuccess = true }); // Done
+
+                                }
+                                return Json(new { message = "Lỗi update giỏ hàng!", isSuccess = false }); // Done
+                            }
                         }
                     }
+                    return Json(new { message = "Sản phẩm ngừng kinh doanh!", isSuccess = false }); // Done
                 }
 
             }
@@ -165,7 +170,7 @@ cartItems.FirstOrDefault(c => c.ProductDetailId == productDetail.Id)?.Quantity *
             {
                 var user = await _userManager.GetUserAsync(HttpContext.User);
                 var cartItems = await _cartItemItemService.GetsByUserId(user.Id);
-                var count = cartItems.Count();
+                var count = cartItems != null ? cartItems.Count() : 0;
                 return Json(new { message = "Lấy thành công!", isSuccess = true , count = count });
             }
             return Json(new { message = "Chưa đăng nhập!", isSuccess = false,count=0 });
