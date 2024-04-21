@@ -60,10 +60,6 @@ namespace FourLeafCloverShoe.Areas.Admin.Controllers
                 Text = r.Name,
                 Value = r.Name
             }).ToListAsync();
-
-
-
-            // Truyền danh sách role vào ViewBag hoặc ViewModel để sử dụng trong Razor view
             ViewBag.Roles = roles;
             return View();
         }
@@ -87,6 +83,7 @@ namespace FourLeafCloverShoe.Areas.Admin.Controllers
                 FullName = user.FullName,
                 PhoneNumber = user.PhoneNumber,
                 Points = 0,
+                Coins = 0,
                 RankId = Guid.Parse("2FA0118D-B530-421F-878E-CE4D54BFC6AB")
             };
             var result = await _userManager.CreateAsync(usermodel, user.Password);

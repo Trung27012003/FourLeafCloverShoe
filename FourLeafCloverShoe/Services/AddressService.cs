@@ -82,6 +82,25 @@ namespace FourLeafCloverShoe.Services
             }
         }
 
+        public async Task<List<Address>> GetByUserId(string userId)
+        {
+            try
+            {
+                var obj =  _myDbContext.Address.Where(c=>c.UserId== userId).ToList();
+                if (obj != null)
+                {
+
+                    return obj;
+                }
+                return new List<Address>();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                return new List<Address>();
+            }
+        }
+
         public async Task<List<Address>> Gets()
         {
             try
@@ -101,6 +120,34 @@ namespace FourLeafCloverShoe.Services
             }
         }
 
+        public async Task<bool> SetDefault(Guid Id)
+        {
+            try
+            {
+                var lstAddress = await _myDbContext.Address.ToListAsync();
+                foreach (var item in lstAddress)
+                {
+                    if (item.Id==Id)
+                    {
+
+                    item.IsDefault=true;
+                    }
+                    else
+                    {
+                        item.IsDefault = false;
+                    }
+                }
+                _myDbContext.Address.UpdateRange(lstAddress);
+                await _myDbContext.SaveChangesAsync();
+                return true;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                return false;
+            }
+        }
+
         public async Task<bool> Update(Address obj)
         {
             try
@@ -108,10 +155,15 @@ namespace FourLeafCloverShoe.Services
                 var objFromDb = await GetById(obj.Id);
                 if (obj != null)
                 {
-                    objFromDb.City = obj.City;
-                    objFromDb.Wards = obj.Wards;
+                    objFromDb.RecipientName = obj.RecipientName;
+                    objFromDb.RecipientPhone = obj.RecipientPhone;
+                    objFromDb.ProvinceID = obj.ProvinceID;
+                    objFromDb.ProvinceName = obj.ProvinceName;
+                    objFromDb.DistrictID = obj.DistrictID;
+                    objFromDb.DistrictName = obj.DistrictName;
+                    objFromDb.WardCode = obj.WardCode;
+                    objFromDb.WardName = obj.WardName;
                     objFromDb.IsDefault = obj.IsDefault;
-                    objFromDb.Province = obj.Province;
                     objFromDb.Description = obj.Description;
                     _myDbContext.Address.Update(objFromDb);
                     await _myDbContext.SaveChangesAsync();

@@ -61,7 +61,7 @@
                                     <td>@item.UserName</td>
                                     <td>@item.Email</td>
                                     <td>
-                                     <span>role</span>
+                                        <span>@String.Join(", ",item.Roles)</span>
                                     </td>
                                     <td>
                                         @if (item.EmailConfirmed)

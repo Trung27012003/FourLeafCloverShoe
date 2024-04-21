@@ -87,7 +87,11 @@ namespace FourLeafCloverShoe.Services
         {
             try
             {
-                var obj = await _myDbContext.Vouchers.ToListAsync();
+                var obj = await _myDbContext.Vouchers
+                   .Include(c=>c.UserVouchers)
+                        .ThenInclude(c=>c.Users)
+                            .ThenInclude(c=>c.Ranks)
+                    .ToListAsync();
                 if (obj != null)
                 {
 
