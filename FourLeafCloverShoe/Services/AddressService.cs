@@ -157,10 +157,13 @@ namespace FourLeafCloverShoe.Services
                 {
                     objFromDb.RecipientName = obj.RecipientName;
                     objFromDb.RecipientPhone = obj.RecipientPhone;
-                    objFromDb.City = obj.City;
-                    objFromDb.Wards = obj.Wards;
+                    objFromDb.ProvinceID = obj.ProvinceID;
+                    objFromDb.ProvinceName = obj.ProvinceName;
+                    objFromDb.DistrictID = obj.DistrictID;
+                    objFromDb.DistrictName = obj.DistrictName;
+                    objFromDb.WardCode = obj.WardCode;
+                    objFromDb.WardName = obj.WardName;
                     objFromDb.IsDefault = obj.IsDefault;
-                    objFromDb.Province = obj.Province;
                     objFromDb.Description = obj.Description;
                     _myDbContext.Address.Update(objFromDb);
                     await _myDbContext.SaveChangesAsync();

@@ -44,7 +44,7 @@ namespace FourLeafCloverShoe.Areas.Identity.Pages.Account.Manage
             var result = await _addressService.SetDefault(Id);
             if (result)
             {
-            return RedirectToPage();
+            return RedirectToPage("Address");
             }
             return NotFound();
         }

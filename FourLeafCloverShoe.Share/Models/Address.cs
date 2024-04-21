@@ -14,11 +14,15 @@ namespace FourLeafCloverShoe.Share.Models
         
         public string? RecipientName { get; set; }
         public string? RecipientPhone { get; set; }
-        public string? City { get; set; }
-        public string? Province { get; set; }
-        public string? Wards { get; set; }
+        public int? ProvinceID { get; set; } //Mã tỉnh thành
+        public string? ProvinceName { get; set; }
+        public int? DistrictID { get; set; } //Mã Quận/Huyện.
+        public string? DistrictName { get; set; } // thành phố
+       public int? WardCode { get; set; }// Mã Phường/Xã.
+        public string? WardName { get; set; } //Tên Phường/Xã.
+
         public string? Description { get; set; }
-        public bool? IsDefault { get; set; }
+        public bool IsDefault { get; set; }
         [ForeignKey("UserId")]
         public virtual User? Users { get; set; }
     }

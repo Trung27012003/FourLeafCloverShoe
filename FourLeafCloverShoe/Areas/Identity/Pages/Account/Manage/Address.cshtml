@@ -15,7 +15,7 @@
                 <div id="DIV_8">
                     <div class="y3hZ9E" id="DIV_9">
                         <div style="display: flex;" id="DIV_10">
-                            <button  class="shopee-button-solid shopee-button-solid--primary qTzF0g" id="BUTTON_11">
+                            <a asp-page="./AddAddress" class="shopee-button-solid shopee-button-solid--primary qTzF0g" id="BUTTON_11">
                                 <div class="psXjeQ" id="DIV_12">
                                     <div class="zNqMl2" id="DIV_13">
                                         <svg enable-background="new 0 0 10 10"
@@ -27,7 +27,7 @@
                                     </div>
                                     <div id="DIV_16">Thêm địa chỉ mới</div>
                                 </div>
-                            </button>
+                            </a>
                         </div>
                     </div>
                 </div>
@@ -73,7 +73,7 @@
                                                 @item.Description
                                             </div>
                                             <div role="row" class="E24UKj" id="DIV_41">
-                                                    Xã @item.Wards, Huyện @item.Province, @item.City : @item.Id
+                                                    @item.ProvinceName @item.DistrictName @item.WardName
                                             </div>
                                         </div>
                                     </div>
