@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Newtonsoft.Json;
 using System;
+using System.Net.Http;
+using System.Security.Claims;
 
 namespace FourLeafCloverShoe.Controllers
 {
@@ -128,7 +130,7 @@ namespace FourLeafCloverShoe.Controllers
                 };
                 var serializedCartItems = JsonConvert.SerializeObject(lstproductdetails, settings);
                 var tongtien = lstproductdetails.Sum(productDetail =>
-cartItems.FirstOrDefault(c => c.ProductDetailId == productDetail.Id)?.Quantity * productDetail.PriceSale ?? 0);
+cartItems.FirstOrDefault(c => c.ProductDetailId == productDetail.Id)?.Quantity * productDetail.PriceSale ?? 0).ToString("N0");
                 return Json(new { lstproducts = serializedCartItems, tongtien = tongtien });
             }
             return Json(new { lstproducts = new List<CartItem>(), tongtien = 0 });
@@ -176,7 +178,50 @@ cartItems.FirstOrDefault(c => c.ProductDetailId == productDetail.Id)?.Quantity *
             return Json(new { message = "Chưa đăng nhập!", isSuccess = false,count=0 });
 
         }
+         public async Task<IActionResult> UpdateSLInCart()
+        {
+            if (User.Identity.IsAuthenticated)
+            {
+                var user = await _userManager.GetUserAsync(HttpContext.User);
+                var cartItems = await _cartItemItemService.GetsByUserId(user.Id);
+                var count = cartItems != null ? cartItems.Count() : 0;
+                return Json(new { message = "Lấy thành công!", isSuccess = true , count = count });
+            }
+            return Json(new { message = "Chưa đăng nhập!", isSuccess = false,count=0 });
 
+        }
+        [HttpPost]
+        public async Task<JsonResult> UpdateSLInCart(Guid idProductDetail, int newQuantity)
+        {
+            ViewBag.message = "xinnchao";
+            if (User.Identity.IsAuthenticated) // đã đăng nhập
+            {
+                var user = await _userManager.GetUserAsync(HttpContext.User);
+                var lstCartItem = await _cartItemItemService.GetsByUserId(user.Id);
+                var cartItem = lstCartItem.FirstOrDefault(c => c.ProductDetailId == idProductDetail); // cartitemid
+                var ProductDetail = await _productDetailService.GetById(idProductDetail);
+                if (ProductDetail.Quantity < newQuantity)
+                {
+                    return Json(new { message = "Sản phẩm vượt quá giới hạn trong kho",oldQuantity = cartItem.Quantity, status = false });
+                }
+                if (newQuantity <= 0)
+                {
+                    return Json(new { message = "Sản phẩm tối thiểu là 1", oldQuantity = cartItem.Quantity, status = false });
+                }
+                var Response = await _cartItemItemService.UpdateQuantity(cartItem.Id, newQuantity);
+                if (Response)
+                {
+                    return Json(new { message = "OK", status = true });
+                }
+                return Json(new { message = "Lỗi không xác định", oldQuantity = cartItem.Quantity, status = false });
+            }
+            else//chưa đăng nhập
+            {
+
+                return Json(new { message = "OK", status = true });
+            }
+
+        }
 
 
     }

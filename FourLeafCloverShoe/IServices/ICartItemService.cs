@@ -9,6 +9,7 @@ namespace FourLeafCloverShoe.IServices
         public Task<bool> Update(CartItem obj);
         public Task<bool> Delete(Guid Id);
         public Task<bool> DeleteByProductDetailId(Guid productDetailId);
+        public Task<bool> UpdateQuantity(Guid cartItemId, int? newquantity);
         public Task<CartItem> GetById(Guid Id);
         public Task<List<CartItem>> Gets();
         public Task<List<CartItem>> GetsByUserId(string userId);

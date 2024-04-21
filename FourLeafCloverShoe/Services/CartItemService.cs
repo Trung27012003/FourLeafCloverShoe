@@ -190,5 +190,26 @@ namespace FourLeafCloverShoe.Services
                 return false;
             }
         }
+
+        public async Task<bool> UpdateQuantity(Guid cartItemId, int? newquantity)
+        {
+            try
+            {
+                var cartitem = await _myDbContext.CartItems.FirstOrDefaultAsync(c => c.Id == cartItemId);
+                if (cartitem != null)
+                {
+                    cartitem.Quantity = newquantity;
+                    _myDbContext.CartItems.Update(cartitem);
+                    await _myDbContext.SaveChangesAsync();
+                    return true;
+                }
+                return false;
+            }
+            catch (Exception)
+            {
+
+                return false;
+            }
+        }
     }
 }

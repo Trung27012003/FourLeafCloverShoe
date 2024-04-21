@@ -1,7 +1,8 @@
 ﻿@page
 @model FourLeafCloverShoe.Areas.Identity.Pages.Account.Manage.AddressModel
-@{
-}
+@using FourLeafCloverShoe.Share.Models
+
+
 <link rel="stylesheet" href="~/css/Address.css" />
 <div class="fkIi86">
     <div class="CAysXD" role="main" id="DIV_2">
@@ -14,7 +15,7 @@
                 <div id="DIV_8">
                     <div class="y3hZ9E" id="DIV_9">
                         <div style="display: flex;" id="DIV_10">
-                            <button class="shopee-button-solid shopee-button-solid--primary qTzF0g" id="BUTTON_11">
+                            <button  class="shopee-button-solid shopee-button-solid--primary qTzF0g" id="BUTTON_11">
                                 <div class="psXjeQ" id="DIV_12">
                                     <div class="zNqMl2" id="DIV_13">
                                         <svg enable-background="new 0 0 10 10"
@@ -48,86 +49,66 @@
                     </div>
                 </div>
                 <div class="OrZkCF" id="DIV_25">
-                    <div class="e65FdS" id="DIV_26">Địa chỉ</div>
-                    <div class="UUD4No SXp5o_" id="DIV_27">
-                        <div class="_RPpod" id="DIV_28">
-                            <div role="heading" class="X57SfF V4So7f" id="DIV_29">
-                                <div id="DIV_30" class="QyRpwQ lWXnp3">
-                                    <span class="Fi1zsg OwAhWT" id="SPAN_31">
-                                        <div class="mjiDsj" id="DIV_32">Trương Văn Trung</div>
-                                    </span>
-                                    <div class="YJU6OK" id="DIV_33"></div>
-                                    <div role="row" class="N_WJUf lw_xYb E24UKj" id="DIV_34">(+84) 376810024</div>
-                                </div>
-                                <div class="YziUfM" id="DIV_35">
-                                    <button class="T_oZqJ" id="BUTTON_36">Cập nhật</button>
-                                </div>
-                            </div>
-                            <div id="DIV_37" role="heading" class="X57SfF V4So7f">
-                                <div class="QyRpwQ lWXnp3" id="DIV_38">
-                                    <div class="We6XvC" id="DIV_39">
-                                        <div role="row" class="E24UKj" id="DIV_40">
-                                            Dốc 2 Con Chó Đá ( đối diện quán hát
-                                            chân tình đi khoảng 100m nhà thứ 2 bên phải)
-                                        </div>
-                                        <div role="row" class="E24UKj" id="DIV_41">
-                                            Xã Viên Nội, Huyện Ứng Hòa, Hà Nội
-                                        </div>
+                    <form  method="post">
+                    @foreach (var item in Model.ListAddress)
+                    {
+                        <div class="UUD4No SXp5o_" id="DIV_27">
+                            <div class="_RPpod" id="DIV_28">
+                                <div role="heading" class="X57SfF V4So7f" id="DIV_29">
+                                    <div id="DIV_30" class="QyRpwQ lWXnp3">
+                                        <span class="Fi1zsg OwAhWT" id="SPAN_31">
+                                            <div class="mjiDsj" id="DIV_32">@item.RecipientName</div>
+                                        </span>
+                                        <div class="YJU6OK" id="DIV_33"></div>
+                                        <div role="row" class="N_WJUf lw_xYb E24UKj" id="DIV_34">@item.RecipientPhone</div>
+                                    </div>
+                                    <div class="YziUfM" id="DIV_35">
+                                        <button class="T_oZqJ" id="BUTTON_36">Cập nhật</button>
                                     </div>
                                 </div>
-                                <div class="KFu3R3 YziUfM" id="DIV_42">
-                                    <button class="k8tV5Y zvyzwn zDPndA" disabled=""
-                                            id="BUTTON_43">
-                                        Thiết lập mặc định
-                                    </button>
-                                </div>
-                            </div>
-                            <div id="DIV_44" role="row" class="vy2yND E24UKj">
-                                <span role="mark"
-                                      class="wZ_1w7 aCY_5O ZDVTqW" id="SPAN_45">Mặc định</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="UUD4No SXp5o_" id="DIV_46">
-                        <div class="_RPpod" id="DIV_47">
-                            <div role="heading" class="X57SfF V4So7f" id="DIV_48">
-                                <div id="DIV_49" class="QyRpwQ lWXnp3">
-                                    <span class="Fi1zsg OwAhWT" id="SPAN_50">
-                                        <div class="mjiDsj" id="DIV_51">Trương Văn Trung</div>
-                                    </span>
-                                    <div class="YJU6OK" id="DIV_52"></div>
-                                    <div role="row" class="N_WJUf lw_xYb E24UKj" id="DIV_53">(+84) 376810024</div>
-                                </div>
-                                <div class="YziUfM" id="DIV_54">
-                                    <button class="T_oZqJ" id="BUTTON_55">
-                                        Cập
-                                        nhật
-                                    </button><button class="T_oZqJ" id="BUTTON_56">Xóa</button>
-                                </div>
-                            </div>
-                            <div id="DIV_57" role="heading" class="X57SfF V4So7f">
-                                <div class="QyRpwQ lWXnp3" id="DIV_58">
-                                    <div class="We6XvC" id="DIV_59">
-                                        <div role="row" class="E24UKj" id="DIV_60">Nhà 2 ngõ 8</div>
-                                        <div role="row" class="E24UKj" id="DIV_61">
-                                            Phường Vạn Phúc, Quận Hà Đông, Hà Nội
+                                <div id="DIV_37" role="heading" class="X57SfF V4So7f">
+                                    <div class="QyRpwQ lWXnp3" id="DIV_38">
+                                        <div class="We6XvC" id="DIV_39">
+                                            <div role="row" class="E24UKj" id="DIV_40">
+                                                @item.Description
+                                            </div>
+                                            <div role="row" class="E24UKj" id="DIV_41">
+                                                    Xã @item.Wards, Huyện @item.Province, @item.City : @item.Id
+                                            </div>
                                         </div>
                                     </div>
+                                    @if (item.IsDefault == true)
+                                    {
+                                        <div class="KFu3R3 YziUfM" id="DIV_42">
+                                            <button class="k8tV5Y zvyzwn zDPndA" disabled=""
+                                                    id="BUTTON_43">
+                                                    Thiết lập mặc định
+                                            </button>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="KFu3R3 YziUfM" id="DIV_62">
+                                                <button type="submit" name="Id" value="@item.Id" class="k8tV5Y zvyzwn zDPndA"
+                                                    id="BUTTON_63" >
+                                                Thiết lập mặc định 
+                                            </button>
+                                        </div>
+                                    }
                                 </div>
-                                <div class="KFu3R3 YziUfM" id="DIV_62">
-                                    <button class="k8tV5Y zvyzwn zDPndA"
-                                            id="BUTTON_63">
-                                        Thiết lập mặc định
-                                    </button>
-                                </div>
-                            </div>
-                            <div id="DIV_64" role="row" class="vy2yND E24UKj">
-                                <span role="mark"
-                                      class="wZ_1w7 va0awL ZDVTqW" id="SPAN_65">Địa chỉ lấy hàng</span><span role="mark"
-                                                                                                             class="wZ_1w7 va0awL ZDVTqW" id="SPAN_66">Địa chỉ trả hàng</span>
+                                @if (item.IsDefault == true)
+                                {
+                                    <div id="DIV_44" role="row" class="vy2yND E24UKj">
+                                        <span role="mark"
+                                              class="wZ_1w7 aCY_5O ZDVTqW" id="SPAN_45">Mặc định</span>
+                                    </div>
+                                }
+
                             </div>
                         </div>
-                    </div>
+                    }
+                    </form>
+
                 </div>
             </div>
         </div>

@@ -12,6 +12,8 @@ namespace FourLeafCloverShoe.Share.Models
         public Guid Id { get; set; }
         public string? UserId { get; set; }
         
+        public string? RecipientName { get; set; }
+        public string? RecipientPhone { get; set; }
         public string? City { get; set; }
         public string? Province { get; set; }
         public string? Wards { get; set; }
