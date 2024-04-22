@@ -1,8 +1,10 @@
 ﻿using FourLeafCloverShoe.Helper;
 using FourLeafCloverShoe.IServices;
+using FourLeafCloverShoe.Services;
 using FourLeafCloverShoe.Share.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.SignalR;
 using Newtonsoft.Json;
 using System;
@@ -14,18 +16,22 @@ namespace FourLeafCloverShoe.Controllers
     public class CartController : Controller
     {
         private readonly ICartService _cartService;
+        private readonly IAddressService _addressService;
         private readonly ICartItemItemService _cartItemItemService;
         private readonly IProductDetailService _productDetailService;
         private readonly IProductService _productService;
         private readonly UserManager<User> _userManager;
+        private readonly IUserVoucherService _userVoucherService;
 
-        public CartController(ICartService cartService, IProductService productService, ICartItemItemService cartItemItemService, IProductDetailService productDetailService, UserManager<User> userManager)
+        public CartController(IAddressService addressService,IUserVoucherService userVoucherService,ICartService cartService, IProductService productService, ICartItemItemService cartItemItemService, IProductDetailService productDetailService, UserManager<User> userManager)
         {
             _cartService = cartService;
+            _addressService = addressService;
             _cartItemItemService = cartItemItemService;
             _productDetailService = productDetailService;
             _productService = productService;
             _userManager = userManager;
+            _userVoucherService = userVoucherService;
         }
         public async Task<IActionResult> Index()
         {
@@ -33,6 +39,18 @@ namespace FourLeafCloverShoe.Controllers
             {
                 var user = await _userManager.GetUserAsync(HttpContext.User);
                 var cartItems = await _cartItemItemService.GetsByUserId(user.Id);
+
+                if (ViewBag.lstVoucher==null)
+                {
+                    ViewBag.lstVoucher = new List<SelectListItem>();
+
+                }
+
+                // get list address
+                var lstAddress = await _addressService.GetByUserId(user.Id);
+                ViewBag.lstAddress = lstAddress;
+                var addressDefault = lstAddress.FirstOrDefault(c=>c.IsDefault==true);
+                ViewBag.addressDefault = addressDefault;
                 return View(cartItems);
             }
             return View();
@@ -78,7 +96,6 @@ namespace FourLeafCloverShoe.Controllers
                                 CartId = (await _cartService.GetByUserId(user.Id)).Id,
                                 ProductDetailId = productDetailId,
                                 Quantity = quantity,
-                                Price = productDetailFromDb.PriceSale
                             };
                             var result = await _cartItemItemService.Add(item);
                             if (result)
@@ -121,6 +138,9 @@ namespace FourLeafCloverShoe.Controllers
             if (User.Identity.IsAuthenticated)
             {
                 var user = await _userManager.GetUserAsync(HttpContext.User);
+
+             
+
                 var cartItems = await _cartItemItemService.GetsByUserId(user.Id);
                 var lstproductdetail = await _productDetailService.Gets();
                 var lstproductdetails = lstproductdetail.Where(c => cartItems.Any(p => p.ProductDetailId == c.Id));
@@ -130,8 +150,31 @@ namespace FourLeafCloverShoe.Controllers
                 };
                 var serializedCartItems = JsonConvert.SerializeObject(lstproductdetails, settings);
                 var tongtien = lstproductdetails.Sum(productDetail =>
-cartItems.FirstOrDefault(c => c.ProductDetailId == productDetail.Id)?.Quantity * productDetail.PriceSale ?? 0).ToString("N0");
-                return Json(new { lstproducts = serializedCartItems, tongtien = tongtien });
+cartItems.FirstOrDefault(c => c.ProductDetailId == productDetail.Id)?.Quantity * productDetail.PriceSale ?? 0);
+
+                // get voucher
+                List<SelectListItem> lstVoucher = new List<SelectListItem>();
+                foreach (var obj in( await _userVoucherService.GetByUserId(user.Id)).Where(c=>c.Vouchers.MinimumOrderValue<=tongtien))
+                {
+                    var giamToiDa = obj.Vouchers.MaximumOrderValue;
+                    var giaTriVoucher = obj.Vouchers.VoucherValue?.ToString("0.##");
+                    if (obj.Vouchers.VoucherType == 1)
+                    {
+                        giaTriVoucher += " %";
+                    }
+                    else
+                    {
+                        giaTriVoucher = String.Format("N0", giaTriVoucher) + " đ";
+
+                    }
+                    lstVoucher.Add(new SelectListItem()
+                    {
+                        Text = $"Mã giảm {giaTriVoucher} tối đa {giamToiDa?.ToString("N0")}k đơn từ {obj.Vouchers.MinimumOrderValue?.ToString("N0")}k ",
+                        Value = obj.Id.ToString()
+                    });
+                }
+                //ViewBag.lstVoucher = lstVoucher;
+                return Json(new { lstproducts = serializedCartItems, tongtien = tongtien , lstVoucher = lstVoucher,myCoins = user.Coins });
             }
             return Json(new { lstproducts = new List<CartItem>(), tongtien = 0 });
         }
@@ -191,9 +234,8 @@ cartItems.FirstOrDefault(c => c.ProductDetailId == productDetail.Id)?.Quantity *
 
         }
         [HttpPost]
-        public async Task<JsonResult> UpdateSLInCart(Guid idProductDetail, int newQuantity)
+        public async Task<IActionResult> UpdateSLInCart(Guid idProductDetail, int newQuantity)
         {
-            ViewBag.message = "xinnchao";
             if (User.Identity.IsAuthenticated) // đã đăng nhập
             {
                 var user = await _userManager.GetUserAsync(HttpContext.User);
@@ -221,6 +263,23 @@ cartItems.FirstOrDefault(c => c.ProductDetailId == productDetail.Id)?.Quantity *
                 return Json(new { message = "OK", status = true });
             }
 
+        }
+        [HttpPost]
+        public async Task<JsonResult> ApplyVoucher(Guid uservoucherId)
+        {
+            if (uservoucherId != new Guid())
+            {
+            var voucherSelected = (await _userVoucherService.GetById(uservoucherId)).Vouchers;
+
+            return Json(new { Id = voucherSelected.Id,voucherType = voucherSelected.VoucherType,voucherValue = voucherSelected.VoucherValue,maxDiscount = voucherSelected.MaximumOrderValue ,isSuccess=true});
+            }
+            return Json(new { isSuccess = false });
+        }
+        [HttpPost]
+        public async Task<JsonResult> getAddress(Guid id)
+        {
+            var address = await _addressService.GetById(id);
+            return Json(new { ProvinceID=address.ProvinceID, ProvinceName=address.ProvinceName, DistrictID  = address.DistrictID, WardName=address.WardName, DistrictName= address.DistrictName   , WardCode =address.WardCode , RecipientPhone = address.RecipientPhone , RecipientName = address.RecipientName, Description=address.Description});
         }
 
 

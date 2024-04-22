@@ -10,12 +10,12 @@ namespace FourLeafCloverShoe.Share.Models
     public class Order
     {
         public Guid Id { get; set; }
-        public string? UserId { get; set; }
+        public string? UserId { get; set; }//
         public string StaffId { get; set; } // id nhan vien
-        public Guid? VoucherId { get; set; }
-        public string? OrderCode { get; set; }
-        public string? PaymentType { get; set; }
-        public int? OrderStatus { get; set; }
+        public Guid? VoucherId { get; set; } //
+        public string? OrderCode { get; set; }//
+        public string? PaymentType { get; set; }//
+        public int? OrderStatus { get; set; }//
         public string? RecipientName { get; set; }
         public string? RecipientAddress { get; set; }// địa chỉ
         public string? RecipientPhone { get; set; }// sdt

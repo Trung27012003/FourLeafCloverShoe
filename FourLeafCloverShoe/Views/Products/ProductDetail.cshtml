@@ -442,10 +442,10 @@
                             <span class="product-grid-price-new-text is-flash-sale">
                                 @if (priceMin == priceMax)
                                 {
-                                    <span>@priceMin đ</span>
+                                    <span>@priceMin.ToString("N0") + " đ"</span>
                                  }else
                                 {
-                                    <span>@priceMin đ  -  @priceMax đ</span>
+                                    <span>@priceMin.ToString("N0") đ -  @priceMax.ToString("N0") đ</span>
                                 }
                             </span>
                         </span>
@@ -843,7 +843,7 @@
                 var quantityValue = response.quantity;
                 productDetailId = response.productDetailId;
                 // Sử dụng jQuery để tìm phần tử có class "product-grid-price-new-text" và gán giá trị quantity vào nội dung của nó
-                $('.product-grid-price-new-text').text(priceValue + ' đ');
+                $('.product-grid-price-new-text').text(priceValue.toLocaleString('en-US', { minimumFractionDigits: 0 }) + " đ");
                 if(response.status==1){
                     $('#availibleQuantity').text(quantityValue);
 

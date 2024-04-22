@@ -1,4 +1,21 @@
-﻿@model IEnumerable<FourLeafCloverShoe.Share.Models.CartItem>
+﻿@using FourLeafCloverShoe.Share.Models;
+@model IEnumerable<FourLeafCloverShoe.Share.Models.CartItem>
+@{
+    var lstVoucher = ViewBag.lstVoucher as List<UserVoucher>;
+    var addressDefautl = ViewBag.addressDefault as Address;
+}<style>
+     /* CSS */
+     .address-item {
+         border: 1px solid rgb(204, 204, 204);
+         border-radius: 10px;
+         cursor: pointer; /* Biểu tượng con trỏ khi di chuột qua */
+         transition: background-color 0.3s ease; /* Hiệu ứng chuyển màu nền */
+     }
+
+         .address-item.selected {
+             background-color: #f0f0f0; /* Màu nền khi được chọn */
+         }
+</style>
 
 <style>
     .error {
@@ -60,17 +77,18 @@
             <div class="cart-list-header-amount">Số Tiền</div>
             <div class="cart-list-header-action">Thao Tác</div>
         </div>
-               @if (Model.Count()<=0)
-                {
-                    <div class="cart-list" id="cart-list">
-                        <span style="left: 50%;position: relative;">Giỏ hàng trống!</span>
+        @if (Model.Count() <= 0)
+        {
+            <div class="cart-list" id="cart-list">
+                <span style="left: 50%;position: relative;">Giỏ hàng trống!</span>
 
-                    </div>
-                }else
-                {
+            </div>
+        }
+        else
+        {
             <div class="cart-item-outer">
                 @foreach (var item in Model)
-                    {
+                {
                     <div class="cart-item-body">
                         <div class="cart-item-body-item">
                             <div class="cart-item-body-inner">
@@ -88,7 +106,7 @@
                                                     <span class="item-variation-value">@item.ProductDetails.SKU</span>
                                                 </li>
                                             </ul>
-                                            <div data-title="Price"> <span class="quantity">@item.Quantity × <span class="woocommerce-Price-amount amount"><bdi>@item.Price?.ToString("N0")<span class="woocommerce-Price-currencySymbol">₫</span></bdi></span></span></div>
+                                            <div data-title="Price"> <span class="quantity">@item.Quantity × <span class="woocommerce-Price-amount amount"><bdi>@item.ProductDetails.PriceSale?.ToString("N0")<span class="woocommerce-Price-currencySymbol">₫</span></bdi></span></span></div>
                                         </div>
                                     </div>
                                 </div>
@@ -104,10 +122,12 @@
                                 </div>
                                 <div class="cart-item--prices">
                                     <div>
+                                        <span hidden class="cart-item--price-item" id="price-item-@item.ProductDetailId">@item.ProductDetails.PriceSale</span>
                                         <span class="cart-item--price-item">@item.ProductDetails.PriceSale?.ToString("N0") đ</span>
 
                                     </div>
                                 </div>
+
                                 <div class="cart-item--quantity">
                                     <div class="cart-item--quantity-actions shopee-input-quantity">
                                         <button onclick="TruSL('@item.ProductDetailId')" type="button" id="button-minus-@item.ProductDetailId" class="cart-item--quantity-actions--item cart-item--quantity-actions--item-minus">
@@ -125,12 +145,13 @@
                                         </button>
                                     </div>
                                 </div>
-                                @{
-                                    int? quantity = item.Quantity;
-                                    decimal? price = item.Price;
-                                    var total = quantity * price;
-                                }
-                                <div class="cart-item--total"><span>@total?.ToString("N0") đ </span></div>
+                                <div class="cart-item--total" id="cart-item-total-@item.ProductDetailId">
+                                    <span>
+                                        @{
+                                            var totalD = item.ProductDetails.PriceSale * item.Quantity;
+                                        }@totalD?.ToString("N0") đ
+                                    </span>
+                                </div>
                                 <div class="cart-item--actions cart-item--actions-column">
                                     <button class="cart-item--action-item" onclick="removeCartItem('@item.ProductDetailId')">Xóa</button>
                                 </div>
@@ -138,182 +159,12 @@
                         </div>
                         <div class="cart-item-body-space"></div>
                     </div>
+
                 }
-        </div>
+            </div>
 
         }
     </div>
-    <script>
-        function CongSL(idProductDetail) {
-            var quantityInput = document.getElementById('quantity-input-' + idProductDetail);
-            var newQuantity = parseInt(quantityInput.value) + 1;
-            UpdateSLInCart(idProductDetail, newQuantity);
-        }
-
-        function TruSL(idProductDetail) {
-            var quantityInput = document.getElementById('quantity-input-' + idProductDetail);
-            var newQuantity = parseInt(quantityInput.value) - 1;
-            if (newQuantity < 1) {
-                // Số lượng không thể nhỏ hơn 1
-                return;
-            }
-            UpdateSLInCart(idProductDetail, newQuantity);
-        }
-
-        function UpdateSLInCart(idProductDetail, newQuantity) {
-            var quantityInput = document.getElementById('quantity-input-' + idProductDetail);
-
-            $.ajax({
-                type: "POST",
-                url: "/Cart/UpdateSLInCart",
-                data: {
-                    idProductDetail: idProductDetail,
-                    newQuantity: newQuantity
-                },
-                success: function (result) {
-                    if (result.status == true) {
-                        quantityInput.value = newQuantity;
-                    } else {
-                        quantityInput.value = result.oldQuantity;
-                        showToast(result.message, result.status);
-                    }
-                },
-                error: function (error) {
-                    showToast(result.message, result.status);
-                    location.reload();
-                }
-            });
-        }
-
-        function updateQuantity(idProductDetail) {
-            var newQuantity = document.getElementById('quantity-input-' + idProductDetail).value;
-            UpdateSLInCart(idProductDetail, newQuantity);
-        }
-
-    </script>
-    <script>
-        init();
-        function init() {
-            console.log(1);
-            //loadProvince();
-        }
-
-        function loadProvince() {
-            let url = '/Product/GetProvince';
-            $.get(url, function (data) {
-                $('#provinceOptions')
-                    .find('option')
-                    .remove()
-                    .end()
-                    .append('<option value="">--Chọn Tỉnh/thành phố</option>')
-                    .val('')
-                if (data.length > 0) {
-                    for (var i in data) {
-                        $('#provinceOptions').append('<option value=' + data[i].Id + '>' + data[i].Name + '</option>');
-                    }
-                }
-            });
-        }
-
-        function removeItem(productDetailId) {
-            console.log(productDetailId);
-            let url = "/Cart/RemoveCart";
-            url = url + "?productDetailId=" + productDetailId;
-            $.post(url, function (res) {
-
-                let count = 0;
-                $('#countCart').text(count);
-                $("#cart-list").html(res);
-                refreshTotal();
-                refreshShipping();
-            });
-        }
-
-        function onChangeInputQty(productId, productDetailId, qty) {
-            console.log(productId, productDetailId, qty);
-            let url = "/Cart/UpdateCartItem";
-            url += '?productId=' + productId + '&productDetailId=' + productDetailId + '&qty=' + qty;
-            $.post(url, function (res) {
-                $("#cart-list").html(res);
-                refreshTotal();
-                refreshShipping();
-            });
-        }
-
-        function increase(productId, productDetailId, flag) {
-            let val = $('#' + productId + '-' + productDetailId).val();
-            let qty = 1;
-            if (flag == 1) {
-                qty = Number(val) + 1;
-            } else {
-                if (Number(val) > 1) {
-                    qty = Number(val) - 1;
-                }
-            }
-
-            let url = "/Cart/UpdateCartItem";
-            url += '?productId=' + productId + '&productDetailId=' + productDetailId + '&qty=' + qty;
-            $.post(url, function (res) {
-                //console.log(res);
-                $("#cart-list").html(res);
-                refreshTotal();
-                refreshShipping();
-            });
-
-        }
-
-        function refreshTotal() {
-            let url2 = '/Cart/GetCartTotal?coupon=' + $('#couponOptions').val();
-            $.get(url2, function (res2) {
-                console.log(res2);
-                let totalOld = res2.TotalOld.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")
-                let totalDiscount = res2.TotalDiscount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")
-                let total = res2.Total.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")
-                let feeship = res2.ShippingFee.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-
-                $('#shipingfee').text(feeship + ' đ');
-                $('#spanTongTienHang').text(totalOld + ' đ');
-                $('#spanGiamGia').text('-' + totalDiscount + ' đ');
-                $('#spanTotal').text(total + ' đ');
-            })
-        }
-
-        function refreshShipping() {
-            let urlCaculateFee = '/Cart/GetShippingFee?provinceId=' + $('#provinceOptions').val() + '&districtId=' + $('#districtSelect').val();
-
-            $.get(urlCaculateFee, function (data) {
-
-                let feeship = data.ShippingFee.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-                let totalOfFeeShip = data.Total.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")
-                $('#shipingfee').text(feeship + ' đ');
-                $('#spanTotal').text(totalOfFeeShip + ' đ');
-            })
-        }
-
-        function changeProductBonus(productId, productBonusId, productBonusDetailId) {
-            let url = "/Cart/UpdateProudctBonusOption";
-            url += '?productId=' + productId + '&productBonusId=' + productBonusId + '&productBonusDetailId=' + productBonusDetailId;
-            $.post(url, function (res) {
-            });
-        }
-        //'item.ProductId','pbonus.ProductId','item.MaxProductBonus',this.checked
-        function choiseProductBonus(productId, productBonusId, maxBonus, isCheck) {
-            let url = "/Cart/CheckedProductBonus";
-            url += '?productId=' + productId + '&productBonusId=' + productBonusId + '&totalMax=' + maxBonus + '&isCheck=' + isCheck;
-            $.post(url, function (res) {
-                if (res == 'ISMAX') {
-                    document.getElementById("pbonus-" + productId + "-" + productBonusId).checked = false;
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Thông báo!',
-                        text: 'Số sản phẩm khuyến mãi quá số lượng cho phép!',
-                    })
-                }
-            });
-
-        }
-    </script>
-
 
     <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-1 border-bottom">
     </div>
@@ -348,14 +199,19 @@
                             </filter>
                         </defs>
                     </svg>
-
-                    <div class="cart-final--top-voucher">Mã Coupon</div>
-                    <div class="cart-final--top-space"></div>
-                    <span class="cart-final--top-codes">
-                        <select class="form-select" style="width:208px" id="couponOptions">
-                            <option value="">--Chọn--</option>
-                        </select>
-                    </span>
+                    <div>
+                        <div class="cart-final--top-voucher">Mã Voucher</div>
+                    </div>
+                    <div class="profile-account__custom-form__form">
+                        <div class="profile-account__custom-form__form-select-flex">
+                            <div class="input-outer" style="width:100% !important;">
+                                <select id="discount-select" class="form-control valid" asp-items="@(new SelectList(ViewBag.lstVoucher, "Value", "Text"))">
+                                    <option value="">-- Chọn mã giảm giá --</option>
+                                </select>
+                                <i class="mwc-icon-angle-down"></i>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 <div class="cart-final--top cart-final-grow-1">
                     <svg fill="none" viewBox="0 -2 23 22" class="shopee-svg-icon icon-voucher-line">
@@ -385,11 +241,18 @@
                         </defs>
                     </svg>
 
-                    <div class="cart-final--top-voucher">Sử dụng điểm (Điểm của bạn: 00)</div>
-                    <div class="cart-final--top-space"></div>
-                    <span class="cart-final--top-codes">
-                        <input class="form-control" id="usePoint">
-                    </span>
+                    <div class="cart-final--top-voucher">Điểm của bạn: <span id="myCoins">0</span></div>
+                    <div class="profile-account__custom-form__form">
+                        <div class="profile-account__custom-form__form-select-flex">
+                            <div class="input-outer" style="width:100%;">
+                                <input class="form-control valid" value="0" type="number" id="usePoint">
+
+                            </div>
+                        </div>
+                    </div><button type="submit" class="btn btn-solid-primary btn--m btn--inline" aria-disabled="false">
+                        Dùng
+                    </button>
+
                 </div>
             </div>
 
@@ -397,25 +260,26 @@
         <div class="col-6  d-mb">
             <div class="d-flex flex-row justify-content-between m-2">
                 <span>Tổng tiền hàng</span>
-                <span id="spanTongTienHang">2.360.000 đ</span>
+                <span id="spanTongTienHang">0 đ</span>
             </div>
             <div class="d-flex flex-row justify-content-between m-2">
                 <span>Giảm giá sản phẩm</span>
-                <span id="spanGiamGia">- 00 đ</span>
+                <span>-  <span id="spanGiamGia">0 đ</span></span>
+               
             </div>
             <div class="d-flex flex-row justify-content-between m-2">
                 <span>Giảm giá coupon</span>
-                <span id="spanGiamGiaCoupon">- 00 đ</span>
+                <span id="spanGiamGiaCoupon">- 0 đ</span>
             </div>
             <div class="d-flex flex-row justify-content-between m-2">
                 <span>Phí vận chuyển</span>
-                <span id="shipingfee">00 đ</span>
+                <span id="shipingfee">0 đ</span>
             </div>
             <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center border-bottom">
             </div>
             <div class="d-flex flex-row justify-content-between m-2">
                 <span style="color:#ee4d2d">TỔNG</span>
-                <span id="spanTotal" style="color:#ee4d2d">2.360.000 đ</span>
+                <span id="spanTotal" style="color:#ee4d2d">0 đ</span>
             </div>
         </div>
     </div>
@@ -425,464 +289,297 @@
             <strong style="color:#ee4d2d">THÔNG TIN VẬN CHUYỂN</strong> <a href="javascript:;" onclick="ChangeAddress()" style="margin-left: 15px; color: #1733f7;"><i class="mwc-icon-exchange-alt"></i> Thay đổi thông tin nhận hàng</a>
         </div>
     </div>
-    <div id="info-user" style="display: block">
+    <div class="info-user" style="display: block">
         <div>
             <div class="d-flex flex-row justify-content-start m-2">
                 <span class="lb">Người nhận:</span>
-                <span> Trung Trương</span>
+                <span>@addressDefautl.RecipientName</span>
             </div>
         </div>
         <div>
             <div class="d-flex flex-row justify-content-start m-2">
                 <span class="lb">Điện thoại:</span>
-                <span> 0376810025</span>
+                <span> @addressDefautl.RecipientPhone</span>
             </div>
         </div>
         <div>
             <div class="d-flex flex-row justify-content-start m-2">
                 <span class="lb">Địa chỉ:</span>
-                <span> HN, Phường Bến Nghé, Quận 1, TP Hồ Chí Minh</span>
+                <span> @addressDefautl.WardName, @addressDefautl.DistrictName, @addressDefautl.ProvinceName</span>
             </div>
         </div>
     </div>
-    <div class="row g-3 mt-3" id="info-input" style="display: none">
-        <div class="col-md-4">
+    <div class="info-input row" style="display: none">
+        @foreach (var item in ViewBag.lstAddress as List<Address>)
+        {
 
-            <input type="text" class="form-control" id="FullName" placeholder="Họ tên">
+            <div class="col-md-4 address-item " onclick="toggleSelection(this, '@item.Id')">
+                <div>
+                    <div class="d-flex flex-row justify-content-start m-2">
+                        <span class="lb">Người nhận:</span>
+                        <span>@item.RecipientName</span>
+                    </div>
+                </div>
+                <div>
+                    <div class="d-flex flex-row justify-content-start m-2">
+                        <span class="lb">Điện thoại:</span>
+                        <span> @item.RecipientPhone</span>
+                    </div>
+                </div>
+                <div>
+                    <div class="d-flex flex-row justify-content-start m-2">
+                        <span class="lb">Địa chỉ:</span>
+                        <span> @item.WardName, @item.DistrictName, @item.ProvinceName</span>
+                    </div>
+                </div>
+            </div>
 
-        </div>
-        <div class="col-md-4">
-            <input type="text" class="form-control" id="Phone" placeholder="SĐT">
-        </div>
-        <div class="col-md-12">
-            <textarea type="text" class="form-control" id="Address" placeholder="Địa chỉ nhận hàng"></textarea>
-        </div>
-        <div class="col-md-4">
 
-            <select class="form-select" id="provinceOptions">
-                <option value="">-- Chọn tỉnh --</option>
-                <option value="70" selected="">TP Hồ Chí Minh</option>
-                <option value="90">TP Cần Thơ</option>
-                <option value="81">Đồng Nai</option>
-                <option value="82">Bình Dương</option>
-                <option value="83">Bình Phước</option>
-                <option value="84">Tây Ninh</option>
-                <option value="85">Long An</option>
-                <option value="86">Tiền Giang</option>
-                <option value="87">Đồng Tháp</option>
-                <option value="79">Bà Rịa Vũng Tàu</option>
-                <option value="80">Bình Thuận</option>
-                <option value="88">An Giang</option>
-                <option value="89">Vĩnh Long</option>
-                <option value="91">Hậu Giang</option>
-                <option value="92">Kiên Giang</option>
-                <option value="93">Bến Tre</option>
-                <option value="94">Trà Vinh</option>
-                <option value="95">Sóc Trăng</option>
-                <option value="96">Bạc Liêu</option>
-                <option value="97">Cà Mau</option>
-                <option value="67">Lâm Đồng</option>
-                <option value="66">Ninh Thuận</option>
-                <option value="65">Khánh Hoà</option>
-                <option value="64">Đắk Nông</option>
-                <option value="63">Đắk Lăk</option>
-                <option value="62">Phú Yên</option>
-                <option value="60">Gia Lai</option>
-                <option value="59">Bình Định</option>
-                <option value="58">Kon Tum</option>
-                <option value="10"> TP Hà Nội</option>
-                <option value="16">Hưng Yên</option>
-                <option value="17">Hải Dương</option>
-                <option value="18"> TP Hải Phòng</option>
-                <option value="20">Quảng Ninh</option>
-                <option value="22">Bắc Ninh</option>
-                <option value="23">Bắc Giang</option>
-                <option value="24">Lạng Sơn</option>
-                <option value="25">Thái Nguyên</option>
-                <option value="26">Bắc Kạn</option>
-                <option value="27">Cao Bằng</option>
-                <option value="28">Vĩnh Phúc</option>
-                <option value="29">Phú Thọ</option>
-                <option value="30">Tuyên Quang</option>
-                <option value="31">Hà Giang</option>
-                <option value="32">Yên Bái</option>
-                <option value="33">Lào Cai</option>
-                <option value="35">Hoà Bình</option>
-                <option value="36">Sơn La</option>
-                <option value="38">Điện Biên</option>
-                <option value="39">Lai Châu</option>
-                <option value="40">Hà Nam</option>
-                <option value="41">Thái Bình</option>
-                <option value="42">Nam Định</option>
-                <option value="43">Ninh Bình</option>
-                <option value="44">Thanh Hoá</option>
-                <option value="46">Nghệ An</option>
-                <option value="48">Hà Tĩnh</option>
-                <option value="51">Quảng Bình</option>
-                <option value="52">Quảng Trị</option>
-                <option value="53">Thừa Thiên Huế</option>
-                <option value="55">TP Đà Nẵng</option>
-                <option value="56">Quảng Nam</option>
-                <option value="57">Quảng Ngãi</option>
-            </select>
-        </div>
-        <div class="col-md-4">
-            <select class="form-select" id="districtSelect">
-                <option value="">--Chọn Quận/huyện--</option>
-                <option value="">Chọn Quận/Huyện</option>
-                <option value="7100" selected="">Quận 1</option>
-                <option value="7130">Quận 2</option>
-                <option value="7150">Quận 9</option>
-                <option value="7170">Quận Bình Thạnh</option>
-                <option value="7200">Quận Thủ Đức</option>
-                <option value="7220">Quận 3</option>
-                <option value="7250">Quận Phú Nhuận</option>
-                <option value="7270">Quận Gò Vấp</option>
-                <option value="7290">Quận 12</option>
-                <option value="7310">Huyện Hóc Môn</option>
-                <option value="7330">Huyện Củ Chi</option>
-                <option value="7360">Quận Tân Bình</option>
-                <option value="7380">Huyện Bình Chánh</option>
-                <option value="7400">Quận 10</option>
-                <option value="7430">Quận 11</option>
-                <option value="7460">Quận 6</option>
-                <option value="7480">Quận 5</option>
-                <option value="7510">Quận 8</option>
-                <option value="7540">Quận 4</option>
-                <option value="7560">Quận 7</option>
-                <option value="7580">Huyện Nhà Bè</option>
-                <option value="7590">Huyện Cần Giờ</option>
-                <option value="7600">Quận Tân Phú</option>
-                <option value="7620">Quận Bình Tân</option>
-            </select>
-        </div>
-        <div class="col-md-4">
-            <select class="form-select" id="wardSelect">
-                <option value="">--Chọn Xã/Phường--</option>
-                <option value="">Chọn Phường/Xã</option>
-                <option value="20101" selected="">Phường Bến Nghé</option>
-                <option value="20102">Phường Bến Thành</option>
-                <option value="20103">Phường Cầu Kho</option>
-                <option value="20104">Phường Cầu Ông Lãnh</option>
-                <option value="20105">Phường Cô Giang</option>
-                <option value="20106">Phường Đa Kao</option>
-                <option value="20107">Phường Nguyễn Cư Trinh</option>
-                <option value="20108">Phường Nguyễn Thái Bình</option>
-                <option value="20109">Phường Phạm Ngũ Lão</option>
-                <option value="20110">Phường Tân Định</option>
-            </select>
-        </div>
-
+        }
     </div>
-
-
     <div class="d-flex flex-row justify-content-end mt-3">
         <button id="btnDatHang" class="shopee-button-solid shopee-button-solid--primary">
             <span class="cart-final--bottom-checkout--btn btnDatHang">Đặt hàng</span>
         </button>
     </div>
-
 </div>
 <script>
-    var cartInfo = { "AccountId": 0, "FullName": "Trương Văn Trung PH 2 8 6 7 1", "Phone": null, "ProvinceId": null, "DistrictId": null, "WardId": null, "Address": null, "Note": null, "UsePoint": 0, "AccumulatedPoints": 0.0, "ShippingFee": 0.0, "CouponCode": null, "CartItems": [{ "ImageUrl": null, "ProductId": 4294, "ProductDetailId": 45720, "Color": "kem", "Size": "35", "Qty": 1, "PriceSale": 175500.00, "Price": 195000.0, "FlashSaleId": 0, "IsFlashSale": false, "Total": 195000.0, "SubTotal": 175500.00, "Name": "Giày cao gót MWC NUCG- G042", "Upc": "G042", "HostThumnail": "https://img.mwc.com.vn/giay-thoi-trang", "KeySlug": "giay-cao-got-mwc-nucg--g042", "MaxProductBonus": 0, "ColorItems": [], "SizeItems": [{ "Value": "35", "Text": "35", "Selected": false }, { "Value": "36", "Text": "36", "Selected": false }, { "Value": "37", "Text": "37", "Selected": false }, { "Value": "38", "Text": "38", "Selected": false }, { "Value": "39", "Text": "39", "Selected": false }], "ProductBonusItems": [] }], "ProvinceOptions": [{ "Id": 44, "Code": "70", "Name": "TP Hồ Chí Minh", "OrderBy": 1, "CodeGhn": "202", "CodePancake": "701" }, { "Id": 56, "Code": "90", "Name": "TP Cần Thơ", "OrderBy": 2, "CodeGhn": "220", "CodePancake": "815" }, { "Id": 47, "Code": "81", "Name": "Đồng Nai", "OrderBy": 3, "CodeGhn": "204", "CodePancake": "713" }, { "Id": 48, "Code": "82", "Name": "Bình Dương", "OrderBy": 4, "CodeGhn": "205", "CodePancake": "711" }, { "Id": 49, "Code": "83", "Name": "Bình Phước", "OrderBy": 5, "CodeGhn": "239", "CodePancake": "707" }, { "Id": 50, "Code": "84", "Name": "Tây Ninh", "OrderBy": 6, "CodeGhn": "240", "CodePancake": "709" }, { "Id": 51, "Code": "85", "Name": "Long An", "OrderBy": 7, "CodeGhn": "211", "CodePancake": "801" }, { "Id": 52, "Code": "86", "Name": "Tiền Giang", "OrderBy": 8, "CodeGhn": "212", "CodePancake": "807" }, { "Id": 53, "Code": "87", "Name": "Đồng Tháp", "OrderBy": 9, "CodeGhn": "216", "CodePancake": "803" }, { "Id": 45, "Code": "79", "Name": "Bà Rịa Vũng Tàu", "OrderBy": 10, "CodeGhn": "206", "CodePancake": "717" }, { "Id": 46, "Code": "80", "Name": "Bình Thuận", "OrderBy": 10, "CodeGhn": "258", "CodePancake": "715" }, { "Id": 54, "Code": "88", "Name": "An Giang", "OrderBy": 10, "CodeGhn": "217", "CodePancake": "805" }, { "Id": 55, "Code": "89", "Name": "Vĩnh Long", "OrderBy": 11, "CodeGhn": "215", "CodePancake": "809" }, { "Id": 57, "Code": "91", "Name": "Hậu Giang", "OrderBy": 12, "CodeGhn": "250", "CodePancake": "816" }, { "Id": 58, "Code": "92", "Name": "Kiên Giang", "OrderBy": 13, "CodeGhn": "219", "CodePancake": "813" }, { "Id": 59, "Code": "93", "Name": "Bến Tre", "OrderBy": 14, "CodeGhn": "213", "CodePancake": "811" }, { "Id": 60, "Code": "94", "Name": "Trà Vinh", "OrderBy": 15, "CodeGhn": "214", "CodePancake": "817" }, { "Id": 61, "Code": "95", "Name": "Sóc Trăng", "OrderBy": 16, "CodeGhn": "218", "CodePancake": "819" }, { "Id": 62, "Code": "96", "Name": "Bạc Liêu", "OrderBy": 17, "CodeGhn": "253", "CodePancake": "821" }, { "Id": 63, "Code": "97", "Name": "Cà Mau", "OrderBy": 18, "CodeGhn": "252", "CodePancake": "823" }, { "Id": 43, "Code": "67", "Name": "Lâm Đồng", "OrderBy": 19, "CodeGhn": "209", "CodePancake": "607" }, { "Id": 42, "Code": "66", "Name": "Ninh Thuận", "OrderBy": 20, "CodeGhn": "261", "CodePancake": "705" }, { "Id": 41, "Code": "65", "Name": "Khánh Hoà", "OrderBy": 21, "CodeGhn": "208", "CodePancake": "511" }, { "Id": 40, "Code": "64", "Name": "Đắk Nông", "OrderBy": 22, "CodeGhn": "241", "CodePancake": "606" }, { "Id": 39, "Code": "63", "Name": "Đắk Lăk", "OrderBy": 23, "CodeGhn": "210", "CodePancake": "605" }, { "Id": 38, "Code": "62", "Name": "Phú Yên", "OrderBy": 24, "CodeGhn": "260", "CodePancake": "509" }, { "Id": 37, "Code": "60", "Name": "Gia Lai", "OrderBy": 25, "CodeGhn": "207", "CodePancake": "603" }, { "Id": 36, "Code": "59", "Name": "Bình Định", "OrderBy": 26, "CodeGhn": "262", "CodePancake": "507" }, { "Id": 35, "Code": "58", "Name": "Kon Tum", "OrderBy": 27, "CodeGhn": "259", "CodePancake": "601" }, { "Id": 1, "Code": "10", "Name": " TP Hà Nội", "OrderBy": 30, "CodeGhn": "201", "CodePancake": "101" }, { "Id": 2, "Code": "16", "Name": "Hưng Yên", "OrderBy": 31, "CodeGhn": "268", "CodePancake": "109" }, { "Id": 3, "Code": "17", "Name": "Hải Dương", "OrderBy": 33, "CodeGhn": "225", "CodePancake": "107" }, { "Id": 4, "Code": "18", "Name": " TP Hải Phòng", "OrderBy": 34, "CodeGhn": "224", "CodePancake": "103" }, { "Id": 5, "Code": "20", "Name": "Quảng Ninh", "OrderBy": 35, "CodeGhn": "230", "CodePancake": "225" }, { "Id": 6, "Code": "22", "Name": "Bắc Ninh", "OrderBy": 36, "CodeGhn": "249", "CodePancake": "106" }, { "Id": 7, "Code": "23", "Name": "Bắc Giang", "OrderBy": 37, "CodeGhn": "248", "CodePancake": "221" }, { "Id": 8, "Code": "24", "Name": "Lạng Sơn", "OrderBy": 38, "CodeGhn": "247", "CodePancake": "209" }, { "Id": 9, "Code": "25", "Name": "Thái Nguyên", "OrderBy": 39, "CodeGhn": "244", "CodePancake": "215" }, { "Id": 10, "Code": "26", "Name": "Bắc Kạn", "OrderBy": 40, "CodeGhn": "245", "CodePancake": "207" }, { "Id": 11, "Code": "27", "Name": "Cao Bằng", "OrderBy": 41, "CodeGhn": "246", "CodePancake": "203" }, { "Id": 12, "Code": "28", "Name": "Vĩnh Phúc", "OrderBy": 42, "CodeGhn": "221", "CodePancake": "104" }, { "Id": 13, "Code": "29", "Name": "Phú Thọ", "OrderBy": 43, "CodeGhn": "229", "CodePancake": "217" }, { "Id": 14, "Code": "30", "Name": "Tuyên Quang", "OrderBy": 44, "CodeGhn": "228", "CodePancake": "211" }, { "Id": 15, "Code": "31", "Name": "Hà Giang", "OrderBy": 45, "CodeGhn": "227", "CodePancake": "201" }, { "Id": 16, "Code": "32", "Name": "Yên Bái", "OrderBy": 46, "CodeGhn": "263", "CodePancake": "213" }, { "Id": 17, "Code": "33", "Name": "Lào Cai", "OrderBy": 47, "CodeGhn": "269", "CodePancake": "205" }, { "Id": 18, "Code": "35", "Name": "Hoà Bình", "OrderBy": 48, "CodeGhn": "267", "CodePancake": "305" }, { "Id": 19, "Code": "36", "Name": "Sơn La", "OrderBy": 49, "CodeGhn": "266", "CodePancake": "303" }, { "Id": 20, "Code": "38", "Name": "Điện Biên", "OrderBy": 50, "CodeGhn": "265", "CodePancake": "302" }, { "Id": 21, "Code": "39", "Name": "Lai Châu", "OrderBy": 51, "CodeGhn": "264", "CodePancake": "301" }, { "Id": 22, "Code": "40", "Name": "Hà Nam", "OrderBy": 52, "CodeGhn": "232", "CodePancake": "111" }, { "Id": 23, "Code": "41", "Name": "Thái Bình", "OrderBy": 53, "CodeGhn": "226", "CodePancake": "115" }, { "Id": 24, "Code": "42", "Name": "Nam Định", "OrderBy": 54, "CodeGhn": "231", "CodePancake": "113" }, { "Id": 25, "Code": "43", "Name": "Ninh Bình", "OrderBy": 55, "CodeGhn": "233", "CodePancake": "117" }, { "Id": 26, "Code": "44", "Name": "Thanh Hoá", "OrderBy": 56, "CodeGhn": "234", "CodePancake": "401" }, { "Id": 27, "Code": "46", "Name": "Nghệ An", "OrderBy": 57, "CodeGhn": "235", "CodePancake": "403" }, { "Id": 28, "Code": "48", "Name": "Hà Tĩnh", "OrderBy": 58, "CodeGhn": "236", "CodePancake": "405" }, { "Id": 29, "Code": "51", "Name": "Quảng Bình", "OrderBy": 59, "CodeGhn": "237", "CodePancake": "407" }, { "Id": 30, "Code": "52", "Name": "Quảng Trị", "OrderBy": 60, "CodeGhn": "238", "CodePancake": "409" }, { "Id": 31, "Code": "53", "Name": "Thừa Thiên Huế", "OrderBy": 61, "CodeGhn": "223", "CodePancake": "411" }, { "Id": 32, "Code": "55", "Name": "TP Đà Nẵng", "OrderBy": 62, "CodeGhn": "203", "CodePancake": "501" }, { "Id": 33, "Code": "56", "Name": "Quảng Nam", "OrderBy": 63, "CodeGhn": "243", "CodePancake": "503" }, { "Id": 34, "Code": "57", "Name": "Quảng Ngãi", "OrderBy": 64, "CodeGhn": "242", "CodePancake": "505" }], "DistrictOptions": [], "WardOptions": [], "CouponOptions": [], "Total": 175500.00, "TotalOld": 175500.00, "SubTotal": 175500.00, "TotalPriceSale": 0.0, "TotalDiscount": 19500.00, "DiscountOrder": 0.0, "TotalDiscountCoupon": 0.0, "TotalOfFeeShip": 175500.00, "IsLoggedIn": true, "FullAddress": null, "PageContentHtml": null, "GoogelAnalyticViewItem": { "currency": "VND", "value": 175500.00, "items": [{ "item_id": "G042", "item_name": "Giày cao gót MWC NUCG- G042", "affiliation": null, "coupon": null, "discount": 19500.00, "index": 0, "item_brand": "MWC", "item_category": null, "item_category2": null, "item_category3": null, "item_category4": null, "item_category5": null, "item_list_id": null, "item_list_name": null, "item_variant": "kem", "location_id": "ChIJIQBpAG2ahYAR_6128GcTUEo", "price": 195000.0, "quantity": 1 }] }, "GoogelAnalyticPurchase": null, "Stores": null, "Menus": null, "ParamItems": [], "LinkItems": [], "TotalCart": 0, "LogoUrl": null };
-    //console.log(cartInfo);
-    // onChange tỉnh thành
-
-    var provinceId = '';
-    var districtId = '';
-    var wardId = '';
-    var usePoint = '';
-    var voucherCode = "";
-    function init() {
-        provinceId = cartInfo.ProvinceId;
-        districtId = cartInfo.DistrictId;
-        wardId = cartInfo.WardId;
-        //console.log(cartInfo);
-        $("#provinceOptions").val(provinceId);
-        $("#districtSelect").val(districtId);
-        $("#wardSelect").val(wardId);
-        $('#FullName').val(cartInfo.FullName);
-        $('#Phone').val(cartInfo.Phone);
-        //$('#Email').val(cartInfo.Email);
-        $('#Address').val(cartInfo.Address);
-
-        let infoText = $('#FullName').val() + ' (SĐT: ' + $('#Phone').val() + ')';
-        let AddressText = $('#Address').val();
-
-        if ($('#FullName').val() != '') {
-            $('#spanUserInfo').text(infoText);
-            $('#spanAddress').text(AddressText);
-        }
+    var total = 0;
+    var voucherId; // co
+    var RecipientName = ""// co
+    var RecipientAddress = ""//cp
+    var RecipientPhone = ""; // co
+    var TotalAmout = 0; // chua
+    var VoucherValue = 0;  // co
+    var ShippingFee = 0;// co
+    var PaymentType; // chua
+    function getTotalAmount() {
+        $("#shipingfee").text(ShippingFee.toLocaleString('en-US', { minimumFractionDigits: 0 }) + " đ");
+        console.log(" total:", total);
+        console.log(" VoucherValue:", VoucherValue);
+        console.log(" ShippingFee:", ShippingFee);
+        TotalAmout = total - VoucherValue + ShippingFee;
+        console.log("Total Amout:",TotalAmout);
+        $("#spanTotal").text(TotalAmout.toLocaleString('en-US', { minimumFractionDigits: 0 }) + " đ");
     }
-    init();
-    $("#provinceOptions").change(function () {
-        provinceId = this.value;
-        //2. refresh data
-        if (provinceId !== '' && provinceId !== null) {
-            var url = '/Product/GetDistrict?provinceId=' + provinceId;
-            $.get(url, function (data) {
-                $('#districtSelect')
-                    .find('option')
-                    .remove()
-                    .end()
-                    .append('<option value="">--Chọn Quận/huyện</option>')
-                    .val('')
-                if (data.length > 0) {
-                    for (var i in data) {
-                        $('#districtSelect').append('<option value=' + data[i].Code + '>' + data[i].Name + '</option>');
-                    }
+    function getShipDefault(){
+        $.ajax({
+            type: "GET",
+            url: "https://online-gateway.ghn.vn/shiip/public-api/v2/shipping-order/fee?shop_id=4643378?to_ward_code=" + @addressDefautl.WardCode + "&to_district_id=" + @addressDefautl.DistrictID + "&weight=" + 10000 + "&length=" + 1000 + "&service_type_id=2",
+            headers: { token: '9f4e42e4-fde8-11ed-a281-3aa62a37e0a5' },
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (data) {
+                ShippingFee = data.data.total;
+                RecipientName = '@addressDefautl.RecipientName';
+                RecipientAddress = '@addressDefautl.Description' + ", " + ' @addressDefautl.WardName' + ", " + ' @addressDefautl.DistrictName ' + ", " + '@addressDefautl.ProvinceName';
+                RecipientPhone = @addressDefautl.RecipientPhone;
+                getcartAjax();// lay total
+                if (total == 0) {
+                    ShippingFee = 0;
                 }
+                // save tien ship
+                console.log("Get ship default :", ShippingFee);
+                getTotalAmount();
+
+            },
+            error: function (reponse) {
+                alert(reponse.responseText);
+            }
+        });
+    }
+    $(document).ready(function () {
+        getcartAjax();
+        // get ship
+        getShipDefault();
 
 
-            });
-        } else {
-            $('#districtSelect')
-                .find('option')
-                .remove()
-                .end()
-                .append('<option value="">--Chọn Quận/huyện</option>')
-                .val('')
-                ;
-        }
-        $('#wardSelect')
-            .find('option')
-            .remove()
-            .end()
-            .append('<option value="">--Chọn Xã/Phường</option>')
-            .val('');
-
-
-    });
-
-    $("#districtSelect").change(function () {
-        districtId = this.value;
-        //2. refresh data
-        if (districtId !== '' && districtId !== null) {
-            var url = '/Product/GetWard?districtId=' + districtId;
-            $.get(url, function (data) {
-                $('#wardSelect')
-                    .find('option')
-                    .remove()
-                    .end()
-                    .append('<option value="">--Chọn Xã/Phường</option>')
-                    .val('')
-                if (data.length > 0) {
-                    for (var i in data) {
-                        $('#wardSelect').append('<option value=' + data[i].Code + '>' + data[i].Name + '</option>');
+        // khi select voucher
+        $('#discount-select').change(function () {
+            var selectedValue = $(this).val();
+            $.ajax({
+                type: "POST",
+                url: "/Cart/ApplyVoucher",
+                data: { uservoucherId: selectedValue },
+                success: function (responseNo1) {
+                    if (responseNo1.isSuccess) {
+                        $.ajax({
+                            url: "/cart/getMiniCart",
+                            type: "GET",
+                            success: function (responseNo2) {
+                                if (responseNo1.voucherType == 1) {
+                                    VoucherValue = responseNo1.voucherValue * responseNo2.tongtien / 100;
+                                    if (VoucherValue > responseNo1.maxDiscount) {
+                                        VoucherValue = responseNo1.maxDiscount;
+                                    }
+                                }
+                                else {
+                                    VoucherValue = responseNo1.voucherValue;
+                                }
+                                getTotalAmount();
+                                $("#spanGiamGia").text(VoucherValue.toLocaleString('en-US', { minimumFractionDigits: 0 }) + " đ");
+                                voucherId = responseNo1.id;
+                                showToast("Đã áp dụng voucher",true);
+                                
+                            }
+                            ,
+                            error: function (error) {
+                                voucherId = "";
+                                VoucherValue = 0;
+                                $("#spanGiamGia").text(VoucherValue.toLocaleString('en-US', { minimumFractionDigits: 0 }) + " đ");
+                                showToast("Có lỗi xảy ra, vui lòng thử lại sau!", false );
+                                console.log(error);
+                            }
+                        });
                     }
+                    else {
+                        voucherId = "";
+                        VoucherValue = 0;
+                        $("#spanGiamGia").text(VoucherValue.toLocaleString('en-US', { minimumFractionDigits: 0 }) + " đ");
+                        getTotalAmount();
+                    }
+                },
+                error: function (xhr, status, error) {
+                    // Xử lý lỗi nếu có
+                    console.error(xhr.responseText);
                 }
-
-
             });
-
-
-        }
-        else {
-            $('#wardSelect')
-                .find('option')
-                .remove()
-                .end()
-                .append('<option value="">--Chọn Xã/Phường</option>')
-                .val('');
-
-        }
-
-        let urlCaculateFee = '/Cart/GetShippingFee?provinceId=' + provinceId + '&districtId=' + districtId;
-
-        $.get(urlCaculateFee, function (data) {
-
-            let feeship = data.ShippingFee.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-            let totalOfFeeShip = data.Total.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")
-            $('#shipingfee').text(feeship + ' đ');
-            $('#spanTotal').text(totalOfFeeShip + ' đ');
-        })
+        });
     });
 
-    var xacNhan = function () {
-        console.log('xacNhan');
-        $('#spanAddress').text('xac nhan')
+    function getcartAjax() {
+        $.ajax({
+            url: "/cart/getMiniCart",
+            type: "GET",
+            success: function (response) {
+                $("#spanTongTienHang").text(response.tongtien.toLocaleString('en-US', { minimumFractionDigits: 0 }) + " đ"); // Hoặc
+                total = response.tongtien;
+                // Xóa tất cả các option cũ trong select
+                $('#discount-select').empty();
+                voucherId = "";
+                VoucherValue = 0;
+                $('#myCoins').text(response.myCoins);
+                $('#discount-select').append('<option value="">-- Chọn mã giảm giá --</option>');
+                // Thêm các option mới từ dữ liệu trả về
+                $.each(response.lstVoucher, function (index, item) {
+                    $('#discount-select').append($('<option>', {
+                        value: item.value,
+                        text: item.text
+                    }));
+                });
+            }
+            ,
+            error: function (error) {
+                console.log(error);
+            }
+        });
     }
-    var paymentBody = {
-        FullName: '',
-        Phone: '',
-        ProvinceId: null,
-        DistrictId: null,
-        WardId: null,
-        Address: '',
-        Note: '',
-        UsePoint: 0,
-        ShippingFee: 0,
-        CartItems: []
+
+    function CongSL(idProductDetail) {
+        var quantityInput = document.getElementById('quantity-input-' + idProductDetail);
+        var newQuantity = parseInt(quantityInput.value) + 1;
+        UpdateSLInCart(idProductDetail, newQuantity);
     }
 
-    $("#form1").validate({
-        rules: {
-            FullName: "required",
-            Phone: "required",
-            Address: "required",
-            ProvinceId: "required",
-            DistrictId: "required",
-            WardId: "required",
-        },
-        messages: {
-            FullName: "Vui lòng nhập!",
-            Phone: "Vui lòng nhập!",
-            Address: "Vui lòng nhập địa chỉ nhận hàng!",
-            ProvinceId: "Vui lòng nhập!",
-            DistrictId: "Vui lòng nhập!",
-            WardId: "Vui lòng nhập!",
-        }
-    })
-
-    $('#btnSubmitForm').click(function () {
-
-
-        if ($("#form1").valid()) {
-            console.log('submited');
-            let infoText = $('#FullName').val() + ' (SĐT: ' + $('#Phone').val() + ')';
-            let AddressText = $('#Address').val();
-            $('#spanUserInfo').text(infoText);
-            $('#spanAddress').text(AddressText);
-
-            var myModalEl = document.getElementById('exampleModal')
-            var modal = bootstrap.Modal.getInstance(myModalEl);
-            modal.hide();
-        }
-
-    });
-    $('#btnDatHang').click(function () {
-        let CartItems = [{ "ImageUrl": null, "ProductId": 4294, "ProductDetailId": 45720, "Color": "kem", "Size": "35", "Qty": 1, "PriceSale": 175500.00, "Price": 195000.0, "FlashSaleId": 0, "IsFlashSale": false, "Total": 195000.0, "SubTotal": 175500.00, "Name": "Giày cao gót MWC NUCG- G042", "Upc": "G042", "HostThumnail": "https://img.mwc.com.vn/giay-thoi-trang", "KeySlug": "giay-cao-got-mwc-nucg--g042", "MaxProductBonus": 0, "ColorItems": [], "SizeItems": [{ "Value": "35", "Text": "35", "Selected": false }, { "Value": "36", "Text": "36", "Selected": false }, { "Value": "37", "Text": "37", "Selected": false }, { "Value": "38", "Text": "38", "Selected": false }, { "Value": "39", "Text": "39", "Selected": false }], "ProductBonusItems": [] }];
-        if (CartItems.length == 0) {
-            Swal.fire({
-                icon: 'error',
-                title: 'Thông báo!',
-                text: 'Giỏ hàng trống!',
-            })
+    function TruSL(idProductDetail) {
+        var quantityInput = document.getElementById('quantity-input-' + idProductDetail);
+        var newQuantity = parseInt(quantityInput.value) - 1;
+        if (newQuantity < 1) {
+            // Số lượng không thể nhỏ hơn 1
             return;
         }
-
-        let usePoint = $('#usePoint').val();
-        if (usePoint != '' && usePoint != null) {
-            if (usePoint < 1000) {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Thông báo!',
-                    text: 'Bạn phải nhập tối thiểu 1000 điểm!',
-                })
-                return;
-            }
-            if (usePoint > cartInfo.AccumulatedPoints) {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Thông báo!',
-                    text: 'Không được vượt quá ' + cartInfo.AccumulatedPoints + ' điểm!',
-                })
-                return;
-            }
-        }
-
-
-        //valid
-        if ($('#FullName').val() === '' || $('#Phone').val() === '' || $('#provinceOptions').val() === '' || $('#districtSelect').val() === '' || $('#wardSelect').val() === '') {
-            Swal.fire({
-                icon: 'error',
-                title: 'Thông báo!',
-                text: 'Bạn chưa nhập thông tin nhận hàng!',
-            })
-            return;
-        }
-
-
-
-        paymentBody.CartItems = CartItems;
-        paymentBody.FullName = $('#FullName').val();
-        paymentBody.Phone = $('#Phone').val();
-        paymentBody.Address = $('#Address').val();
-        paymentBody.ProvinceId = $('#provinceOptions').val();
-        paymentBody.DistrictId = $('#districtSelect').val();
-        paymentBody.WardId = $('#wardSelect').val();
-        paymentBody.UsePoint = $('#usePoint').val();
-        paymentBody.CouponCode = $('#couponOptions').val();
-
-        Swal.showLoading();
-
-        console.log(paymentBody);
-        let urlPayment = '/Cart/Payment'
-        $.post(urlPayment, paymentBody, function (res) {
-            console.log(res);
-            window.location = "/cart/success";
-            //Swal.fire(
-            //    'Đặt hàng thành công!',
-            //    '',
-            //    'success'
-            //).then(function () {
-            //    window.location = "/";
-            //})
-
-        })
-            .fail(function (response) {
-                console.log('Error: ' + response.responseText);
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Thông báo!',
-                    text: response.responseText,
-                })
-            });
-
-
-
-    })
-
-
-    $("#couponOptions").change(function () {
-        voucherCode = this.value;
-
-        caculateCartTotal(provinceId, districtId, voucherCode, usePoint);
-    });
-
-    $('#usePoint').change(function () {
-        usePoint = this.value;
-        if (usePoint != '') {
-            if (usePoint < 1000) {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Thông báo!',
-                    text: 'Bạn phải nhập tối thiểu 1000 điểm!',
-                })
-                return;
-            }
-            if (usePoint > cartInfo.AccumulatedPoints) {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Thông báo!',
-                    text: 'Không được vượt quá ' + cartInfo.AccumulatedPoints + ' điểm!',
-                })
-                return;
-            }
-        }
-        caculateCartTotal(provinceId, districtId, voucherCode, usePoint);
-
-        console.log(usePoint);
-    })
-
-    function caculateCartTotal(provinceId = "", districtId = "", voucherCode = "", Point = 0) {
-        let url = '/Cart/CaculateCartTotal?provinceId=' + provinceId;
-        url = url + '&districtId=' + districtId;
-        url = url + '&voucherCode=' + voucherCode;
-        url = url + '&Point=' + Point;
-        $.get(url, function (data) {
-            console.log('caculateCartTotal', data);
-            let total = data.Total.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")
-            let totalDiscountCoupon = data.TotalDiscountCoupon.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")
-
-            $('#spanTotal').text(total + ' đ');
-            $('#spanGiamGiaCoupon').text('-' + totalDiscountCoupon + ' đ');
-        })
+        UpdateSLInCart(idProductDetail, newQuantity);
     }
+
+    function UpdateSLInCart(idProductDetail, newQuantity) {
+        var priceValue = document.getElementById('price-item-' + idProductDetail).textContent;
+
+        $.ajax({
+            type: "POST",
+            url: "/Cart/UpdateSLInCart",
+            data: {
+                idProductDetail: idProductDetail,
+                newQuantity: newQuantity
+            },
+            success: function (result) {
+                if (result.status == true) {
+                    var totalPrice = priceValue * newQuantity;
+                    var formattedTotalPrice = totalPrice.toLocaleString('en-US', { minimumFractionDigits: 0 });
+                    document.getElementById('cart-item-total-' + idProductDetail).textContent = formattedTotalPrice + " đ";
+                    total=totalPrice;
+                    getcartAjax();
+                    getTotalAmount();
+                } else {
+                    
+                    document.getElementById('cart-item-total-' + idProductDetail).textContent = result.oldQuantity;
+                    showToast(result.message, result.status);
+                    location.reload();
+                }
+            },
+            error: function (error) {
+                
+                location.reload();
+            }
+        });
+    }
+
+    function updateQuantity(idProductDetail) {
+        var newQuantity = document.getElementById('quantity-input-' + idProductDetail).value;
+        UpdateSLInCart(idProductDetail, newQuantity);
+    }
+
 
     function ChangeAddress() {
-        $('#info-user').hide();
-        $('#info-input').show();
+        $('.info-user').hide();
+        $('.info-input').show();
+    }
+
+    let selectedAddressId = null;
+   
+       
+    
+    function toggleSelection(element, id) {
+        // Nếu phần tử được click đã được chọn trước đó, không làm gì cả
+        if (selectedAddressId === id) {
+            return;
+        }
+
+        // Xóa class 'selected' từ tất cả các phần tử có class 'address-item'
+        const addressItems = document.querySelectorAll('.address-item');
+        addressItems.forEach(item => item.classList.remove('selected'));
+
+        // Thêm class 'selected' vào phần tử được click
+        element.classList.add('selected');
+        selectedAddressId = id;
+        $.ajax({
+            type: "POST",
+            url: "/Cart/getAddress",
+            data: { id: id },
+            success: function (responseNo1) {
+                RecipientName = responseNo1.recipientName;
+                RecipientAddress = responseNo1.description + ", " + responseNo1.wardName + ", " + responseNo1.districtName + ", " + responseNo1.provinceName;
+                RecipientPhone = responseNo1.recipientPhone;
+                $.ajax({
+                    type: "GET",
+                    url: "https://online-gateway.ghn.vn/shiip/public-api/v2/shipping-order/fee?shop_id=4643378?to_ward_code=" + responseNo1.wardCode + "&to_district_id=" + responseNo1.districtID + "&weight=" + 10000 + "&length=" + 1000 + "&service_type_id=2",
+                    headers: { token: '9f4e42e4-fde8-11ed-a281-3aa62a37e0a5' },
+                    contentType: "application/json; charset=utf-8",
+                    dataType: "json",
+                    success: function (data) {
+                        $("#shipingfee").text(data.data.total.toLocaleString('en-US', { minimumFractionDigits: 0 }) + " đ");
+                        ShippingFee = data.data.total;
+                        getTotalAmount();
+                    },
+                    error: function (reponse) {
+                        alert(reponse.responseText);
+                    }
+                });
+            },
+            error: function (xhr, status, error) {
+                console.error(xhr.responseText);
+            }
+        });
+
     }
 
 </script>

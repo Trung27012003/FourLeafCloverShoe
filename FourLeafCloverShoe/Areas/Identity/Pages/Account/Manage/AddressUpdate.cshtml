@@ -1,5 +1,5 @@
-﻿@page
-@model FourLeafCloverShoe.Areas.Identity.Pages.Account.Manage.AddAddressModel
+﻿@page 
+@model FourLeafCloverShoe.Areas.Identity.Pages.Account.Manage.AddressUpdateModel
 @using FourLeafCloverShoe.Share.Models
 
 <div class="profile-main__account-inner">
@@ -21,7 +21,9 @@
                         </div>
                         <div class="profile-account__custom-form__form">
                             <div class="input-with-validator-wrapper">
-                                <input    class="form-control valid" asp-for="Input.RecipientName" aria-invalid="false">
+                                <input class="form-control valid" asp-for="Input.RecipientName" aria-invalid="false">
+                                <input class="form-control valid" asp-for="Input.Id" hidden aria-invalid="false">
+                                <input class="form-control valid" asp-for="Input.UserId" hidden aria-invalid="false">
                             </div>
                         </div>
                     </div>
@@ -33,12 +35,12 @@
                         </div>
                         <div class="profile-account__custom-form__form">
                             <div class="input-with-validator-wrapper">
-                                <input    class="form-control valid" type="text" asp-for="Input.RecipientPhone" aria-invalid="false">
+                                <input class="form-control valid" type="text" asp-for="Input.RecipientPhone" aria-invalid="false">
                             </div>
                         </div>
                     </div>
                 </div>
-                <input asp-for="Input.ProvinceName" id="ProvinceName" hidden/>
+                <input asp-for="Input.ProvinceName" id="ProvinceName" hidden />
                 <input asp-for="Input.DistrictName" id="DistrictName" hidden />
                 <input asp-for="Input.WardName" id="WardName" hidden />
                 <div class="profile-account__custom-form__group">
@@ -49,7 +51,7 @@
                         <div class="profile-account__custom-form__form">
                             <div class="profile-account__custom-form__form-select-flex">
                                 <div class="input-outer" style="width:100% !important;">
-                                    <select  class="form-control valid" asp-for="Input.ProvinceID" id="province" required="">
+                                    <select class="form-control valid" asp-for="Input.ProvinceID" id="province" required="">
                                     </select>
                                     <i class="mwc-icon-angle-down"></i>
                                 </div>
@@ -57,7 +59,7 @@
                         </div>
                     </div>
                 </div>
-            
+
                 <div class="profile-account__custom-form__group">
                     <div class="profile-account__custom-form__items">
                         <div class="profile-account__custom-form__label">
@@ -136,8 +138,9 @@
 
 <script>
 
-  // onchange
+    // onchange
     $(document).ready(function () {
+       
         $("#province").change(function () {
             var selectedProvince = $(this).val();
             var selectedProvinceName = $(this).find("option:selected").text();

@@ -39,12 +39,21 @@ namespace FourLeafCloverShoe.Areas.Identity.Pages.Account.Manage
             await LoadAsync(user);
             return Page();
         }
-        public async Task<IActionResult> OnPost(Guid Id)
+        public async Task<IActionResult> OnPostSetDefaultAsync(Guid Id)
         {
             var result = await _addressService.SetDefault(Id);
             if (result)
             {
-            return RedirectToPage("Address");
+            return RedirectToPage("./Address");
+            }
+            return NotFound();
+        }
+        public async Task<IActionResult> OnPostDeleteAsync(Guid idDelete)
+        {
+            var result = await _addressService.Delete(idDelete);
+            if (result)
+            {
+            return RedirectToPage("./Address");
             }
             return NotFound();
         }

@@ -100,7 +100,6 @@ namespace FourLeafCloverShoe.Services
                         .ThenInclude(c => c.Products)
                             .ThenInclude(c=>c.Categories)
                             .ToListAsync();
-
                 var obj =  lstobj.FirstOrDefault(c=>c.Id==Id);
                 if (obj != null)
                 {
