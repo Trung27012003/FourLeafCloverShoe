@@ -112,6 +112,7 @@ namespace FourLeafCloverShoe.Services
                     objFromDb.StaffId = obj.StaffId;
                     objFromDb.VoucherId = obj.VoucherId;
                     objFromDb.OrderCode = obj.OrderCode;
+                    objFromDb.CoinsUsed = obj.CoinsUsed;
                     objFromDb.PaymentType = obj.PaymentType;
                     objFromDb.OrderStatus = obj.OrderStatus;
                     objFromDb.RecipientName = obj.RecipientName;

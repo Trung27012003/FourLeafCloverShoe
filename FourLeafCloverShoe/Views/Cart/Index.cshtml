@@ -3,7 +3,9 @@
 @{
     var lstVoucher = ViewBag.lstVoucher as List<UserVoucher>;
     var addressDefautl = ViewBag.addressDefault as Address;
-}<style>
+}
+
+<style>
      /* CSS */
      .address-item {
          border: 1px solid rgb(204, 204, 204);
@@ -241,15 +243,15 @@
                         </defs>
                     </svg>
 
-                    <div class="cart-final--top-voucher">Điểm của bạn: <span id="myCoins">0</span></div>
+                    <div class="cart-final--top-voucher">Điểm còn lại: <span id="myCoins">0</span></div>
                     <div class="profile-account__custom-form__form">
                         <div class="profile-account__custom-form__form-select-flex">
                             <div class="input-outer" style="width:100%;">
-                                <input class="form-control valid" value="0" type="number" id="usePoint">
+                                <input class="form-control valid" value="0" type="number" id="useCoins">
 
                             </div>
                         </div>
-                    </div><button type="submit" class="btn btn-solid-primary btn--m btn--inline" aria-disabled="false">
+                    </div><button type="submit" class="btn btn-solid-primary btn--m btn--inline" id="useCoinsBtn" aria-disabled="false">
                         Dùng
                     </button>
 
@@ -265,11 +267,12 @@
             <div class="d-flex flex-row justify-content-between m-2">
                 <span>Giảm giá sản phẩm</span>
                 <span>-  <span id="spanGiamGia">0 đ</span></span>
-               
+
             </div>
             <div class="d-flex flex-row justify-content-between m-2">
                 <span>Giảm giá coupon</span>
-                <span id="spanGiamGiaCoupon">- 0 đ</span>
+                <span>- <span id="spanCoinsUsed">0 đ</span></span>
+
             </div>
             <div class="d-flex flex-row justify-content-between m-2">
                 <span>Phí vận chuyển</span>
@@ -338,12 +341,61 @@
         }
     </div>
     <div class="d-flex flex-row justify-content-end mt-3">
-        <button id="btnDatHang" class="shopee-button-solid shopee-button-solid--primary">
+        <button id="btnDatHang" class="shopee-button-solid shopee-button-solid--primary" data-bs-toggle="modal"
+                               data-bs-target="#modalHDSIZE">
             <span class="cart-final--bottom-checkout--btn btnDatHang">Đặt hàng</span>
         </button>
     </div>
+
+    <!-- Modal -->
+    <div class="modal fade" id="modalHDSIZE" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Chọn Phương thức thanh toán</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="payment-option" id="cashOnDelivery" onclick="checkOut('home')">
+                            <img src="https://th.bing.com/th/id/OIP.qlW_g40gDJhOEZJEXJcMZAHaE7?w=330&amp;h=188&amp;c=8&amp;rs=1&amp;qlt=90&amp;o=6&amp;dpr=1.3&amp;pid=3.1&amp;rm=2" alt="Cash On Delivery" class="img-fluid">
+                            <h4 style="text-align:center;">Tại nhà</h4>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="payment-option" id="vnpay" onclick="checkOut('vnpay')">
+                            <img src="https://th.bing.com/th/id/OIP.pudtAVAIzcFnMbEVmwTt6wHaEK?w=330&amp;h=188&amp;c=8&amp;rs=1&amp;qlt=90&amp;o=6&amp;dpr=1.3&amp;pid=3.1&amp;rm=2" alt="VNPay" class="img-fluid">
+                            <h4 style="text-align:center;">VNPay</h4>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="payment-option" id="momo" onclick="checkOut('momo')">
+                            <img src="https://th.bing.com/th?id=OIP.GeFcLtlBbXpoqkNN_UtThQHaEO&amp;w=330&amp;h=188&amp;c=8&amp;rs=1&amp;qlt=90&amp;o=6&amp;dpr=1.3&amp;pid=3.1&amp;rm=2" alt="Momo" class="img-fluid">
+                            <h4 style="text-align:center;">Momo</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
 </div>
 <script>
+       function checkOut(type) {
+        if (confirm("Bạn có chắc chắn muốn chọn phương thức thanh toán " + type + " không?")) {
+        console.log("Người dùng đã chọn phương thức thanh toán " + type);
+
+
+    } else {
+        console.log("Người dùng đã huỷ bỏ việc chọn phương thức thanh toán " + type);
+    }
+    }
     var total = 0;
     var voucherId; // co
     var RecipientName = ""// co
@@ -353,16 +405,108 @@
     var VoucherValue = 0;  // co
     var ShippingFee = 0;// co
     var PaymentType; // chua
+    var myCoinsDb; // chua
+    var coinsUsed = 0; // chua
+   $("#useCoinsBtn").click(function () {
+  var myCoins = parseInt($("#myCoins").text());
+  var useCoins = parseInt($("#useCoins").val());
+  if (useCoins >= 0) {
+    if (useCoins == 0) {
+      if (coinsUsed != 0) {
+        myCoins = myCoinsDb;
+        coinsUsed = 0;
+        $("#spanCoinsUsed").text(
+          coinsUsed.toLocaleString("en-US", { minimumFractionDigits: 0 }) + " đ"
+        );
+        $("#myCoins").text(myCoins);
+        getTotalAmount();
+        showToast("Đã huỷ dùng xu", true);
+      }
+    } else {
+      if (TotalAmout > 0) {
+        if (useCoins <= myCoinsDb) {
+          var coinsInThisInput = useCoins; // Số xu đã sử dụng trong lần nhập này
+          if (coinsUsed == 0) {
+            if (useCoins <= TotalAmout) {
+              myCoins = myCoinsDb - useCoins;
+              coinsUsed = useCoins;
+              $("#spanCoinsUsed").text(
+                coinsUsed.toLocaleString("en-US", {
+                  minimumFractionDigits: 0,
+                }) + " đ"
+              );
+              $("#myCoins").text(myCoins);
+              showToast("Xu đã được sử dụng vào đơn hàng.", true);
+            } else {
+              coinsUsed = -(0 - TotalAmout);
+              myCoins = myCoinsDb - coinsUsed;
+              useCoins = coinsUsed;
+              $("#myCoins").text(myCoins);
+              $("#useCoins").text(coinsUsed);
+              $("#spanCoinsUsed").text(
+                coinsUsed.toLocaleString("en-US", {
+                  minimumFractionDigits: 0,
+                }) + " đ"
+              );
+              showToast("Xu đã được sử dụng vào đơn hàng.", true);
+            }
+          } else {
+            // Kiểm tra nếu số xu nhập lớn hơn tổng số xu đã sử dụng trong lần này,
+            // thì chỉ cập nhật lại giá trị của số xu đã sử dụng trong lần này
+            if (useCoins <= coinsUsed) {
+              coinsInThisInput = useCoins - coinsUsed;
+            }
+            if (coinsInThisInput <= TotalAmout) {
+              coinsUsed += coinsInThisInput;
+              myCoins = myCoinsDb - coinsUsed;
+              $("#spanCoinsUsed").text(
+                coinsUsed.toLocaleString("en-US", {
+                  minimumFractionDigits: 0,
+                }) + " đ"
+              );
+              showToast("Xu đã được sử dụng vào đơn hàng.", true);
+              $("#myCoins").text(myCoins);
+            } else {
+              coinsUsed += TotalAmout;
+              myCoins = myCoinsDb - coinsUsed;
+              $("#spanCoinsUsed").text(
+                coinsUsed.toLocaleString("en-US", {
+                  minimumFractionDigits: 0,
+                }) + " đ"
+              );
+              $("#myCoins").text(myCoins);
+              showToast("Xu đã được sử dụng vào đơn hàng.", true);
+            }
+          }
+          getTotalAmount();
+        } else {
+          showToast("Bạn không đủ xu để sử dụng, vui lòng kiểm tra lại");
+          $("#useCoins").text(0);
+        }
+      } else {
+        showToast("Đơn hàng đang là 0đ", true);
+      }
+    }
+  } else {
+    showToast("Vui lòng nhập xu hợp lệ");
+    $("#useCoins").text(0);
+  }
+});
+
+
     function getTotalAmount() {
         $("#shipingfee").text(ShippingFee.toLocaleString('en-US', { minimumFractionDigits: 0 }) + " đ");
-        console.log(" total:", total);
-        console.log(" VoucherValue:", VoucherValue);
-        console.log(" ShippingFee:", ShippingFee);
-        TotalAmout = total - VoucherValue + ShippingFee;
-        console.log("Total Amout:",TotalAmout);
+        TotalAmout = total - VoucherValue + ShippingFee - coinsUsed;
+        if (TotalAmout == coinsUsed) {
+            TotalAmout = 0;
+        }
         $("#spanTotal").text(TotalAmout.toLocaleString('en-US', { minimumFractionDigits: 0 }) + " đ");
+        console.log("click call getTotalAmount ", TotalAmout);
     }
-    function getShipDefault(){
+    function decodeHTMLEntities(str) {
+    return $("<textarea/>").html(str).text();
+}
+    function getShipDefault() {
         $.ajax({
             type: "GET",
             url: "https://online-gateway.ghn.vn/shiip/public-api/v2/shipping-order/fee?shop_id=4643378?to_ward_code=" + @addressDefautl.WardCode + "&to_district_id=" + @addressDefautl.DistrictID + "&weight=" + 10000 + "&length=" + 1000 + "&service_type_id=2",
@@ -371,15 +515,13 @@
             dataType: "json",
             success: function (data) {
                 ShippingFee = data.data.total;
-                RecipientName = '@addressDefautl.RecipientName';
-                RecipientAddress = '@addressDefautl.Description' + ", " + ' @addressDefautl.WardName' + ", " + ' @addressDefautl.DistrictName ' + ", " + '@addressDefautl.ProvinceName';
+                RecipientName = decodeHTMLEntities("@addressDefautl.RecipientName");
+                    RecipientAddress = decodeHTMLEntities("@addressDefautl.Description ")+ ", " + decodeHTMLEntities("@addressDefautl.WardName ")+ ", " + decodeHTMLEntities( "@addressDefautl.DistrictName" ) + ", " +decodeHTMLEntities( "@addressDefautl.ProvinceName");
                 RecipientPhone = @addressDefautl.RecipientPhone;
                 getcartAjax();// lay total
                 if (total == 0) {
                     ShippingFee = 0;
                 }
-                // save tien ship
-                console.log("Get ship default :", ShippingFee);
                 getTotalAmount();
 
             },
@@ -389,63 +531,81 @@
         });
     }
     $(document).ready(function () {
-        getcartAjax();
-        // get ship
-        getShipDefault();
-
-
-        // khi select voucher
-        $('#discount-select').change(function () {
-            var selectedValue = $(this).val();
-            $.ajax({
-                type: "POST",
-                url: "/Cart/ApplyVoucher",
-                data: { uservoucherId: selectedValue },
-                success: function (responseNo1) {
-                    if (responseNo1.isSuccess) {
-                        $.ajax({
-                            url: "/cart/getMiniCart",
-                            type: "GET",
-                            success: function (responseNo2) {
-                                if (responseNo1.voucherType == 1) {
-                                    VoucherValue = responseNo1.voucherValue * responseNo2.tongtien / 100;
-                                    if (VoucherValue > responseNo1.maxDiscount) {
+    getcartAjax();
+    getShipDefault();
+    $('#discount-select').change(function () {
+        var selectedValue = $(this).val();
+         voucherId = "";
+         VoucherValue = 0;
+                            getTotalAmount();
+        $.ajax({
+            type: "POST",
+            url: "/Cart/ApplyVoucher",
+            data: { uservoucherId: selectedValue },
+            success: function (responseNo1) {
+                if (responseNo1.isSuccess) {
+                    $.ajax({
+                        url: "/cart/getMiniCart",
+                        type: "GET",
+                        success: function (responseNo2) {
+                            if (TotalAmout==0){
+                             $('#discount-select').empty();
+                            $("#spanGiamGia").text(VoucherValue.toLocaleString('en-US', { minimumFractionDigits: 0 }) + " đ");
+                            showToast("Không thể áp dụng voucher do đơn hàng đang là 0đ!", false);
+                            }
+                            else{
+                                if (responseNo1.voucherType == 1) { // theo %
+                                var tinhtien = responseNo1.voucherValue * responseNo2.tongtien / 100;
+                                VoucherValue = tinhtien;
+                                 if (tinhtien > responseNo1.maxDiscount) {
                                         VoucherValue = responseNo1.maxDiscount;
+                                        console.log("tinhtien > responseNo1.maxDiscount");
+                                    }
+                                    if(tinhtien>TotalAmout){
+                                        VoucherValue=TotalAmout;
+                                        console.log("responseNo1.voucherValue>TotalAmout");
+                                    }
+                                  
+                                }
+                                else {// theo vnd
+                                    VoucherValue = responseNo1.voucherValue;
+                                     if(responseNo1.voucherValue>TotalAmout){
+                                        VoucherValue=TotalAmout;
                                     }
                                 }
-                                else {
-                                    VoucherValue = responseNo1.voucherValue;
-                                }
+                               
                                 getTotalAmount();
+                                    console.log("VoucherValue1 ",VoucherValue);
+                                    console.log("TotalAmout 1",TotalAmout);
                                 $("#spanGiamGia").text(VoucherValue.toLocaleString('en-US', { minimumFractionDigits: 0 }) + " đ");
                                 voucherId = responseNo1.id;
-                                showToast("Đã áp dụng voucher",true);
-                                
+                                showToast("Đã áp dụng voucher", true);
                             }
-                            ,
-                            error: function (error) {
-                                voucherId = "";
-                                VoucherValue = 0;
-                                $("#spanGiamGia").text(VoucherValue.toLocaleString('en-US', { minimumFractionDigits: 0 }) + " đ");
-                                showToast("Có lỗi xảy ra, vui lòng thử lại sau!", false );
-                                console.log(error);
-                            }
-                        });
-                    }
-                    else {
-                        voucherId = "";
-                        VoucherValue = 0;
-                        $("#spanGiamGia").text(VoucherValue.toLocaleString('en-US', { minimumFractionDigits: 0 }) + " đ");
-                        getTotalAmount();
-                    }
-                },
-                error: function (xhr, status, error) {
-                    // Xử lý lỗi nếu có
-                    console.error(xhr.responseText);
+                        }
+                        ,
+                        error: function (error) {
+                            voucherId = "";
+                            VoucherValue = 0;
+                            $("#spanGiamGia").text(VoucherValue.toLocaleString('en-US', { minimumFractionDigits: 0 }) + " đ");
+                            showToast("Có lỗi xảy ra, vui lòng thử lại sau!", false);
+                            console.log(error);
+                        }
+                    });
                 }
-            });
+                else {
+                    voucherId = "";
+                    VoucherValue = 0;
+                    $("#spanGiamGia").text(VoucherValue.toLocaleString('en-US', { minimumFractionDigits: 0 }) + " đ");
+                    getTotalAmount();
+                }
+            },
+            error: function (xhr, status, error) {
+                // Xử lý lỗi nếu có
+                console.error(xhr.responseText);
+            }
         });
     });
+});
 
     function getcartAjax() {
         $.ajax({
@@ -459,6 +619,7 @@
                 voucherId = "";
                 VoucherValue = 0;
                 $('#myCoins').text(response.myCoins);
+                myCoinsDb = response.myCoins;
                 $('#discount-select').append('<option value="">-- Chọn mã giảm giá --</option>');
                 // Thêm các option mới từ dữ liệu trả về
                 $.each(response.lstVoucher, function (index, item) {
@@ -506,18 +667,18 @@
                     var totalPrice = priceValue * newQuantity;
                     var formattedTotalPrice = totalPrice.toLocaleString('en-US', { minimumFractionDigits: 0 });
                     document.getElementById('cart-item-total-' + idProductDetail).textContent = formattedTotalPrice + " đ";
-                    total=totalPrice;
+                    total = totalPrice;
                     getcartAjax();
                     getTotalAmount();
                 } else {
-                    
+
                     document.getElementById('cart-item-total-' + idProductDetail).textContent = result.oldQuantity;
                     showToast(result.message, result.status);
                     location.reload();
                 }
             },
             error: function (error) {
-                
+
                 location.reload();
             }
         });
@@ -535,9 +696,9 @@
     }
 
     let selectedAddressId = null;
-   
-       
-    
+
+
+
     function toggleSelection(element, id) {
         // Nếu phần tử được click đã được chọn trước đó, không làm gì cả
         if (selectedAddressId === id) {

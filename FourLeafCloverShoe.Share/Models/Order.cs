@@ -19,6 +19,7 @@ namespace FourLeafCloverShoe.Share.Models
         public string? RecipientName { get; set; }
         public string? RecipientAddress { get; set; }// địa chỉ
         public string? RecipientPhone { get; set; }// sdt
+        public decimal? CoinsUsed { get; set; } // tổng tiền trước khi áp dụng
         public decimal? TotalAmout { get; set; } // tổng tiền trước khi áp dụng
         public decimal? VoucherValue { get; set; } // giá trị voucher
         public decimal? ShippingFee { get; set; } // phí ship
