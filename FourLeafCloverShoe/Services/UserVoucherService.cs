@@ -67,7 +67,7 @@ namespace FourLeafCloverShoe.Services
         {
             try
             {
-                var obj = await _myDbContext.UserVouchers.FindAsync(Id);
+                var obj = (await _myDbContext.UserVouchers.Include(c => c.Vouchers).ToListAsync()).FirstOrDefault(c=>c.Id==Id);
                 if (obj != null)
                 {
 
@@ -79,6 +79,23 @@ namespace FourLeafCloverShoe.Services
             {
                 Console.WriteLine(e.Message);
                 return new UserVoucher();
+            }
+        }
+
+        public async Task<List<UserVoucher>> GetByUserId(string userId)
+        {
+            try
+            {
+                var userVouchers = await _myDbContext.UserVouchers
+                                        .Include(c => c.Vouchers).ToListAsync();
+                var lstObjValid = userVouchers.Where(c=>c.UserId==userId&&c.Status==1&&c.Vouchers.Status==1&&c.Vouchers.StartDate<=DateTime.Now&&c.Vouchers.EndDate>DateTime.Now&&c.Vouchers.Quantity>0);
+                return lstObjValid.ToList();
+
+            }
+            catch (Exception)
+            {
+
+                return new List<UserVoucher>();
             }
         }
 

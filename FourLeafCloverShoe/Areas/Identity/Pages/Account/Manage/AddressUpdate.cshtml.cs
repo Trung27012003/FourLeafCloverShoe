@@ -6,43 +6,40 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace FourLeafCloverShoe.Areas.Identity.Pages.Account.Manage
 {
-    public class AddAddressModel : PageModel
+    public class AddressUpdateModel : PageModel
     {
         private readonly IAddressService _addressService;
         private readonly UserManager<User> _userManager;
-
-        public AddAddressModel(UserManager<User> userManager, IAddressService addressService)
+        public AddressUpdateModel(UserManager<User> userManager, IAddressService addressService)
         {
             _addressService = addressService;
             _userManager = userManager;
         }
         [BindProperty]
         public Address Input { get; set; }
-        public async Task<IActionResult> OnGet()
+        public async Task<IActionResult> OnGet(Guid id)
         {
-
+            Input = await _addressService.GetById(id);
             return Page();
         }
         public async Task<IActionResult> OnPostAsync()
         {
             if (ModelState.IsValid)
             {
-                var user = await _userManager.GetUserAsync(User);
-                Input.UserId = user.Id;
-                var result =  await _addressService.Add(Input);
+
+                var result = await _addressService.Update(Input);
                 if (result)
                 {
                     if (Input.IsDefault)
                     {
-                       var a= await _addressService.SetDefault(Input.Id);
+                        var a = await _addressService.SetDefault(Input.Id);
 
                     }
-                    return RedirectToPage();
+                    return RedirectToPage("./Address");
                 }
             }
-
             return Page();
-            
+
         }
     }
 }

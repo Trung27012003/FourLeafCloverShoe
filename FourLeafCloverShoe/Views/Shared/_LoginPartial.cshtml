@@ -177,7 +177,7 @@ else
                 html += '<div id="sidebar-cart" class="cart-widget-side wd-side-hidden wd-right wd-opened">';
                 html += '<div class="wd-heading widget-heading"><span class="title widget-title">Giỏ hàng</span>';
                 html += '<div class="close-side-widget wd-action-btn wd-style-text wd-cross-icon">';
-                html += '<a href="javascript:;" onclick="closecart()"><img src="~/fileuser/Assets/App/images/iconclose.png"style="width:17px;padding-right:5px;">Đóng</a>';
+                html += '<a href="javascript:;" onclick="closecart()"><img src="/fileuser/Assets/App/images/iconclose.png"style="width:17px;padding-right:5px;">Đóng</a>';
                 html += '</div></div><div class="widget woocommerce widget_shopping_cart"><div id="cart-list-item" class="widget_shopping_cart_content" style="opacity: 1;">';
                 if (response.tongtien == 0) {
                     html += '<span class="cart-item-name">Giỏ hàng trống</span>';
@@ -203,12 +203,12 @@ else
                         html += '<li class="variation-Kchc"><span class="item-variation-name">Kích cỡ:</span><span class="item-variation-value">' + item.Size.Name + '</span></li>';
                         html += ' </ul></div>';
                         html += '<div class="elementor-menu-cart__product-price product-price" data-title="Price">';
-                        html += ' <span class="quantity">' + so + ' × <span class="woocommerce-Price-amount amount"><bdi>' + item.PriceSale + '<span class="woocommerce-Price-currencySymbol">₫</span></bdi></span></span></div>';
+                        html += ' <span class="quantity">' + so + ' × <span class="woocommerce-Price-amount amount"><bdi>' + item.PriceSale.toLocaleString('en-US', { minimumFractionDigits: 0 })+ " đ" + '<span class="woocommerce-Price-currencySymbol"></span></bdi></span></span></div>';
                         html += '<div class="elementor-menu-cart__product-remove product-remove">';
                         html += '<a href="javascript:;" onclick="removeMiniCartItem(\'' + item.Id + '\')" aria-label="Xóa sản phẩm"></a></div></div></div>';
                     });
                     html += '<div class="elementor-menu-cart__subtotal">';
-                    html += '<strong>Tạm tính:</strong> <span class="woocommerce-Price-amount amount"><bdi>' + response.tongtien + '<span class="woocommerce-Price-currencySymbol">₫</span></bdi></span></div>';
+                    html += '<strong>Tạm tính:</strong> <span class="woocommerce-Price-amount amount"><bdi>' + response.tongtien.toLocaleString('en-US', { minimumFractionDigits: 0 }) + " đ" + '<span class="woocommerce-Price-currencySymbol"></span></bdi></span></div>';
                     html += '<div class="elementor-menu-cart__footer-buttons">';
                     html += '<a href="/cart" class="elementor-button elementor-button--view-cart elementor-size-md"><span class="elementor-button-text">Xem giỏ hàng</span> </a></div></div></div></div>';
                 }

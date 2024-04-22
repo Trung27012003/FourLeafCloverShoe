@@ -15,7 +15,7 @@
                 <div id="DIV_8">
                     <div class="y3hZ9E" id="DIV_9">
                         <div style="display: flex;" id="DIV_10">
-                            <a asp-page="./AddAddress" class="shopee-button-solid shopee-button-solid--primary qTzF0g" id="BUTTON_11">
+                            <a asp-page="./AddressAdd" class="shopee-button-solid shopee-button-solid--primary qTzF0g" id="BUTTON_11">
                                 <div class="psXjeQ" id="DIV_12">
                                     <div class="zNqMl2" id="DIV_13">
                                         <svg enable-background="new 0 0 10 10"
@@ -49,7 +49,6 @@
                     </div>
                 </div>
                 <div class="OrZkCF" id="DIV_25">
-                    <form  method="post">
                     @foreach (var item in Model.ListAddress)
                     {
                         <div class="UUD4No SXp5o_" id="DIV_27">
@@ -63,8 +62,17 @@
                                         <div role="row" class="N_WJUf lw_xYb E24UKj" id="DIV_34">@item.RecipientPhone</div>
                                     </div>
                                     <div class="YziUfM" id="DIV_35">
-                                        <button class="T_oZqJ" id="BUTTON_36">Cập nhật</button>
+                                        <a asp-page="./AddressUpdate" asp-route-id="@item.Id" class="T_oZqJ" id="BUTTON_36">Cập nhật</a>
                                     </div>
+                                    @if (item.IsDefault != true)
+                                    {
+                                        <div class="YziUfM" id="DIV_35">
+                                            <form method="post" asp-page="./Address" asp-page-handler="Delete">
+                                                <input type="hidden" name="idDelete" value="@item.Id">  <button type="submit" class="T_oZqJ" id="BUTTON_36">Xoá</button>
+                                            </form>
+                                        </div>
+
+                                    }
                                 </div>
                                 <div id="DIV_37" role="heading" class="X57SfF V4So7f">
                                     <div class="QyRpwQ lWXnp3" id="DIV_38">
@@ -73,7 +81,7 @@
                                                 @item.Description
                                             </div>
                                             <div role="row" class="E24UKj" id="DIV_41">
-                                                    @item.ProvinceName @item.DistrictName @item.WardName
+                                                @item.ProvinceName @item.DistrictName @item.WardName
                                             </div>
                                         </div>
                                     </div>
@@ -82,18 +90,21 @@
                                         <div class="KFu3R3 YziUfM" id="DIV_42">
                                             <button class="k8tV5Y zvyzwn zDPndA" disabled=""
                                                     id="BUTTON_43">
-                                                    Thiết lập mặc định
+                                                Thiết lập mặc định
                                             </button>
                                         </div>
                                     }
                                     else
                                     {
-                                        <div class="KFu3R3 YziUfM" id="DIV_62">
-                                                <button type="submit" name="Id" value="@item.Id" class="k8tV5Y zvyzwn zDPndA"
-                                                    id="BUTTON_63" >
-                                                Thiết lập mặc định 
-                                            </button>
-                                        </div>
+                                        <form method="post" asp-page-handler="SetDefault">
+                                            <div class="KFu3R3 YziUfM" id="DIV_62">
+                                                <input type="hidden" name="id" value="@item.Id">
+                                                <button type="submit" class="k8tV5Y zvyzwn zDPndA"
+                                                        id="BUTTON_63">
+                                                    Thiết lập mặc định
+                                                </button>
+                                            </div>
+                                        </form>
                                     }
                                 </div>
                                 @if (item.IsDefault == true)
@@ -103,11 +114,9 @@
                                               class="wZ_1w7 aCY_5O ZDVTqW" id="SPAN_45">Mặc định</span>
                                     </div>
                                 }
-
                             </div>
                         </div>
                     }
-                    </form>
 
                 </div>
             </div>

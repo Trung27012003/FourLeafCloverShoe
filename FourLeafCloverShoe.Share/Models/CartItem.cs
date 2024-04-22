@@ -13,7 +13,6 @@ namespace FourLeafCloverShoe.Share.Models
         public Guid? CartId { get; set; }
         public Guid? ProductDetailId { get; set; }
         public int? Quantity { get; set; }
-        public decimal? Price { get; set; }
         [ForeignKey("CartId")]
         public Cart? Cart { get; set; }
         [ForeignKey("ProductDetailId")]
