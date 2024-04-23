@@ -10,6 +10,7 @@ using Newtonsoft.Json;
 using System;
 using System.Net.Http;
 using System.Security.Claims;
+using System.Text.Json;
 
 namespace FourLeafCloverShoe.Controllers
 {
@@ -50,6 +51,13 @@ namespace FourLeafCloverShoe.Controllers
                 var lstAddress = await _addressService.GetByUserId(user.Id);
                 ViewBag.lstAddress = lstAddress;
                 var addressDefault = lstAddress.FirstOrDefault(c=>c.IsDefault==true);
+                //var options = new JsonSerializerOptions
+                //{
+                //    ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.Preserve
+                //};
+
+                //// Tuần tự hóa đối tượng của bạn với các tùy chọn
+                //var json = System.Text.Json.JsonSerializer.Serialize(addressDefault, options);
                 ViewBag.addressDefault = addressDefault;
                 return View(cartItems);
             }
@@ -138,9 +146,6 @@ namespace FourLeafCloverShoe.Controllers
             if (User.Identity.IsAuthenticated)
             {
                 var user = await _userManager.GetUserAsync(HttpContext.User);
-
-             
-
                 var cartItems = await _cartItemItemService.GetsByUserId(user.Id);
                 var lstproductdetail = await _productDetailService.Gets();
                 var lstproductdetails = lstproductdetail.Where(c => cartItems.Any(p => p.ProductDetailId == c.Id));
@@ -173,8 +178,9 @@ cartItems.FirstOrDefault(c => c.ProductDetailId == productDetail.Id)?.Quantity *
                         Value = obj.Id.ToString()
                     });
                 }
+                var coutProduct = cartItems.Sum(c => c.Quantity);
                 //ViewBag.lstVoucher = lstVoucher;
-                return Json(new { lstproducts = serializedCartItems, tongtien = tongtien , lstVoucher = lstVoucher,myCoins = user.Coins });
+                return Json(new { lstproducts = serializedCartItems, tongtien = tongtien , lstVoucher = lstVoucher,myCoins = user.Coins ,coutProduct = coutProduct });
             }
             return Json(new { lstproducts = new List<CartItem>(), tongtien = 0 });
         }

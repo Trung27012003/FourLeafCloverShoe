@@ -2,7 +2,25 @@
 @model IEnumerable<FourLeafCloverShoe.Share.Models.CartItem>
 @{
     var lstVoucher = ViewBag.lstVoucher as List<UserVoucher>;
-    var addressDefautl = ViewBag.addressDefault as Address;
+    int check = 0;
+    var addressDefault = ViewBag.addressDefault as Address;
+    if (addressDefault == null)
+    {
+        check = -1;
+        addressDefault = new Address()
+                {
+                    WardCode = -1,
+                    Description = "",
+                    DistrictID = -1,
+                    DistrictName = "",
+                    IsDefault = false,
+                    ProvinceID = -1,
+                    RecipientPhone = "0376810024",
+                    ProvinceName = "",
+                    RecipientName = "",
+                    WardName = ""
+                };
+    }
 }
 
 <style>
@@ -17,9 +35,7 @@
         .address-item.selected {
             background-color: #f0f0f0; /* Màu nền khi được chọn */
         }
-</style>
 
-<style>
     .error {
         color: #ee4d2d !important
     }
@@ -68,9 +84,8 @@
         }
     }
 </style>
+
 <div class="container">
-
-
     <div class="cart-list" id="cart-list">
         <div class="cart-list-header">
             <div class="cart-list-header-title">Sản Phẩm</div>
@@ -83,7 +98,6 @@
         {
             <div class="cart-list" id="cart-list">
                 <span style="left: 50%;position: relative;">Giỏ hàng trống!</span>
-
             </div>
         }
         else
@@ -118,7 +132,6 @@
                                             <div class="cart-item-body-item-product-options-name d-none d-lg-block">
                                                 Kích cỡ: @item.ProductDetails.Size.Name
                                             </div>
-
                                         </div>
                                     </div>
                                 </div>
@@ -126,10 +139,8 @@
                                     <div>
                                         <span hidden class="cart-item--price-item" id="price-item-@item.ProductDetailId">@item.ProductDetails.PriceSale</span>
                                         <span class="cart-item--price-item">@item.ProductDetails.PriceSale?.ToString("N0") đ</span>
-
                                     </div>
                                 </div>
-
                                 <div class="cart-item--quantity">
                                     <div class="cart-item--quantity-actions shopee-input-quantity">
                                         <button onclick="TruSL('@item.ProductDetailId')" type="button" id="button-minus-@item.ProductDetailId" class="cart-item--quantity-actions--item cart-item--quantity-actions--item-minus">
@@ -151,7 +162,8 @@
                                     <span>
                                         @{
                                             var totalD = item.ProductDetails.PriceSale * item.Quantity;
-                                        }@totalD?.ToString("N0") đ
+                                        }
+                                        @totalD?.ToString("N0") đ
                                     </span>
                                 </div>
                                 <div class="cart-item--actions cart-item--actions-column">
@@ -161,10 +173,8 @@
                         </div>
                         <div class="cart-item-body-space"></div>
                     </div>
-
                 }
             </div>
-
         }
     </div>
 
@@ -243,7 +253,7 @@
                         </defs>
                     </svg>
 
-                    <div class="cart-final--top-voucher">Điểm còn lại: <span id="myCoins">0 xu</span></div>
+                    <div class="cart-final--top-voucher">Điểm còn lại: <span id="myCoins">0 </span> xu</div>
                     <div class="profile-account__custom-form__form">
                         <div class="profile-account__custom-form__form-select-flex">
                             <div class="input-outer" style="width:100%;">
@@ -287,31 +297,74 @@
         </div>
     </div>
 
-    <div class="row">
-        <div class="col-12">
-            <strong style="color:#ee4d2d">THÔNG TIN VẬN CHUYỂN</strong> <a href="javascript:;" onclick="ChangeAddress()" style="margin-left: 15px; color: #1733f7;"><i class="mwc-icon-exchange-alt"></i> Thay đổi thông tin nhận hàng</a>
-        </div>
-    </div>
-    <div class="info-user" style="display: block">
-        <div>
-            <div class="d-flex flex-row justify-content-start m-2">
-                <span class="lb">Người nhận:</span>
-                <span>@addressDefautl.RecipientName</span>
+
+    @if (check != -1)
+    {
+        <div class="row">
+            <div class="col-12">
+                <strong style="color:#ee4d2d">THÔNG TIN VẬN CHUYỂN</strong> 
+             
+                    <a href="javascript:;" onclick="ChangeAddress()" style="margin-left: 15px; color: #1733f7;"><i class="mwc-icon-exchange-alt"></i> Thay đổi thông tin nhận hàng</a>
+                
             </div>
         </div>
-        <div>
-            <div class="d-flex flex-row justify-content-start m-2">
-                <span class="lb">Điện thoại:</span>
-                <span> @addressDefautl.RecipientPhone</span>
+        <div class="info-user" style="display: block">
+            <div>
+                <div class="d-flex flex-row justify-content-start m-2">
+                    <span class="lb">Người nhận:</span>
+                    <span>@addressDefault.RecipientName</span>
+                </div>
+            </div>
+            <div>
+                <div class="d-flex flex-row justify-content-start m-2">
+                    <span class="lb">Điện thoại:</span>
+                    <span> @addressDefault.RecipientPhone</span>
+                </div>
+            </div>
+            <div>
+                <div class="d-flex flex-row justify-content-start m-2">
+                    <span class="lb">Địa chỉ:</span>
+                    <span> @addressDefault.WardName, @addressDefault.DistrictName, @addressDefault.ProvinceName</span>
+                </div>
             </div>
         </div>
-        <div>
-            <div class="d-flex flex-row justify-content-start m-2">
-                <span class="lb">Địa chỉ:</span>
-                <span> @addressDefautl.WardName, @addressDefautl.DistrictName, @addressDefautl.ProvinceName</span>
+    }
+    else
+    {
+        <div class="row">
+            <div class="col-12">
+                <strong style="color:#ee4d2d">THÔNG TIN VẬN CHUYỂN</strong>
             </div>
         </div>
-    </div>
+        <input id="ProvinceName" hidden />
+        <input id="DistrictName" hidden />
+        <input id="WardName" hidden />
+        <div class="row g-3 mt-3" id="info-input" style="display: inline-flex">
+            <div class="col-md-4">
+
+                <input type="text" class="form-control" id="RecipientName" placeholder="Họ tên">
+            </div>
+            <div class="col-md-4">
+                <input type="text" class="form-control" id="RecipientPhone" placeholder="SĐT">
+            </div>
+            <div class="col-md-12">
+                <textarea type="text" class="form-control" id="Description" placeholder="Địa chỉ nhận hàng"></textarea>
+            </div>
+            <div class="col-md-4">
+                <select class="form-select valid" id="province" required="">
+                </select>
+            </div>
+            <div class="col-md-4">
+                <select class="form-select valid" id="district" required="">
+                </select>
+            </div>
+            <div class="col-md-4">
+                <select class="form-select valid" id="ward" required="">
+                </select>
+            </div>
+
+        </div>
+    }
     <div class="info-input row" style="display: none">
         @foreach (var item in ViewBag.lstAddress as List<Address>)
         {
@@ -341,8 +394,7 @@
         }
     </div>
     <div class="d-flex flex-row justify-content-end mt-3">
-        <button id="btnDatHang" class="shopee-button-solid shopee-button-solid--primary" data-bs-toggle="modal"
-                data-bs-target="#modalHDSIZE">
+        <button id="btnDatHang" class="shopee-button-solid shopee-button-solid--primary">
             <span class="cart-final--bottom-checkout--btn btnDatHang">Đặt hàng</span>
         </button>
     </div>
@@ -387,14 +439,43 @@
 
 </div>
 <script>
+    $(document).ready(function () {
+        $("#btnDatHang").click(function () {
+            // Kiểm tra tiền ship và tổng tiền
+            if (ShippingFee == 0) {
+                showToast("Vui lòng kiểm tra lại địa chỉ nhận hàng!", false);
+            }
+            else if (total <= 0) {
+
+                showToast("Giỏ hàng trống!", false);
+            }
+            else if (TotalAmout < 0) {
+
+                showToast("Lỗi không xác định", false);
+                location.reload();
+            }
+
+            else {
+                // Mở modal để chọn phương thức thanh toán
+                $('#modalHDSIZE').modal('show');
+            }
+        });
+    });
     function checkOut(type) {
-        if (confirm("Bạn có chắc chắn muốn chọn phương thức thanh toán " + type + " không?")) {
-            console.log("Người dùng đã chọn phương thức thanh toán " + type);
+        if (ShippingFee > 0 && total > 0 && TotalAmout >= 0) {
+            if (confirm("Bạn có chắc chắn muốn chọn phương thức thanh toán " + type + " không?")) {
+                console.log("Người dùng đã chọn phương thức thanh toán " + type);
 
 
-        } else {
-            console.log("Người dùng đã huỷ bỏ việc chọn phương thức thanh toán " + type);
+            } else {
+                console.log("Người dùng đã huỷ bỏ việc chọn phương thức thanh toán " + type);
+            }
         }
+        else {
+            showToast("Bạn cần nhập địa chỉ để tiếp tục đặt hang");
+        }
+
+
     };
     var total = 0;
     var voucherId; // co
@@ -407,95 +488,243 @@
     var PaymentType; // chua
     var myCoinsDb; // chua
     var coinsUsed = 0; // chua
+    var coutProduct = 1; // chua
+
     $("#useCoinsBtn").click(function () {
         var myCoins = parseInt($("#myCoins").text());
         var useCoins = parseInt($("#useCoins").val());
-        if (useCoins >= 0) {
-            if (useCoins == 0) {
-                if (coinsUsed != 0) {
-                    myCoins = myCoinsDb;
-                    coinsUsed = 0;
-                    $("#spanCoinsUsed").text(
-                        coinsUsed.toLocaleString("en-US", { minimumFractionDigits: 0 }) + " đ"
-                    );
-                    $("#myCoins").text(myCoins.toLocaleString("en-US", { minimumFractionDigits: 0 }) + " xu");
-                    getTotalAmount();
-                    showToast("Đã huỷ dùng xu", true);
-                }
-            } else {
-                if (TotalAmout >= 0) {
-                    if (useCoins <= myCoinsDb) {
-                        var coinsInThisInput = useCoins; // Số xu đã sử dụng trong lần nhập này
-                        if (coinsUsed == 0) {
-                            if (useCoins <= TotalAmout) {
-                                myCoins = myCoinsDb - useCoins;
-                                coinsUsed = useCoins;
-                                $("#spanCoinsUsed").text(
-                                    coinsUsed.toLocaleString("en-US", {
-                                        minimumFractionDigits: 0,
-                                    }) + " đ"
-                                );
-                                $("#myCoins").text(myCoins.toLocaleString("en-US", { minimumFractionDigits: 0 }) + " xu");
-                                $("#useCoins").val(coinsUsed);
-                                showToast("Xu đã được sử dụng vào đơn hàng s1.", true);
-                            } else {
-                                coinsUsed = -(0 - TotalAmout);
-                                myCoins = myCoinsDb - coinsUsed;
-                                useCoins = coinsUsed;
-                                $("#myCoins").text(myCoins.toLocaleString("en-US", { minimumFractionDigits: 0 }) + " xu");
-                                $("#useCoins").val(coinsUsed);
-                                $("#spanCoinsUsed").text(
-                                    coinsUsed.toLocaleString("en-US", {
-                                        minimumFractionDigits: 0,
-                                    }) + " đ"
-                                );
-                                showToast("Xu đã được sử dụng vào đơn hàng s2.", true);
-                            }
-                        } else {
-                            // Kiểm tra nếu số xu nhập lớn hơn tổng số xu đã sử dụng trong lần này,
-                            // thì chỉ cập nhật lại giá trị của số xu đã sử dụng trong lần này
-                            if (useCoins <= coinsUsed) {
-                                coinsInThisInput = useCoins - coinsUsed;
-                            }
-                            if (coinsInThisInput <= TotalAmout) {
-                                coinsUsed += coinsInThisInput;
-                                myCoins = myCoinsDb - coinsUsed;
-                                $("#spanCoinsUsed").text(
-                                    coinsUsed.toLocaleString("en-US", {
-                                        minimumFractionDigits: 0,
-                                    }) + " đ"
-                                );
-                                showToast("Xu đã được sử dụng vào đơn hàng s3.", true);
-                                $("#useCoins").val(coinsUsed);
-                                $("#myCoins").text(myCoins.toLocaleString("en-US", { minimumFractionDigits: 0 }) + " xu");
-                            } else {
-                                coinsUsed += TotalAmout;
-                                myCoins = myCoinsDb - coinsUsed;
-                                $("#spanCoinsUsed").text(
-                                    coinsUsed.toLocaleString("en-US", {
-                                        minimumFractionDigits: 0,
-                                    }) + " đ"
-                                );
-                                $("#useCoins").val(coinsUsed);
-                                $("#myCoins").text(myCoins.toLocaleString("en-US", { minimumFractionDigits: 0 }) + " xu");
-                                showToast("Xu đã được sử dụng vào đơn hàng s4.", true);
-                            }
-                        }
+        if (total > 0) {
+            if (useCoins >= 0) {
+                if (useCoins == 0) {
+                    if (coinsUsed != 0) {
+                        myCoins = myCoinsDb;
+                        coinsUsed = 0;
+                        $("#spanCoinsUsed").text(
+                            coinsUsed.toLocaleString("en-US", { minimumFractionDigits: 0 }) + " đ"
+                        );
+                        $("#myCoins").text(myCoins.toLocaleString("en-US", { minimumFractionDigits: 0 }));
                         getTotalAmount();
-                    } else {
-                        showToast("Bạn không đủ xu để sử dụng, vui lòng kiểm tra lại");
-                        $("#useCoins").val(0);
+                        showToast("Đã huỷ dùng xu", true);
                     }
                 } else {
-                    showToast("Đơn hàng đang là 0đ", true);
+                    if (TotalAmout >= 0) {
+                        if (useCoins <= myCoinsDb) {
+                            var coinsInThisInput = useCoins; // Số xu đã sử dụng trong lần nhập này
+                            if (coinsUsed == 0) {
+                                if (useCoins <= TotalAmout) {
+                                    myCoins = myCoinsDb - useCoins;
+                                    coinsUsed = useCoins;
+                                    $("#spanCoinsUsed").text(
+                                        coinsUsed.toLocaleString("en-US", {
+                                            minimumFractionDigits: 0,
+                                        }) + " đ"
+                                    );
+                                    $("#myCoins").text(myCoins.toLocaleString("en-US", { minimumFractionDigits: 0 }));
+                                    $("#useCoins").val(coinsUsed);
+                                    showToast("Xu đã được sử dụng vào đơn hàng .", true);
+                                } else {
+                                    coinsUsed = -(0 - TotalAmout);
+                                    myCoins = myCoinsDb - coinsUsed;
+                                    useCoins = coinsUsed;
+                                    $("#myCoins").text(myCoins.toLocaleString("en-US", { minimumFractionDigits: 0 }));
+                                    $("#useCoins").val(coinsUsed);
+                                    $("#spanCoinsUsed").text(
+                                        coinsUsed.toLocaleString("en-US", {
+                                            minimumFractionDigits: 0,
+                                        }) + " đ"
+                                    );
+                                    showToast("Xu đã được sử dụng vào đơn hàng, xu thừa đã được hoàn tác lại tài khoản .", true);
+                                }
+                            } else {
+                                if (useCoins <= coinsUsed) {
+                                    coinsInThisInput = useCoins - coinsUsed;
+                                }
+                                if (coinsInThisInput <= TotalAmout) {
+                                    coinsUsed += coinsInThisInput;
+                                    myCoins = myCoinsDb - coinsUsed;
+                                    $("#spanCoinsUsed").text(
+                                        coinsUsed.toLocaleString("en-US", {
+                                            minimumFractionDigits: 0,
+                                        }) + " đ"
+                                    );
+                                    showToast("Xu đã được sử dụng vào đơn hàng .", true);
+                                    $("#useCoins").val(coinsUsed);
+                                    $("#myCoins").text(myCoins.toLocaleString("en-US", { minimumFractionDigits: 0 }));
+                                } else {
+                                    coinsUsed += TotalAmout;
+                                    myCoins = myCoinsDb - coinsUsed;
+                                    $("#spanCoinsUsed").text(
+                                        coinsUsed.toLocaleString("en-US", {
+                                            minimumFractionDigits: 0,
+                                        }) + " đ"
+                                    );
+                                    $("#useCoins").val(coinsUsed);
+                                    $("#myCoins").text(myCoins.toLocaleString("en-US", { minimumFractionDigits: 0 }));
+                                    showToast("Xu đã được sử dụng vào đơn hàng .", true);
+                                }
+                            }
+                            getTotalAmount();
+                        } else {
+
+                            showToast("Xu nhập không hợp lệ, vui lòng kiểm tra lại");
+                            $("#useCoins").val(coinsUsed);
+                        }
+                    } else {
+                        showToast("Đơn hàng đang là 0đ", true);
+                    }
                 }
             }
-        } else {
-            showToast("Vui lòng nhập xu hợp lệ");
-            $("#useCoins").val(0);
+            else {
+
+                showToast("Xu nhập không hợp lệ, vui lòng kiểm tra lại");
+                $("#useCoins").val(coinsUsed);
+            }
+
+        }
+        else {
+            showToast("Giỏ hàng trống, lựa chọn thêm sản phẩm để tiếp tục mua hàng");
+        }
+    });
+    $.ajax({
+        type: "GET",
+        url: "https://online-gateway.ghn.vn/shiip/public-api/master-data/province",
+        headers: { token: '9f4e42e4-fde8-11ed-a281-3aa62a37e0a5' },
+        contentType: "application/json; charset=utf-8",
+        dataType: "json",
+        success: function (data) {
+            $("#province").append('<option disabled selected hidden>Vui lòng chọn tỉnh</option>');
+            for (var i = 0; i < data.data.length; i++) {
+                var option = $("<option>").val(data.data[i].ProvinceID).text(data.data[i].ProvinceName);
+                $("#province").append(option);
+            }
+            $("#district").append('<option disabled selected hidden>Vui lòng chọn huyện</option>');
+            for (var i = 0; i < data.data.length; i++) {
+                var option = $("<option>").val(data.data[i].DistrictID).text(data.data[i].DistrictName);
+                $("#district").append(option);
+            }
+            $("#ward").append('<option disabled selected hidden>Vui lòng chọn Xã</option>');
+            for (var i = 0; i < data.data.length; i++) {
+                var option = $("<option>").val(data.data[i].WardCode).text(data.data[i].WardName);
+                $("#ward").append(option);
+            }
+        },
+        error: function (response) {
+            console.error(response);
         }
     });
 
+    $("#province").change(function () {
+        var selectedProvince = $(this).val();
+        $(this).val();
+        var selectedProvinceName = $(this).find("option:selected").text();
+        $('#ProvinceName').val(selectedProvinceName);
+        console.log(selectedProvince, selectedProvinceName);
+    });
+
+    $("#province").change(function () {
+        var provinceId = $(this).val();
+        $.ajax({
+            type: "GET",
+            url: "https://online-gateway.ghn.vn/shiip/public-api/master-data/district?province_id=" + provinceId,
+            headers: { token: '9f4e42e4-fde8-11ed-a281-3aa62a37e0a5' },
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (data) {
+                $("#district").empty();
+                $("#ward").empty();
+                $('#DistrictName').val("");
+                $('#WardName').val("");
+                shippingfee = 0;
+                $("#shipingfee").text("0 đ");
+                resetCountponse();
+                // Thêm option mặc định
+                $("#district").append('<option disabled selected hidden>Vui lòng chọn huyện</option>');
+                for (var i = 0; i < data.data.length; i++) {
+                    var option = $("<option>").val(data.data[i].DistrictID).text(data.data[i].DistrictName);
+                    $("#district").append(option);
+                }
+                $("#ward").append('<option disabled selected hidden>Vui lòng chọn Xã</option>');
+                for (var i = 0; i < data.data.length; i++) {
+                    var option = $("<option>").val(data.data[i].WardCode).text(data.data[i].WardName);
+                    $("#ward").append(option);
+                }
+            },
+            error: function (response) {
+                console.error(response);
+            }
+        });
+    });
+
+    $("#district").change(function () {
+        var selectedDistrict = $(this).val();
+        var selectedDistrictName = $(this).find("option:selected").text();
+        $('#DistrictName').val(selectedDistrictName);
+        console.log(selectedDistrict, selectedDistrictName);
+    });
+
+    $("#district").change(function () {
+        var districtId = $(this).val();
+        $.ajax({
+            type: "GET",
+            url: "https://online-gateway.ghn.vn/shiip/public-api/master-data/ward?district_id=" + districtId,
+            headers: { token: '9f4e42e4-fde8-11ed-a281-3aa62a37e0a5' },
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (data) {
+                $("#ward").empty();
+                resetCountponse();
+                ShippingFee = 0;
+                $("#shipingfee").text("0 đ");
+                $("#ward").append('<option disabled selected hidden>Vui lòng chọn Xã</option>');
+                for (var i = 0; i < data.data.length; i++) {
+                    var option = $("<option>").val(data.data[i].WardCode).text(data.data[i].WardName);
+                    $("#ward").append(option);
+                }
+            },
+            error: function (response) {
+                console.error(response);
+            }
+        });
+    });
+
+    $("#ward").change(function () {
+        var selectedWard = $(this).val();
+        var selectedWardName = $(this).find("option:selected").text();
+        $('#WardName').val(selectedWardName);
+        console.log(selectedWard, selectedWardName);
+    });
+
+    $("#ward").change(function () {
+        var value1 = document.getElementById("ward").value;
+        var value2 = document.getElementById("district").value;
+        //xa = document.getElementById(value1).innerHTML;
+        if (total > 0) {
+            $.ajax({
+                type: "GET",
+                url: "https://online-gateway.ghn.vn/shiip/public-api/v2/shipping-order/fee?shop_id=4643378?to_ward_code=" + value1 + "&to_district_id=" + value2 + "&weight=" + 500 * coutProduct + "&service_type_id=2",// 500*1 trong đó 1 là số lượng *********************
+                headers: { token: '9f4e42e4-fde8-11ed-a281-3aa62a37e0a5' },
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (data) {
+                    ShippingFee = data.data.total;
+                    RecipientName = $("#RecipientName").val();
+                    RecipientAddress = $("#RecipientName").val();
+                    RecipientPhone = $("#RecipientName").val();
+                    getcartAjax();// lay total
+                    if (total == 0) {
+                        ShippingFee = 0;
+                    }
+                    getTotalAmount();
+                    console.log("API Response:", data.data.total);
+                },
+                error: function (reponse) {
+                    alert(reponse.responseText);
+                }
+            });
+        }
+        showToast("Giỏ hàng trống, lựa chọn thêm sản phẩm để tiếp tục mua hàng");
+
+    });
 
     function getTotalAmount() {
         $("#shipingfee").text(ShippingFee.toLocaleString('en-US', { minimumFractionDigits: 0 }) + " đ");
@@ -510,32 +739,65 @@
         return $("<textarea/>").html(str).text();
     }
     function getShipDefault() {
-        $.ajax({
-            type: "GET",
-            url: "https://online-gateway.ghn.vn/shiip/public-api/v2/shipping-order/fee?shop_id=4643378?to_ward_code=" + @addressDefautl.WardCode + "&to_district_id=" + @addressDefautl.DistrictID + "&weight=" + 10000 + "&length=" + 1000 + "&service_type_id=2",
-            headers: { token: '9f4e42e4-fde8-11ed-a281-3aa62a37e0a5' },
-            contentType: "application/json; charset=utf-8",
-            dataType: "json",
-            success: function (data) {
-                ShippingFee = data.data.total;
-                RecipientName = decodeHTMLEntities("@addressDefautl.RecipientName");
-                RecipientAddress = decodeHTMLEntities("@addressDefautl.Description ") + ", " + decodeHTMLEntities("@addressDefautl.WardName ") + ", " + decodeHTMLEntities("@addressDefautl.DistrictName") + ", " + decodeHTMLEntities("@addressDefautl.ProvinceName");
-                RecipientPhone = @addressDefautl.RecipientPhone;
-                getcartAjax();// lay total
-                if (total == 0) {
-                    ShippingFee = 0;
-                }
-                getTotalAmount();
-
-            },
-            error: function (reponse) {
-                alert(reponse.responseText);
+        if (@check != -1) {
+            if (total > 0) {
+                $.ajax({
+                    type: "GET",
+                    url: "https://online-gateway.ghn.vn/shiip/public-api/v2/shipping-order/fee?shop_id=4643378?to_ward_code=" + @addressDefault.WardCode + "&to_district_id=" + @addressDefault.DistrictID + "&weight=" + (500 * coutProduct) + "&service_type_id=2",
+                    headers: { token: '9f4e42e4-fde8-11ed-a281-3aa62a37e0a5' },
+                    contentType: "application/json; charset=utf-8",
+                    dataType: "json",
+                    success: function (data) {
+                        ShippingFee = data.data.total;
+                        RecipientName = decodeHTMLEntities('@addressDefault.RecipientName');
+                        RecipientAddress = decodeHTMLEntities('@addressDefault.Description') + ", " + decodeHTMLEntities('@addressDefault.WardName') + ", " + decodeHTMLEntities('@addressDefault.DistrictName') + ", " + decodeHTMLEntities('@addressDefault.ProvinceName');
+                        RecipientPhone = @addressDefault.RecipientPhone;
+                        if (total == 0) {
+                            ShippingFee = 0;
+                        }
+                        getTotalAmount();
+                    },
+                    error: function (reponse) {
+                        alert(reponse.responseText);
+                    }
+                });
             }
-        });
+        }
+        else {
+            var value1 = document.getElementById("ward").value;
+            var value2 = document.getElementById("district").value;
+
+            //xa = document.getElementById(value1).innerHTML;
+            if (value1 != "" && value2 != "" && value1 != "Vui lòng chọn Xã" && value2 != "Vui lòng chọn huyện" && total > 0) {
+                $.ajax({
+                    type: "GET",
+                    url: "https://online-gateway.ghn.vn/shiip/public-api/v2/shipping-order/fee?shop_id=4643378?to_ward_code=" + value1 + "&to_district_id=" + value2 + "&weight=" + 500 * coutProduct + "&service_type_id=2",// 500*1 trong đó 1 là số lượng *********************
+                    headers: { token: '9f4e42e4-fde8-11ed-a281-3aa62a37e0a5' },
+                    contentType: "application/json; charset=utf-8",
+                    dataType: "json",
+                    success: function (data) {
+                        ShippingFee = data.data.total;
+                        RecipientName = $("#RecipientName").val();
+                        RecipientAddress = $("#RecipientName").val();
+                        RecipientPhone = $("#RecipientName").val();
+                        if (total == 0) {
+                            ShippingFee = 0;
+                        }
+                        getTotalAmount();
+                        console.log("API Response:", data.data.total);
+                    },
+                    error: function (reponse) {
+                        alert(reponse.responseText);
+                    }
+                });
+            }
+
+        }
     }
+
     $(document).ready(function () {
         getcartAjax();
-        getShipDefault();
+
         $('#discount-select').change(function () {
             var selectedValue = $(this).val();
             voucherId = "";
@@ -615,13 +877,17 @@
             url: "/cart/getMiniCart",
             type: "GET",
             success: function (response) {
+
                 $("#spanTongTienHang").text(response.tongtien.toLocaleString('en-US', { minimumFractionDigits: 0 }) + " đ"); // Hoặc
                 total = response.tongtien;
                 // Xóa tất cả các option cũ trong select
                 $('#discount-select').empty();
                 voucherId = "";
                 VoucherValue = 0;
-                $('#myCoins').text(response.myCoins.toLocaleString('en-US', { minimumFractionDigits: 0 }) + " xu");
+                coutProduct = response.coutProduct;
+                getShipDefault();
+                console.log("coutProduct", coutProduct);
+                $('#myCoins').text(response.myCoins.toLocaleString('en-US', { minimumFractionDigits: 0 }));
                 myCoinsDb = response.myCoins;
                 $('#discount-select').append('<option value="">-- Chọn mã giảm giá --</option>');
                 // Thêm các option mới từ dữ liệu trả về
@@ -670,11 +936,8 @@
                     var totalPrice = priceValue * newQuantity;
                     var formattedTotalPrice = totalPrice.toLocaleString('en-US', { minimumFractionDigits: 0 });
                     document.getElementById('cart-item-total-' + idProductDetail).textContent = formattedTotalPrice + " đ";
-                    $("#spanGiamGia").text(0);
-                    $("#spanCoinsUsed").text("0 đ");
-                    $("#myCoins").text(myCoinsDb.toLocaleString('en-US', { minimumFractionDigits: 0 }+ " xu"));
-                    $("#useCoins").val(0);
-                    coinsUsed=0;
+                    resetCountponse();
+                    coinsUsed = 0;
                     total = result.total;
                     getcartAjax();
                     getTotalAmount();
@@ -706,7 +969,18 @@
     let selectedAddressId = null;
 
 
+    function resetCountponse() {
+        VoucherValue = 0;
+        $("#spanGiamGia").text("0 đ");
+        coinsUsed = 0;
+        $("#spanCoinsUsed").text("0 đ");
+        //ShippingFee=0;
+        //$("#shipingfee").text("0 đ");
+        $("#myCoins").text(myCoinsDb.toLocaleString('en-US', { minimumFractionDigits: 0 }));
+        $("#useCoins").val(0);
+        $("#discount-select").prop("selectedIndex", 0);
 
+    }
     function toggleSelection(element, id) {
         // Nếu phần tử được click đã được chọn trước đó, không làm gì cả
         if (selectedAddressId === id) {
@@ -720,6 +994,7 @@
         // Thêm class 'selected' vào phần tử được click
         element.classList.add('selected');
         selectedAddressId = id;
+        if (total > 0) {
         $.ajax({
             type: "POST",
             url: "/Cart/getAddress",
@@ -730,7 +1005,7 @@
                 RecipientPhone = responseNo1.recipientPhone;
                 $.ajax({
                     type: "GET",
-                    url: "https://online-gateway.ghn.vn/shiip/public-api/v2/shipping-order/fee?shop_id=4643378?to_ward_code=" + responseNo1.wardCode + "&to_district_id=" + responseNo1.districtID + "&weight=" + 10000 + "&length=" + 1000 + "&service_type_id=2",
+                    url: "https://online-gateway.ghn.vn/shiip/public-api/v2/shipping-order/fee?shop_id=4643378?to_ward_code=" + responseNo1.wardCode + "&to_district_id=" + responseNo1.districtID + "&weight=" + 500 * coutProduct + "&service_type_id=2",
                     headers: { token: '9f4e42e4-fde8-11ed-a281-3aa62a37e0a5' },
                     contentType: "application/json; charset=utf-8",
                     dataType: "json",
@@ -748,7 +1023,7 @@
                 console.error(xhr.responseText);
             }
         });
+        }
 
     }
-
 </script>
