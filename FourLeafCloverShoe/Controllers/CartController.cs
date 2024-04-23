@@ -169,7 +169,7 @@ cartItems.FirstOrDefault(c => c.ProductDetailId == productDetail.Id)?.Quantity *
                     }
                     lstVoucher.Add(new SelectListItem()
                     {
-                        Text = $"Mã giảm {giaTriVoucher} tối đa {giamToiDa?.ToString("N0")}k đơn từ {obj.Vouchers.MinimumOrderValue?.ToString("N0")}k ",
+                        Text = $"Mã giảm {giaTriVoucher} tối đa {giamToiDa?.ToString("N0")} đ đơn từ {obj.Vouchers.MinimumOrderValue?.ToString("N0")}đ ",
                         Value = obj.Id.ToString()
                     });
                 }
@@ -253,7 +253,10 @@ cartItems.FirstOrDefault(c => c.ProductDetailId == productDetail.Id)?.Quantity *
                 var Response = await _cartItemItemService.UpdateQuantity(cartItem.Id, newQuantity);
                 if (Response)
                 {
-                    return Json(new { message = "OK", status = true });
+                    var cartItems = await _cartItemItemService.GetsByUserId(user.Id);
+                    var total = cartItems.Sum(c => c.Quantity * c.ProductDetails.PriceSale);
+
+                    return Json(new { message = "OK", total = total, status = true });
                 }
                 return Json(new { message = "Lỗi không xác định", oldQuantity = cartItem.Quantity, status = false });
             }
