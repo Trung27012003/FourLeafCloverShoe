@@ -11,11 +11,36 @@ namespace FourLeafCloverShoe.Share.Models
     {
         public Guid Id { get; set; }
         public string? UserId { get; set; }//
-        public string StaffId { get; set; } // id nhan vien
+        public string? StaffId { get; set; } // id nhan vien
         public Guid? VoucherId { get; set; } //
         public string? OrderCode { get; set; }//
         public string? PaymentType { get; set; }//
         public int? OrderStatus { get; set; }//
+
+        // 0 --> chờ thanh toán
+        // 1 --> đã thanh toán           ----> chờ lấy hàng
+        // 2 --> chờ xác nhận
+
+
+        // 3 --> chờ lấy hàng            ----> chờ giao hàng
+
+
+        // 4 --> đang giao hàng           ----> đang giao
+        // 5  --> khách yêu cầu huỷ (trong khi giao hàng)
+        // 6--> giao hàng thất bại   
+
+        // 7--> giao hàng thành công      ---- >đã giao
+        // 8-> thanh toán tại quầy
+        // 8 -->yêu cầu đổi trả
+        // 10 --> chấp nhận đổi trả
+        // 12 --> từ chối đổi trả
+
+        // 11 --> khách huỷ đơn            ---- > đã huỷ
+        // 12 --> chấp nhận huỷ đơn
+        // 13 --> yêu cầu huỷ đơn thất bại
+
+
+
         public string? RecipientName { get; set; }
         public string? RecipientAddress { get; set; }// địa chỉ
         public string? RecipientPhone { get; set; }// sdt

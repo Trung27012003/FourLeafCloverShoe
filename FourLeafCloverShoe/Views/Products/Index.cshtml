@@ -100,11 +100,11 @@
                                                        
                                                              @if (minprice == maxprice)
                                                             {
-                                                                <span>@minprice đ</span>
+                                                            <span>@minprice?.ToString("N0") đ</span>
                                                             }
                                                             else
                                                             {
-                                                                <span>@minprice đ - <span>@maxprice đ</span></span>
+                                                            <span>@minprice?.ToString("N0") đ - <span>@maxprice đ</span></span>
                                                             }
                                                     </span>
                                                 </span>

@@ -302,10 +302,10 @@
     {
         <div class="row">
             <div class="col-12">
-                <strong style="color:#ee4d2d">THÔNG TIN VẬN CHUYỂN</strong> 
-             
-                    <a href="javascript:;" onclick="ChangeAddress()" style="margin-left: 15px; color: #1733f7;"><i class="mwc-icon-exchange-alt"></i> Thay đổi thông tin nhận hàng</a>
-                
+                <strong style="color:#ee4d2d">THÔNG TIN VẬN CHUYỂN</strong>
+
+                <a href="javascript:;" onclick="ChangeAddress()" style="margin-left: 15px; color: #1733f7;"><i class="mwc-icon-exchange-alt"></i> Thay đổi thông tin nhận hàng</a>
+
             </div>
         </div>
         <div class="info-user" style="display: block">
@@ -439,10 +439,33 @@
 
 </div>
 <script>
+    var total = 0;
+    var voucherId = ""; // co
+    var RecipientName = ""// co
+    var RecipientAddress = ""//cp
+    var RecipientPhone = ""; // co
+    var TotalAmout = 0; // chua
+    var VoucherValue = 0;  // co
+    var ShippingFee = 0;// co
+    var PaymentType = ""; // chua
+    var myCoinsDb = 0; // chua
+    var coinsUsed = 0; // chua
+    var coutProduct = 1; // chua
     $(document).ready(function () {
         $("#btnDatHang").click(function () {
-            // Kiểm tra tiền ship và tổng tiền
-            if (ShippingFee == 0) {
+            RecipientName = $("#RecipientName").val();
+            RecipientAddress = $("#Description").val() + ", " + $("#WardName").val() + ", " + $("#DistrictName").val() + ", " + $("#ProvinceName").val();
+            RecipientPhone = $("#RecipientPhone").val();
+            if (RecipientName == "") {
+                showToast("Vui lòng kiểm tra lại tên người nhận hàng!", false);
+            } 
+            else if (RecipientAddress == "" && $("#Description").val()=="") {
+                showToast("Vui lòng kiểm tra lại địa chỉ nhận hàng!", false);
+            }
+            else if (RecipientPhone == "") {
+                showToast("Vui lòng kiểm tra lại số điện thoại nhận hàng!", false);
+            }
+            else if (ShippingFee == 0) {
                 showToast("Vui lòng kiểm tra lại địa chỉ nhận hàng!", false);
             }
             else if (total <= 0) {
@@ -454,9 +477,7 @@
                 showToast("Lỗi không xác định", false);
                 location.reload();
             }
-
             else {
-                // Mở modal để chọn phương thức thanh toán
                 $('#modalHDSIZE').modal('show');
             }
         });
@@ -464,7 +485,28 @@
     function checkOut(type) {
         if (ShippingFee > 0 && total > 0 && TotalAmout >= 0) {
             if (confirm("Bạn có chắc chắn muốn chọn phương thức thanh toán " + type + " không?")) {
-                console.log("Người dùng đã chọn phương thức thanh toán " + type);
+              PaymentType = type;
+                $.ajax({
+                    type: "POST",
+                    url: "/Order/CheckOut",
+                    data: {
+                        VoucherId: voucherId,
+                        PaymentType: PaymentType,
+                        RecipientName: RecipientName,
+                        RecipientAddress: RecipientAddress,
+                        RecipientPhone: RecipientPhone,
+                        CoinsUsed: coinsUsed,
+                        TotalAmout: TotalAmout,
+                        VoucherValue: VoucherValue,
+                        ShippingFee: ShippingFee
+                    },
+                    success: function (response) {
+                        window.location.href = response;
+                    },
+                    error: function (xhr, status, error) {
+                        console.error(xhr.responseText);
+                    }
+                });
 
 
             } else {
@@ -475,20 +517,8 @@
             showToast("Bạn cần nhập địa chỉ để tiếp tục đặt hang");
         }
 
-
     };
-    var total = 0;
-    var voucherId; // co
-    var RecipientName = ""// co
-    var RecipientAddress = ""//cp
-    var RecipientPhone = ""; // co
-    var TotalAmout = 0; // chua
-    var VoucherValue = 0;  // co
-    var ShippingFee = 0;// co
-    var PaymentType; // chua
-    var myCoinsDb; // chua
-    var coinsUsed = 0; // chua
-    var coutProduct = 1; // chua
+
 
     $("#useCoinsBtn").click(function () {
         var myCoins = parseInt($("#myCoins").text());
@@ -618,7 +648,6 @@
         $(this).val();
         var selectedProvinceName = $(this).find("option:selected").text();
         $('#ProvinceName').val(selectedProvinceName);
-        console.log(selectedProvince, selectedProvinceName);
     });
 
     $("#province").change(function () {
@@ -659,7 +688,6 @@
         var selectedDistrict = $(this).val();
         var selectedDistrictName = $(this).find("option:selected").text();
         $('#DistrictName').val(selectedDistrictName);
-        console.log(selectedDistrict, selectedDistrictName);
     });
 
     $("#district").change(function () {
@@ -691,7 +719,6 @@
         var selectedWard = $(this).val();
         var selectedWardName = $(this).find("option:selected").text();
         $('#WardName').val(selectedWardName);
-        console.log(selectedWard, selectedWardName);
     });
 
     $("#ward").change(function () {
@@ -708,21 +735,22 @@
                 success: function (data) {
                     ShippingFee = data.data.total;
                     RecipientName = $("#RecipientName").val();
-                    RecipientAddress = $("#RecipientName").val();
-                    RecipientPhone = $("#RecipientName").val();
+                    RecipientAddress = $("#Description").val() + ", " + $("#WardName").val() + ", " + $("#DistrictName").val() + ", " + $("#ProvinceName").val();
+                    RecipientPhone = $("#RecipientPhone").val();
                     getcartAjax();// lay total
                     if (total == 0) {
                         ShippingFee = 0;
                     }
                     getTotalAmount();
-                    console.log("API Response:", data.data.total);
                 },
                 error: function (reponse) {
                     alert(reponse.responseText);
                 }
             });
+        } else {
+
+            showToast("Giỏ hàng trống, lựa chọn thêm sản phẩm để tiếp tục mua hàng");
         }
-        showToast("Giỏ hàng trống, lựa chọn thêm sản phẩm để tiếp tục mua hàng");
 
     });
 
@@ -733,7 +761,6 @@
             TotalAmout = 0;
         }
         $("#spanTotal").text(TotalAmout.toLocaleString('en-US', { minimumFractionDigits: 0 }) + " đ");
-        console.log("click call getTotalAmount ", TotalAmout);
     }
     function decodeHTMLEntities(str) {
         return $("<textarea/>").html(str).text();
@@ -778,13 +805,12 @@
                     success: function (data) {
                         ShippingFee = data.data.total;
                         RecipientName = $("#RecipientName").val();
-                        RecipientAddress = $("#RecipientName").val();
-                        RecipientPhone = $("#RecipientName").val();
+                        RecipientAddress = $("#Description").val() + ", " + $("#WardName").val() + ", " + $("#DistrictName").val() + ", " + $("#ProvinceName").val();
+                        RecipientPhone = $("#RecipientPhone").val();
                         if (total == 0) {
                             ShippingFee = 0;
                         }
                         getTotalAmount();
-                        console.log("API Response:", data.data.total);
                     },
                     error: function (reponse) {
                         alert(reponse.responseText);
@@ -824,11 +850,9 @@
                                         VoucherValue = tinhtien;
                                         if (tinhtien > responseNo1.maxDiscount) {
                                             VoucherValue = responseNo1.maxDiscount;
-                                            console.log("tinhtien > responseNo1.maxDiscount");
                                         }
                                         if (tinhtien > TotalAmout) {
                                             VoucherValue = TotalAmout;
-                                            console.log("responseNo1.voucherValue>TotalAmout");
                                         }
 
                                     }
@@ -840,8 +864,7 @@
                                     }
 
                                     getTotalAmount();
-                                    console.log("VoucherValue1 ", VoucherValue);
-                                    console.log("TotalAmout 1", TotalAmout);
+
                                     $("#spanGiamGia").text(VoucherValue.toLocaleString('en-US', { minimumFractionDigits: 0 }) + " đ");
                                     voucherId = responseNo1.id;
                                     showToast("Đã áp dụng voucher", true);
@@ -853,7 +876,7 @@
                                 VoucherValue = 0;
                                 $("#spanGiamGia").text(VoucherValue.toLocaleString('en-US', { minimumFractionDigits: 0 }) + " đ");
                                 showToast("Có lỗi xảy ra, vui lòng thử lại sau!", false);
-                                console.log(error);
+                                console.error(error);
                             }
                         });
                     }
@@ -886,7 +909,6 @@
                 VoucherValue = 0;
                 coutProduct = response.coutProduct;
                 getShipDefault();
-                console.log("coutProduct", coutProduct);
                 $('#myCoins').text(response.myCoins.toLocaleString('en-US', { minimumFractionDigits: 0 }));
                 myCoinsDb = response.myCoins;
                 $('#discount-select').append('<option value="">-- Chọn mã giảm giá --</option>');
@@ -995,34 +1017,34 @@
         element.classList.add('selected');
         selectedAddressId = id;
         if (total > 0) {
-        $.ajax({
-            type: "POST",
-            url: "/Cart/getAddress",
-            data: { id: id },
-            success: function (responseNo1) {
-                RecipientName = responseNo1.recipientName;
-                RecipientAddress = responseNo1.description + ", " + responseNo1.wardName + ", " + responseNo1.districtName + ", " + responseNo1.provinceName;
-                RecipientPhone = responseNo1.recipientPhone;
-                $.ajax({
-                    type: "GET",
-                    url: "https://online-gateway.ghn.vn/shiip/public-api/v2/shipping-order/fee?shop_id=4643378?to_ward_code=" + responseNo1.wardCode + "&to_district_id=" + responseNo1.districtID + "&weight=" + 500 * coutProduct + "&service_type_id=2",
-                    headers: { token: '9f4e42e4-fde8-11ed-a281-3aa62a37e0a5' },
-                    contentType: "application/json; charset=utf-8",
-                    dataType: "json",
-                    success: function (data) {
-                        $("#shipingfee").text(data.data.total.toLocaleString('en-US', { minimumFractionDigits: 0 }) + " đ");
-                        ShippingFee = data.data.total;
-                        getTotalAmount();
-                    },
-                    error: function (reponse) {
-                        alert(reponse.responseText);
-                    }
-                });
-            },
-            error: function (xhr, status, error) {
-                console.error(xhr.responseText);
-            }
-        });
+            $.ajax({
+                type: "POST",
+                url: "/Cart/getAddress",
+                data: { id: id },
+                success: function (responseNo1) {
+                    RecipientName = responseNo1.recipientName;
+                    RecipientAddress = responseNo1.description + ", " + responseNo1.wardName + ", " + responseNo1.districtName + ", " + responseNo1.provinceName;
+                    RecipientPhone = responseNo1.recipientPhone;
+                    $.ajax({
+                        type: "GET",
+                        url: "https://online-gateway.ghn.vn/shiip/public-api/v2/shipping-order/fee?shop_id=4643378?to_ward_code=" + responseNo1.wardCode + "&to_district_id=" + responseNo1.districtID + "&weight=" + 500 * coutProduct + "&service_type_id=2",
+                        headers: { token: '9f4e42e4-fde8-11ed-a281-3aa62a37e0a5' },
+                        contentType: "application/json; charset=utf-8",
+                        dataType: "json",
+                        success: function (data) {
+                            $("#shipingfee").text(data.data.total.toLocaleString('en-US', { minimumFractionDigits: 0 }) + " đ");
+                            ShippingFee = data.data.total;
+                            getTotalAmount();
+                        },
+                        error: function (reponse) {
+                            alert(reponse.responseText);
+                        }
+                    });
+                },
+                error: function (xhr, status, error) {
+                    console.error(xhr.responseText);
+                }
+            });
         }
 
     }
