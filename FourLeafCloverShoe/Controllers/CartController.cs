@@ -178,6 +178,10 @@ cartItems.FirstOrDefault(c => c.ProductDetailId == productDetail.Id)?.Quantity *
                         Value = obj.Id.ToString()
                     });
                 }
+                var lstAddress = await _addressService.GetByUserId(user.Id);
+                ViewBag.lstAddress = lstAddress;
+                var addressDefault = lstAddress.FirstOrDefault(c => c.IsDefault == true);
+                ViewBag.addressDefault = addressDefault;
                 var coutProduct = cartItems.Sum(c => c.Quantity);
                 //ViewBag.lstVoucher = lstVoucher;
                 return Json(new { lstproducts = serializedCartItems, tongtien = tongtien , lstVoucher = lstVoucher,myCoins = user.Coins ,coutProduct = coutProduct });

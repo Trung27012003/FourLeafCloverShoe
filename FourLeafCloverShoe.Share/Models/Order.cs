@@ -18,24 +18,25 @@ namespace FourLeafCloverShoe.Share.Models
         public int? OrderStatus { get; set; }//
 
         // 0 --> chờ thanh toán
-        // 1 --> đã thanh toán           ----> chờ lấy hàng
+        // 1 --> đã thanh toán                                       ----> (user)chờ xác nhận  --> admin duyệt ( nhấn nút : xác nhận đơn)
         // 2 --> chờ xác nhận
 
 
-        // 3 --> chờ lấy hàng            ----> chờ giao hàng
+        // 3 --> chờ lấy hàng                                       ----> (user)chờ lấy hàng   --> admin duyệt ( nhấn nút : giao hàng)
 
 
-        // 4 --> đang giao hàng           ----> đang giao
+        // 4 --> đang giao hàng                                      ----> (user)đang giao   --> admin duyệt yêu cầu huỷ
         // 5  --> khách yêu cầu huỷ (trong khi giao hàng)
-        // 6--> giao hàng thất bại   
 
-        // 7--> giao hàng thành công      ---- >đã giao
+
+        // 6--> giao hàng thất bại   
+        // 7--> giao hàng thành công                                 --> admin duyệt trạng thái
         // 8-> thanh toán tại quầy
         // 8 -->yêu cầu đổi trả
-        // 10 --> chấp nhận đổi trả
-        // 12 --> từ chối đổi trả
+        // 9 --> chấp nhận đổi trả
+        // 10 --> từ chối đổi trả
 
-        // 11 --> khách huỷ đơn            ---- > đã huỷ
+        // 11 --> khách huỷ đơn                                          ---- > đã huỷ
         // 12 --> chấp nhận huỷ đơn
         // 13 --> yêu cầu huỷ đơn thất bại
 

@@ -336,9 +336,9 @@
                 <strong style="color:#ee4d2d">THÔNG TIN VẬN CHUYỂN</strong>
             </div>
         </div>
-        <input id="ProvinceName" hidden />
-        <input id="DistrictName" hidden />
-        <input id="WardName" hidden />
+        <input id="ProvinceName"  />
+        <input id="DistrictName"  />
+        <input id="WardName"  />
         <div class="row g-3 mt-3" id="info-input" style="display: inline-flex">
             <div class="col-md-4">
 
@@ -410,7 +410,7 @@
                 <div class="modal-body">
                     <div class="row">
                         <div class="col-md-4">
-                            <div class="payment-option" id="cashOnDelivery" onclick="checkOut('home')">
+                            <div class="payment-option" id="cashOnDelivery" onclick="checkOut('cod')">
                                 <img src="https://th.bing.com/th/id/OIP.qlW_g40gDJhOEZJEXJcMZAHaE7?w=330&amp;h=188&amp;c=8&amp;rs=1&amp;qlt=90&amp;o=6&amp;dpr=1.3&amp;pid=3.1&amp;rm=2" alt="Cash On Delivery" class="img-fluid">
                                 <h4 style="text-align:center;">Tại nhà</h4>
                             </div>
@@ -459,9 +459,13 @@
             if (RecipientName == "") {
                 showToast("Vui lòng kiểm tra lại tên người nhận hàng!", false);
             } 
-            else if (RecipientAddress == "" && $("#Description").val()=="") {
+            else if ( $("#Description").val()=="") {
                 showToast("Vui lòng kiểm tra lại địa chỉ nhận hàng!", false);
             }
+            else if (RecipientAddress == "") {
+                showToast("Vui lòng kiểm tra lại RecipientAddress địa chỉ nhận hàng!", false);
+            }
+
             else if (RecipientPhone == "") {
                 showToast("Vui lòng kiểm tra lại số điện thoại nhận hàng!", false);
             }
@@ -767,6 +771,9 @@
     }
     function getShipDefault() {
         if (@check != -1) {
+    @{
+        addressDefault = ViewBag.addressDefault as Address;
+    }
             if (total > 0) {
                 $.ajax({
                     type: "GET",
@@ -967,7 +974,7 @@
 
                     document.getElementById('cart-item-total-' + idProductDetail).textContent = result.oldQuantity;
                     showToast(result.message, result.status);
-                    location.reload();
+                    showToast(" status gfalse");
                 }
             },
             error: function (error) {
@@ -1046,6 +1053,5 @@
                 }
             });
         }
-
     }
 </script>
