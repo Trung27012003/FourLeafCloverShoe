@@ -2,8 +2,10 @@
 using FourLeafCloverShoe.Libraries;
 using FourLeafCloverShoe.Services;
 using FourLeafCloverShoe.Share.Models;
+using MailKit.Search;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json.Linq;
 
 namespace FourLeafCloverShoe.Controllers
 {
@@ -93,7 +95,7 @@ namespace FourLeafCloverShoe.Controllers
                     // tạo đơn hàng thành công
                     if (order.PaymentType == "cod")
                     {
-                        return "thanh toán khi nhận hàng";
+                        return $"/Order/CheckOutSuccess?orderid={order.Id}";
                     }
                     else if (order.PaymentType == "momo" || order.PaymentType == "vnpay")
                     {
@@ -112,7 +114,7 @@ namespace FourLeafCloverShoe.Controllers
                     }
                 }
             }
-            return "Lỗi tạo hoá đơn";
+            return $"/Order/CheckOutFailed";
         }
         public async Task<string> UrlCheckOutVnPay(Order order)
         {
@@ -144,7 +146,60 @@ namespace FourLeafCloverShoe.Controllers
         }
         public async Task<string> UrlCheckOutMoMo(Order order)
         {
-            return "checkoutmomo";
+            //request params need to request to MoMo system
+            string endpoint = "https://test-payment.momo.vn/v2/gateway/api/create";
+            string partnerCode = "MOMO5RGX20191128";
+            string accessKey = "M8brj9K6E22vXoDB";
+            string serectkey = "nqQiVSgDMy809JoPF6OzP5OdBUB550Y4";
+            string orderInfo = "Thanh toán đơn hàng :" + order.OrderCode;
+            string redirectUrl = $"https://localhost:7116/Order/PaymentCallBack?orderId={order.Id}";
+            string ipnUrl = $"https://localhost:7116/Order/PaymentCallBack?orderId={order.Id}";
+            string requestType = "captureWallet";
+
+            string amount = order.TotalAmout.ToString();
+            string orderId = Guid.NewGuid().ToString();
+            string requestId = Guid.NewGuid().ToString();
+            string extraData = "";
+
+            //Before sign HMAC SHA256 signature
+            string rawHash = "accessKey=" + accessKey +
+                "&amount=" + amount +
+                "&extraData=" + extraData +
+                "&ipnUrl=" + ipnUrl +
+                "&orderId=" + orderId +
+                "&orderInfo=" + orderInfo +
+                "&partnerCode=" + partnerCode +
+                "&redirectUrl=" + redirectUrl +
+                "&requestId=" + requestId +
+                "&requestType=" + requestType
+                ;
+
+
+            MoMoLibrary crypto = new MoMoLibrary();
+            //sign signature SHA256
+            string signature = crypto.signSHA256(rawHash, serectkey);
+
+            //build body json request
+            JObject message = new JObject
+            {
+                { "partnerCode", partnerCode },
+                { "partnerName", "Test" },
+                { "storeId", "MomoTestStore" },
+                { "requestId", requestId },
+                { "amount", amount },
+                { "orderId", orderId },
+                { "orderInfo", orderInfo },
+                { "redirectUrl", redirectUrl },
+                { "ipnUrl", ipnUrl },
+                { "lang", "en" },
+                { "extraData", extraData },
+                { "requestType", requestType },
+                { "signature", signature }
+
+            };
+            string responseFromMomo = MoMoRequest.sendPaymentRequest(endpoint, message.ToString());
+            JObject jmessage = JObject.Parse(responseFromMomo);
+            return (jmessage.GetValue("payUrl").ToString());
         }
         public async Task<IActionResult> CheckOutSuccess(Guid orderId)
         {
@@ -152,7 +207,7 @@ namespace FourLeafCloverShoe.Controllers
         }
         public async Task<IActionResult> CheckOutFailed()
         {
-            return Redirect("CheckOutFailed");
+            return Redirect($"/Order/CheckOutFailed");
         }
 
         [HttpGet]
@@ -160,26 +215,12 @@ namespace FourLeafCloverShoe.Controllers
         {
             if (Request.Query.Count > 0)
             {
-                string vnp_HashSecret = "KGUFENFAPPMWXGAYUBTNECEYOYEWEPWR"; //Secret Key
-                var vnpayData = Request.Query;
-                VnPayLibrary vnpay = new VnPayLibrary();
-                foreach (var s in vnpayData)
+                var order = await _orderService.GetById(orderId);
+                if (order.PaymentType == "momo")
                 {
-                    //get all querystring data
-                    if (!string.IsNullOrEmpty(s.Key) && s.Key.StartsWith("vnp_"))
+                    var resultCode = Request.Query["resultCode"];
+                    if (resultCode == 0|| resultCode=="0")
                     {
-                        vnpay.AddResponseData(s.Key, vnpayData[s.Key]);
-                    }
-                }
-                string vnp_ResponseCode = vnpay.GetResponseData("vnp_ResponseCode");
-                string vnp_TransactionStatus = vnpay.GetResponseData("vnp_TransactionStatus");
-                String vnp_SecureHash = Request.Query["vnp_SecureHash"];
-                bool checkSignature = vnpay.ValidateSignature(vnp_SecureHash, vnp_HashSecret);
-                if (checkSignature)
-                {
-                    if (vnp_ResponseCode == "00" && vnp_TransactionStatus == "00")
-                    {
-                        var order = await _orderService.GetById(orderId);
                         order.OrderStatus = 1;
                         order.PaymentDate = DateTime.Now;
                         order.UpdateDate = DateTime.Now;
@@ -190,9 +231,41 @@ namespace FourLeafCloverShoe.Controllers
                         }
                     }
                 }
+                if (order.PaymentType == "vnpay")
+                {
+                    string vnp_HashSecret = "KGUFENFAPPMWXGAYUBTNECEYOYEWEPWR"; //Secret Key
+                    var vnpayData = Request.Query;
+                    VnPayLibrary vnpay = new VnPayLibrary();
+                    foreach (var s in vnpayData)
+                    {
+                        //get all querystring data
+                        if (!string.IsNullOrEmpty(s.Key) && s.Key.StartsWith("vnp_"))
+                        {
+                            vnpay.AddResponseData(s.Key, vnpayData[s.Key]);
+                        }
+                    }
+                    string vnp_ResponseCode = vnpay.GetResponseData("vnp_ResponseCode");
+                    string vnp_TransactionStatus = vnpay.GetResponseData("vnp_TransactionStatus");
+                    String vnp_SecureHash = Request.Query["vnp_SecureHash"];
+                    bool checkSignature = vnpay.ValidateSignature(vnp_SecureHash, vnp_HashSecret);
+                    if (checkSignature)
+                    {
+                        if (vnp_ResponseCode == "00" && vnp_TransactionStatus == "00")
+                        {
+
+                            order.OrderStatus = 1;
+                            order.PaymentDate = DateTime.Now;
+                            order.UpdateDate = DateTime.Now;
+                            var result = await _orderService.Update(order);
+                            if (result)
+                            {
+                                return Redirect($"/Order/CheckOutSuccess?orderid={orderId}");
+                            }
+                        }
+                    }
+                }
             }
             return Redirect($"/Order/CheckOutFailed");
         }
     }
-
 }
