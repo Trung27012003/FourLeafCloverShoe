@@ -336,9 +336,9 @@
                 <strong style="color:#ee4d2d">THÔNG TIN VẬN CHUYỂN</strong>
             </div>
         </div>
-        <input id="ProvinceName"  />
-        <input id="DistrictName"  />
-        <input id="WardName"  />
+        <input id="ProvinceName" hidden/>
+        <input id="DistrictName" hidden />
+        <input id="WardName" hidden />
         <div class="row g-3 mt-3" id="info-input" style="display: inline-flex">
             <div class="col-md-4">
 
@@ -476,10 +476,33 @@
 
                 showToast("Giỏ hàng trống!", false);
             }
-            else if (TotalAmout < 0) {
+            else if (TotalAmout == 0) {
+                if (confirm("Bạn có chắc chắn muốn đặt hàng không?")) {
+                    PaymentType = type;
+                    $.ajax({
+                        type: "POST",
+                        url: "/Order/CheckOut",
+                        data: {
+                            VoucherId: voucherId,
+                            PaymentType: PaymentType,
+                            RecipientName: RecipientName,
+                            RecipientAddress: RecipientAddress,
+                            RecipientPhone: RecipientPhone,
+                            CoinsUsed: coinsUsed,
+                            TotalAmout: TotalAmout,
+                            VoucherValue: VoucherValue,
+                            ShippingFee: ShippingFee
+                        },
+                        success: function (response) {
+                            window.location.href = response;
+                        },
+                        error: function (xhr, status, error) {
+                            console.error(xhr.responseText);
+                        }
+                    });
 
-                showToast("Lỗi không xác định", false);
-                location.reload();
+
+                }
             }
             else {
                 $('#modalHDSIZE').modal('show');
@@ -511,10 +534,7 @@
                         console.error(xhr.responseText);
                     }
                 });
-
-
             } else {
-                console.log("Người dùng đã huỷ bỏ việc chọn phương thức thanh toán " + type);
             }
         }
         else {
@@ -600,7 +620,7 @@
                             getTotalAmount();
                         } else {
 
-                            showToast("Xu nhập không hợp lệ, vui lòng kiểm tra lại");
+                            showToast("Số lượng xu muốn dùng vướt quá số lượng xu sở hữu!");
                             $("#useCoins").val(coinsUsed);
                         }
                     } else {
@@ -771,9 +791,7 @@
     }
     function getShipDefault() {
         if (@check != -1) {
-    @{
-        addressDefault = ViewBag.addressDefault as Address;
-    }
+
             if (total > 0) {
                 $.ajax({
                     type: "GET",

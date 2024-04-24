@@ -15,7 +15,7 @@ namespace FourLeafCloverShoe.Share.Models
         public DateTime? DateOfBirth { get; set; }
         public int? Points { get; set; }
         public byte[]? ProfilePicture { get; set; }
-        public int? Coins { get; set; }
+        public decimal? Coins { get; set; }
         [ForeignKey("RankId")]
         public virtual Ranks? Ranks { get; set; }
         public virtual List<Address>? Address { get; set; }

@@ -1,11 +1,14 @@
-﻿using FourLeafCloverShoe.IServices;
+﻿using FourLeafCloverShoe.Helper;
+using FourLeafCloverShoe.IServices;
 using FourLeafCloverShoe.Libraries;
 using FourLeafCloverShoe.Services;
 using FourLeafCloverShoe.Share.Models;
 using MailKit.Search;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using Newtonsoft.Json.Linq;
+using System.Net.WebSockets;
 
 namespace FourLeafCloverShoe.Controllers
 {
@@ -15,13 +18,21 @@ namespace FourLeafCloverShoe.Controllers
         private readonly IOrderItemService _orderItemService;
         private readonly IOrderService _orderService;
         private readonly ICartItemItemService _cartItemItemService;
+        private readonly IUserVoucherService _userVoucherService;
+        private readonly IVoucherService _voucherService;
+        private readonly IHubContext<Hubs> _hubContext;
 
-        public OrderController(UserManager<User> userManager, IOrderService orderService, IOrderItemService orderItemService, ICartItemItemService cartItemItemService)
+
+        public OrderController(IHubContext<Hubs> hubContext, UserManager<User> userManager,IVoucherService voucherService,IUserVoucherService userVoucherService , IOrderService orderService, IOrderItemService orderItemService, ICartItemItemService cartItemItemService)
         {
             _userManager = userManager;
             _orderItemService = orderItemService;
             _orderService = orderService;
             _cartItemItemService = cartItemItemService;
+            _userVoucherService = userVoucherService;
+            _voucherService = voucherService;
+            _hubContext = hubContext;
+
         }
         public static string GenerateInvoiceCode(string paymentType)
         {
@@ -93,13 +104,62 @@ namespace FourLeafCloverShoe.Controllers
                 if (resultCreateOrderItems)
                 {
                     // tạo đơn hàng thành công
-                    if (order.PaymentType == "cod")
+
+                    var cartItems = await _cartItemItemService.GetsByUserId(user.Id);
+                    var resultDeleteCartItems = await _cartItemItemService.DeleteMany(cartItems);
+                    if (!resultDeleteCartItems) // xoá giỏ hàng
                     {
-                        return $"/Order/CheckOutSuccess?orderid={order.Id}";
+                        return "xoa gio hang khong thanh cong";
                     }
-                    else if (order.PaymentType == "momo" || order.PaymentType == "vnpay")
+                    // tru coins
+                    if (order.CoinsUsed>0)
                     {
-                        if (order.PaymentType == "momo")
+                        user.Coins -= order.CoinsUsed;
+                        var resultUpdateUser = await _userManager.UpdateAsync(user);
+                        if (!resultUpdateUser.Succeeded)
+                        {
+                            return "Tru coins khong thanh cong";
+                        }
+                    }
+                    // tru sl ma giam gia
+                    // cap nhat trang thai ma giam gia
+                    if (order.VoucherId!=null)
+                    {
+                        var getUserVoucherbyUserId = await _userVoucherService?.GetByUserId(user.Id);
+                        if (getUserVoucherbyUserId != null)
+                        {
+                            var getUserVoucher =  getUserVoucherbyUserId.FirstOrDefault(c => c.VoucherId == order.VoucherId);
+                            if (getUserVoucher!=null)
+                            {
+                                getUserVoucher.Status = -1;
+                                var resultStatusUserVoucher = await _userVoucherService.Update(getUserVoucher);
+                                if (!resultStatusUserVoucher)
+                                {
+                                    return "cap nhat status uservoucher fail";
+                                }
+                            }
+                           
+                        }
+                        var getVoucher = await _voucherService.GetById((Guid)(order.VoucherId));
+                        if (getVoucher != null)
+                        {
+                            getVoucher.Status =-1;
+                            var resultUpdateQuantityVoucher = await _voucherService.Update(getVoucher);
+                            if (!resultUpdateQuantityVoucher)
+                            {
+                                return "cap nhat so luong voucher fail";
+                            }
+                        }
+                    }
+                   if (order.PaymentType == "cod"||order.PaymentType == "momo" || order.PaymentType == "vnpay")
+                    {
+                        await _hubContext.Clients.All.SendAsync("alertToAdmin", $"Bạn có đơn hàng mới từ {user.FullName}", true);
+
+                        if (order.PaymentType == "cod")
+                        {
+                            return $"/Order/CheckOutSuccess?orderid={order.Id}";
+                        }
+                        else if (order.PaymentType == "momo")
                         {
                             return await UrlCheckOutMoMo(order);
                         }
@@ -227,6 +287,7 @@ namespace FourLeafCloverShoe.Controllers
                         var result = await _orderService.Update(order);
                         if (result)
                         {
+
                             return Redirect($"/Order/CheckOutSuccess?orderid={orderId}");
                         }
                     }

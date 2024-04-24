@@ -83,6 +83,22 @@ namespace FourLeafCloverShoe.Services
             }
         }
 
+        public async Task<bool> DeleteMany(List<CartItem> lstobj)
+        {
+            try
+            {
+                 _myDbContext.CartItems.RemoveRange(lstobj);
+                await _myDbContext.SaveChangesAsync();
+                    return true;
+
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                return false;
+            }
+        }
+
         public async Task<CartItem> GetById(Guid Id)
         {
             try
