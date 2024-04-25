@@ -60,6 +60,35 @@ namespace FourLeafCloverShoe.Controllers
         {
             return View();
         }
+        public async Task<bool> ReturnVoucher(Guid ?voucherId, string userId)
+        {
+            var voucher = await _voucherService.GetById((Guid)voucherId);
+            voucher.Quantity += 1;
+            var resultVoucher = await _voucherService.Update(voucher);
+            if (!resultVoucher)
+            {
+                return false;
+            }
+            var userVoucher = (await _userVoucherService.GetByUserId(userId)).FirstOrDefault(c=>c.VoucherId==voucherId);
+            userVoucher.Status = 1;
+            var resultUserVoucher = await _userVoucherService.Update(userVoucher);
+            if (!resultUserVoucher)
+            {
+                return false;
+            }
+            return true;
+        }
+        public async Task<bool> ReturnCoins(decimal? coins)
+        {
+            var user = await _userManager.GetUserAsync(HttpContext.User);
+            user.Coins += coins;
+            var resultUpdateUser = await _userManager.UpdateAsync(user);
+            if (resultUpdateUser.Succeeded)
+            {
+                return true;
+            }
+            return false;
+        }
         [HttpPost]
         public async Task<string> CheckOutAsync(Order order)
         {
@@ -271,6 +300,7 @@ namespace FourLeafCloverShoe.Controllers
         {
             return View();
         }
+      
 
         [HttpGet]
         public async Task<IActionResult> PaymentCallBack(Guid orderId)
@@ -283,8 +313,36 @@ namespace FourLeafCloverShoe.Controllers
                     var resultCode = Request.Query["resultCode"];
                     if (resultCode=="0")
                     {
-                        order.OrderStatus = 1;
+                        order.OrderStatus = 1; // chờ xác nhận
                         order.PaymentDate = DateTime.Now;
+                        order.UpdateDate = DateTime.Now;
+                        var result = await _orderService.Update(order);
+                        if (result)
+                        {
+
+                            return Redirect($"/Order/CheckOutSuccess");
+                        }
+                    }else if (resultCode== "1006") //Giao dịch thất bại do người dùng đã từ chối xác nhận thanh toán.
+                    {
+                        
+                        order.OrderStatus = 11; // đã huỷ
+                        order.UpdateDate = DateTime.Now;
+                        var result = await _orderService.Update(order);
+                            if (!( await ReturnVoucher(order.VoucherId,order.UserId)))
+                            {
+                                return Redirect($"Khong hoan duoc voucher");
+                            }
+                            if (!( await ReturnCoins(order.CoinsUsed)))
+                            {
+                                return Redirect($"Khong hoan duoc xu");
+                            }
+                            
+                            return Redirect($"/Order/CheckOutFailed");
+
+                    }
+                    else
+                    {
+                        order.OrderStatus = 0;// chờ thanh toán
                         order.UpdateDate = DateTime.Now;
                         var result = await _orderService.Update(order);
                         if (result)
@@ -324,6 +382,21 @@ namespace FourLeafCloverShoe.Controllers
                             {
                                 return Redirect($"/Order/CheckOutSuccess");
                             }
+                        }
+                        else if (vnp_ResponseCode== "24") //Giao dịch không thành công do: Khách hàng hủy giao dịch
+                        {
+                            order.OrderStatus = 11;
+                            order.UpdateDate = DateTime.Now;
+                            var result = await _orderService.Update(order);
+                            if (!(await ReturnVoucher(order.VoucherId, order.UserId)))
+                            {
+                                return Redirect($"Khong hoan duoc voucher");
+                            }
+                            if (!(await ReturnCoins(order.CoinsUsed)))
+                            {
+                                return Redirect($"Khong hoan duoc xu");
+                            }
+                            return Redirect($"/Order/CheckOutFailed");
                         }
                     }
                 }
