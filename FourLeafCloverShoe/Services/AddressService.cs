@@ -124,7 +124,7 @@ namespace FourLeafCloverShoe.Services
         {
             try
             {
-                var lstAddress = await _myDbContext.Address.ToListAsync();
+                var lstAddress = await GetByUserId((await _myDbContext.Address.ToListAsync()).FirstOrDefault(c => c.Id == Id).UserId);
                 foreach (var item in lstAddress)
                 {
                     if (item.Id==Id)

@@ -8,6 +8,8 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Newtonsoft.Json.Linq;
+using Rotativa.AspNetCore;
+using System.Net.Http;
 using System.Net.WebSockets;
 
 namespace FourLeafCloverShoe.Controllers
@@ -157,7 +159,7 @@ namespace FourLeafCloverShoe.Controllers
 
                         if (order.PaymentType == "cod")
                         {
-                            return $"/Order/CheckOutSuccess?orderid={order.Id}";
+                            return $"/Order/CheckOutSuccess";
                         }
                         else if (order.PaymentType == "momo")
                         {
@@ -261,13 +263,13 @@ namespace FourLeafCloverShoe.Controllers
             JObject jmessage = JObject.Parse(responseFromMomo);
             return (jmessage.GetValue("payUrl").ToString());
         }
-        public async Task<IActionResult> CheckOutSuccess(Guid orderId)
+        public async Task<IActionResult> CheckOutSuccess()
         {
-            return Redirect("CheckOutSuccess");
+            return View();
         }
         public async Task<IActionResult> CheckOutFailed()
         {
-            return Redirect($"/Order/CheckOutFailed");
+            return View();
         }
 
         [HttpGet]
@@ -279,7 +281,7 @@ namespace FourLeafCloverShoe.Controllers
                 if (order.PaymentType == "momo")
                 {
                     var resultCode = Request.Query["resultCode"];
-                    if (resultCode == 0|| resultCode=="0")
+                    if (resultCode=="0")
                     {
                         order.OrderStatus = 1;
                         order.PaymentDate = DateTime.Now;
@@ -288,7 +290,7 @@ namespace FourLeafCloverShoe.Controllers
                         if (result)
                         {
 
-                            return Redirect($"/Order/CheckOutSuccess?orderid={orderId}");
+                            return Redirect($"/Order/CheckOutSuccess");
                         }
                     }
                 }
@@ -320,7 +322,7 @@ namespace FourLeafCloverShoe.Controllers
                             var result = await _orderService.Update(order);
                             if (result)
                             {
-                                return Redirect($"/Order/CheckOutSuccess?orderid={orderId}");
+                                return Redirect($"/Order/CheckOutSuccess");
                             }
                         }
                     }
@@ -328,5 +330,31 @@ namespace FourLeafCloverShoe.Controllers
             }
             return Redirect($"/Order/CheckOutFailed");
         }
+
+        public async Task<IActionResult> ExportPDF(Guid orderId)
+        {
+            try
+            {
+                var order = await _orderService.GetById(orderId);
+                var view = new ViewAsPdf("ExportHD", order.OrderCode)
+                {
+                    FileName = $"{order.OrderCode}.pdf",
+                    PageOrientation = Rotativa.AspNetCore.Options.Orientation.Portrait,
+                    PageSize = Rotativa.AspNetCore.Options.Size.A4,
+                };
+                return view;
+            }
+            catch (Exception)
+            {
+                return RedirectToAction("index", "Home");
+            }
+        }
+        //In hóa đơn
+        //[HttpGet("/Bill/PrintBill/{idhd}")]
+        //public async Task<IActionResult> PrintHD(Guid idhd)
+        //{
+        //    var cthd = await _httpClient.GetFromJsonAsync<QLHDViewModel>($"https://localhost:7007/api/order/GetQLHDWithDetails?orderId={idhd}");
+        //    return View("ExportHD", cthd);
+        //}
     }
 }

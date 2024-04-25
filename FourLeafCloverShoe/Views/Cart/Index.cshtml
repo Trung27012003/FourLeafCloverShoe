@@ -453,23 +453,12 @@
     var coutProduct = 1; // chua
     $(document).ready(function () {
         $("#btnDatHang").click(function () {
-            RecipientName = $("#RecipientName").val();
-            RecipientAddress = $("#Description").val() + ", " + $("#WardName").val() + ", " + $("#DistrictName").val() + ", " + $("#ProvinceName").val();
-            RecipientPhone = $("#RecipientPhone").val();
-            if (RecipientName == "") {
-                showToast("Vui lòng kiểm tra lại tên người nhận hàng!", false);
-            } 
-            else if ( $("#Description").val()=="") {
-                showToast("Vui lòng kiểm tra lại địa chỉ nhận hàng!", false);
-            }
-            else if (RecipientAddress == "") {
-                showToast("Vui lòng kiểm tra lại RecipientAddress địa chỉ nhận hàng!", false);
-            }
-
-            else if (RecipientPhone == "") {
-                showToast("Vui lòng kiểm tra lại số điện thoại nhận hàng!", false);
-            }
-            else if (ShippingFee == 0) {
+            //RecipientName =;
+            //RecipientAddress = $("#Description").val() + ", " + $("#WardName").val() + ", " + $("#DistrictName").val() + ", " + $("#ProvinceName").val();
+            //RecipientPhone = ;
+            
+            
+           if (ShippingFee == 0) {
                 showToast("Vui lòng kiểm tra lại địa chỉ nhận hàng!", false);
             }
             else if (total <= 0) {
@@ -505,6 +494,24 @@
                 }
             }
             else {
+                if (@check== -1) {
+                    RecipientName = $("#RecipientName").val();
+                    RecipientAddress = $("#Description").val() + ", " + $("#WardName").val() + ", " + $("#DistrictName").val() + ", " + $("#ProvinceName").val();
+                    RecipientPhone = $("#RecipientPhone").val();
+                    if ($("#RecipientName").val() == "") {
+                        showToast("Vui lòng kiểm tra lại tên người nhận hàng!", false);
+                    }
+                    else if ($("#Description").val() == "") {
+                        showToast("Vui lòng kiểm tra lại địa chỉ nhận hàng!", false);
+                    }
+                    else if ($("#WardName").val() == "" || $("#DistrictName").val() == "" || $("#ProvinceName").val() == "") {
+                        showToast("Vui lòng kiểm tra lại RecipientAddress địa chỉ nhận hàng!", false);
+                    }
+
+                    else if ($("#RecipientPhone").val() == "") {
+                        showToast("Vui lòng kiểm tra lại số điện thoại nhận hàng!", false);
+                    }
+                }
                 $('#modalHDSIZE').modal('show');
             }
         });
@@ -752,7 +759,7 @@
         if (total > 0) {
             $.ajax({
                 type: "GET",
-                url: "https://online-gateway.ghn.vn/shiip/public-api/v2/shipping-order/fee?shop_id=4643378?to_ward_code=" + value1 + "&to_district_id=" + value2 + "&weight=" + 500 * coutProduct + "&service_type_id=2",// 500*1 trong đó 1 là số lượng *********************
+                url: "https://online-gateway.ghn.vn/shiip/public-api/v2/shipping-order/fee?shop_id=4643378?to_ward_code=" + value1 + "&to_district_id=" + value2 + "&height=12&length=30&weight=" + 400 * coutProduct + "&width=20" + "&service_type_id=2",
                 headers: { token: '9f4e42e4-fde8-11ed-a281-3aa62a37e0a5' },
                 contentType: "application/json; charset=utf-8",
                 dataType: "json",
@@ -795,7 +802,7 @@
             if (total > 0) {
                 $.ajax({
                     type: "GET",
-                    url: "https://online-gateway.ghn.vn/shiip/public-api/v2/shipping-order/fee?shop_id=4643378?to_ward_code=" + @addressDefault.WardCode + "&to_district_id=" + @addressDefault.DistrictID + "&weight=" + (500 * coutProduct) + "&service_type_id=2",
+                    url: "https://online-gateway.ghn.vn/shiip/public-api/v2/shipping-order/fee?shop_id=4643378?to_ward_code=" + @addressDefault.WardCode + "&to_district_id=" + @addressDefault.DistrictID + "&height=12&length=30&weight=" + 400 * coutProduct + "&width=20" + "&service_type_id=2",
                     headers: { token: '9f4e42e4-fde8-11ed-a281-3aa62a37e0a5' },
                     contentType: "application/json; charset=utf-8",
                     dataType: "json",
@@ -823,7 +830,7 @@
             if (value1 != "" && value2 != "" && value1 != "Vui lòng chọn Xã" && value2 != "Vui lòng chọn huyện" && total > 0) {
                 $.ajax({
                     type: "GET",
-                    url: "https://online-gateway.ghn.vn/shiip/public-api/v2/shipping-order/fee?shop_id=4643378?to_ward_code=" + value1 + "&to_district_id=" + value2 + "&weight=" + 500 * coutProduct + "&service_type_id=2",// 500*1 trong đó 1 là số lượng *********************
+                    url: "https://online-gateway.ghn.vn/shiip/public-api/v2/shipping-order/fee?shop_id=4643378?to_ward_code=" + value1 + "&to_district_id=" + value2 + "&weight=" + "&height=12&length=30&weight=" + 400 * coutProduct + "&width=20" + "&service_type_id=2",
                     headers: { token: '9f4e42e4-fde8-11ed-a281-3aa62a37e0a5' },
                     contentType: "application/json; charset=utf-8",
                     dataType: "json",
@@ -992,7 +999,6 @@
 
                     document.getElementById('cart-item-total-' + idProductDetail).textContent = result.oldQuantity;
                     showToast(result.message, result.status);
-                    showToast(" status gfalse");
                 }
             },
             error: function (error) {
@@ -1052,7 +1058,7 @@
                     RecipientPhone = responseNo1.recipientPhone;
                     $.ajax({
                         type: "GET",
-                        url: "https://online-gateway.ghn.vn/shiip/public-api/v2/shipping-order/fee?shop_id=4643378?to_ward_code=" + responseNo1.wardCode + "&to_district_id=" + responseNo1.districtID + "&weight=" + 500 * coutProduct + "&service_type_id=2",
+                        url: "https://online-gateway.ghn.vn/shiip/public-api/v2/shipping-order/fee?shop_id=4643378?to_ward_code=" + responseNo1.wardCode + "&to_district_id=" + responseNo1.districtID + "&height=12&length=30&weight=" + 400 * coutProduct + "&width=20" + "&service_type_id=2",
                         headers: { token: '9f4e42e4-fde8-11ed-a281-3aa62a37e0a5' },
                         contentType: "application/json; charset=utf-8",
                         dataType: "json",

@@ -17,6 +17,7 @@ namespace FourLeafCloverShoe.Share.Models
         public float? Rating { get; set; }
         public int? Status { get; set; }
         [ForeignKey("OrderItemId")]
-        public virtual OrderItem? OrderItems { get; set; }
+        // Thêm thuộc tính navigation để thiết lập quan hệ 1-1
+        public virtual OrderItem? OrderItem { get; set; }
     }
 }

@@ -18,5 +18,7 @@ namespace FourLeafCloverShoe.Share.Models
         public Order? Orders { get; set; }
         [ForeignKey("ProductDetailId")]
         public ProductDetail? ProductDetails { get; set; }
+        // Thêm thuộc tính navigation để thiết lập quan hệ 1-1
+        public virtual Rate? Rate { get; set; }
     }
 }

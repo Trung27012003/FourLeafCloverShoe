@@ -68,7 +68,7 @@ namespace FourLeafCloverShoe.Services
         {
             try
             {
-                var obj = await _myDbContext.Orders.FindAsync(Id);
+                var obj = (await Gets()).FirstOrDefault(c => c.Id == Id);
                 if (obj != null)
                 {
 
@@ -87,7 +87,14 @@ namespace FourLeafCloverShoe.Services
         {
             try
             {
-                var obj = await _myDbContext.Orders.ToListAsync();
+                var obj = await _myDbContext.Orders
+                    .Include(c => c.OrderItems)
+                        .ThenInclude(c => c.ProductDetails)
+                            .ThenInclude(c => c.Products)
+                    .Include(c => c.OrderItems)
+                        .ThenInclude(c => c.ProductDetails)
+                            .ThenInclude(c => c.Size)
+                    .ToListAsync();
                 if (obj != null)
                 {
 

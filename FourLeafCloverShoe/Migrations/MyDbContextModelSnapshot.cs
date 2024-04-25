@@ -84,77 +84,77 @@ namespace FourLeafCloverShoe.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("58a8b67b-b569-4af4-8f3e-62002bdfe385"),
+                            Id = new Guid("73bd566f-8508-4ac3-829e-2f570a4dce0b"),
                             Name = "Nike"
                         },
                         new
                         {
-                            Id = new Guid("10044a3f-7058-42e9-8b5a-f18dd9f998f2"),
+                            Id = new Guid("489eb9e9-e808-4b08-8d78-0796ff837a2b"),
                             Name = "Adidas"
                         },
                         new
                         {
-                            Id = new Guid("565481d4-a073-4e9a-a405-8ff57ece8da9"),
+                            Id = new Guid("5b6eef14-02bb-42f1-baec-854279ff1d26"),
                             Name = "Reebok"
                         },
                         new
                         {
-                            Id = new Guid("09ece388-1006-4489-98a4-b79f56c94d59"),
+                            Id = new Guid("14bc5843-d5e6-4f80-9e29-9aa39f27afdd"),
                             Name = "Puma"
                         },
                         new
                         {
-                            Id = new Guid("a3356624-13aa-462a-9d95-d787d6a5c47f"),
+                            Id = new Guid("10df5c83-fcdf-4b60-9868-638f98e3dfed"),
                             Name = "New Balance "
                         },
                         new
                         {
-                            Id = new Guid("6c6afadf-f1d3-4458-abe9-26b473061c77"),
+                            Id = new Guid("0611258f-9521-431a-960c-6b0433363ccd"),
                             Name = "Vans"
                         },
                         new
                         {
-                            Id = new Guid("13d6e4f5-be49-4f01-b058-7da69c600a99"),
+                            Id = new Guid("0f212bbb-9d12-4bc7-95d1-8fa7646a1ef6"),
                             Name = "Converse"
                         },
                         new
                         {
-                            Id = new Guid("41fb9ebd-18b8-40e8-a53e-2d38675e1155"),
+                            Id = new Guid("028c8cf0-2ab6-4107-9d85-811f38d41b24"),
                             Name = "Asics"
                         },
                         new
                         {
-                            Id = new Guid("570918ed-a966-44bd-8a77-8ae36edd0da8"),
+                            Id = new Guid("0fa4a56b-e098-4874-bc63-fbe88b2308ca"),
                             Name = "Skechers"
                         },
                         new
                         {
-                            Id = new Guid("8cd5d124-2fac-4d83-b5d5-c76596a05005"),
+                            Id = new Guid("89a55abc-a4f0-4c89-bf17-a33c55fcc301"),
                             Name = "Timberland"
                         },
                         new
                         {
-                            Id = new Guid("bcab0aac-a3e0-4cea-b3b1-611696736d8b"),
+                            Id = new Guid("61884cd1-d52a-4098-bc72-15415ac835d1"),
                             Name = "Dr. Martens"
                         },
                         new
                         {
-                            Id = new Guid("983e03fc-107c-44ba-adf0-c305a95af236"),
+                            Id = new Guid("db2b417a-1603-4c67-a3fc-373ef9ec0d56"),
                             Name = "Clarks"
                         },
                         new
                         {
-                            Id = new Guid("a0173724-cc92-437d-943c-b31316e65608"),
+                            Id = new Guid("1ce9c758-d66f-4842-aa3d-ff601c6103c9"),
                             Name = "Brooks"
                         },
                         new
                         {
-                            Id = new Guid("80f55db3-97b1-4fa5-92c9-1d6c58e90e80"),
+                            Id = new Guid("9a128f32-a27c-4c1a-bf8a-15cc1f914bf4"),
                             Name = "Under Armour"
                         },
                         new
                         {
-                            Id = new Guid("ca131e2d-0803-4f65-9762-3bb53ba03211"),
+                            Id = new Guid("b430bdde-d822-4f40-a076-b6a4aed36fc9"),
                             Name = "Fila"
                         });
                 });
@@ -216,52 +216,52 @@ namespace FourLeafCloverShoe.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("77d60430-3bfb-44d1-93ff-4434127e88fe"),
+                            Id = new Guid("d10ccf56-d724-45fd-a5d2-b5e2ad61c5d2"),
                             Name = "Sneakers "
                         },
                         new
                         {
-                            Id = new Guid("326b39ce-c6d7-41a8-aee1-a1787ab89fa7"),
+                            Id = new Guid("8106eb54-ae9a-4a59-9eb5-ee20cd50cbd8"),
                             Name = "Boots  "
                         },
                         new
                         {
-                            Id = new Guid("55c62ad0-2553-4970-9abd-eddd598f8354"),
+                            Id = new Guid("147c8c0b-69d3-41c3-ad37-abea5a8c5906"),
                             Name = "Sandals  "
                         },
                         new
                         {
-                            Id = new Guid("f5651d5c-ea99-4743-a1ed-45b50efb3b33"),
+                            Id = new Guid("fc18d754-e252-45ce-ac88-1808b3a859b6"),
                             Name = "Loafers  "
                         },
                         new
                         {
-                            Id = new Guid("c9178e47-4abf-4482-ad5b-368c56610a7e"),
+                            Id = new Guid("7af92d3e-11a4-4ada-b0a6-fd028f1dce0b"),
                             Name = "Slippers  "
                         },
                         new
                         {
-                            Id = new Guid("01554432-7410-4863-8575-4afc7b7bba43"),
+                            Id = new Guid("0bfdc92d-8d57-4f0c-b7cf-e64aff246f1e"),
                             Name = "Dress shoes "
                         },
                         new
                         {
-                            Id = new Guid("80144f07-3fff-4339-9833-8c491aecc4e0"),
+                            Id = new Guid("3230f843-fa7d-45e8-8103-0e692436a859"),
                             Name = "Athletic shoes "
                         },
                         new
                         {
-                            Id = new Guid("bb3d3061-5890-4289-b353-0d9527c52f09"),
+                            Id = new Guid("0c268ef5-c628-4297-b8c0-0a81f3a41da7"),
                             Name = "Espadrilles"
                         },
                         new
                         {
-                            Id = new Guid("4de6bac5-f531-463c-a526-22aae3226507"),
+                            Id = new Guid("facd6e1d-9ccd-44c1-b620-82eb40510b81"),
                             Name = "High heels"
                         },
                         new
                         {
-                            Id = new Guid("1c70e21d-9aef-488a-a9f1-fef37f830ad7"),
+                            Id = new Guid("2fbe0cd8-905f-4464-a03e-0f3296218bc5"),
                             Name = "Flats"
                         });
                 });
@@ -534,14 +534,14 @@ namespace FourLeafCloverShoe.Migrations
                         },
                         new
                         {
-                            Id = new Guid("70060411-da3a-4e6d-b4ab-227c434de88f"),
+                            Id = new Guid("1282acbe-74fb-4c7d-aac5-5677bfafbc49"),
                             Name = "Vàng",
                             PoinsMax = 3000000,
                             PointsMin = 1000001
                         },
                         new
                         {
-                            Id = new Guid("3fa52de4-9223-4e65-97c8-c5d2051e2a8d"),
+                            Id = new Guid("cd3dcfde-6955-443c-a29e-0875643f7544"),
                             Name = "Kim Cương",
                             PoinsMax = 10000000,
                             PointsMin = 3000001
@@ -574,7 +574,8 @@ namespace FourLeafCloverShoe.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("OrderItemId");
+                    b.HasIndex("OrderItemId")
+                        .IsUnique();
 
                     b.ToTable("Rates");
                 });
@@ -595,37 +596,37 @@ namespace FourLeafCloverShoe.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("6b3b7a3b-bef1-49b2-b254-63ba56a3ee10"),
+                            Id = new Guid("c538dd26-f65f-472d-acc9-28fc19f9c5e1"),
                             Name = "38"
                         },
                         new
                         {
-                            Id = new Guid("751d4771-ea7d-49c1-97a8-b09f0a9245d6"),
+                            Id = new Guid("6ae487af-5a7c-47f1-b9f5-dc08a7ede6f2"),
                             Name = "39"
                         },
                         new
                         {
-                            Id = new Guid("6b330aa6-cdf6-4d3e-96e3-5df33911c330"),
+                            Id = new Guid("646d685a-e846-4530-9877-877b434bc554"),
                             Name = "40"
                         },
                         new
                         {
-                            Id = new Guid("a81a3c72-93d9-4288-a9ed-466ae367e8a9"),
+                            Id = new Guid("7ad618b1-7bd6-499b-a451-a5962d60507e"),
                             Name = "41"
                         },
                         new
                         {
-                            Id = new Guid("befd7d3b-622f-455c-8b0e-5d83e3b994ea"),
+                            Id = new Guid("d50d0c0b-4db0-45ae-8c84-17cd6a6c2cab"),
                             Name = "42"
                         },
                         new
                         {
-                            Id = new Guid("771b9143-bd7b-4d53-93d2-df0ff0f6cc50"),
+                            Id = new Guid("eb4900e6-cd0b-4f01-81da-cdb84539099e"),
                             Name = "43"
                         },
                         new
                         {
-                            Id = new Guid("d692669d-59da-45b6-89bb-501d73a5548c"),
+                            Id = new Guid("c377bac3-ce64-4551-847a-342607278c80"),
                             Name = "44"
                         });
                 });
@@ -719,14 +720,14 @@ namespace FourLeafCloverShoe.Migrations
                         {
                             Id = "2FA6148D-B530-421F-878E-CE4D54BFC6AB",
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "55d59d45-69e2-44a1-887b-22d81987a167",
+                            ConcurrencyStamp = "d52a40a1-b2f4-43db-b2c4-bfc42ef63941",
                             EmailConfirmed = false,
                             LockoutEnabled = true,
                             NormalizedUserName = "GUEST",
                             PhoneNumberConfirmed = false,
                             Points = 0,
                             RankId = new Guid("2fa0118d-b530-421f-878e-ce4d54bfc6ab"),
-                            SecurityStamp = "b8c681be-63d7-47f8-819a-adb7f436fbf6",
+                            SecurityStamp = "ca6419ac-978e-4be4-b400-75f8467784e3",
                             TwoFactorEnabled = false,
                             UserName = "Guest"
                         });
@@ -830,28 +831,28 @@ namespace FourLeafCloverShoe.Migrations
                         new
                         {
                             Id = "2FA6148D-B530-421F-878E-CE1D54BFC6AB",
-                            ConcurrencyStamp = "5d1174fa-7c04-41f9-aaf8-2b01e6dcbee7",
+                            ConcurrencyStamp = "2bc2bdac-3583-46e2-8508-c876a8495d36",
                             Name = "Admin",
                             NormalizedName = "ADMIN"
                         },
                         new
                         {
                             Id = "2FA6148D-B530-421F-878E-CE2D54BFC6AB",
-                            ConcurrencyStamp = "54f44eac-cb90-4c45-8002-4dc37dcba0f9",
+                            ConcurrencyStamp = "d14a6fc6-094b-452c-b1cd-e2383b3113f3",
                             Name = "User",
                             NormalizedName = "USER"
                         },
                         new
                         {
                             Id = "2FA6148D-B530-421F-878E-CE3D54BFC6AB",
-                            ConcurrencyStamp = "40cca3cf-863e-48ca-87c7-c6fb308fb039",
+                            ConcurrencyStamp = "70cd26be-1fea-4cbe-a75f-a768b8df28f7",
                             Name = "Guest",
                             NormalizedName = "GUEST"
                         },
                         new
                         {
                             Id = "2FA6148D-B530-421F-878E-CE4D54BFC6AB",
-                            ConcurrencyStamp = "e9ad0ca6-6058-4a5b-aa26-d40320247b1b",
+                            ConcurrencyStamp = "4f297a4c-0a59-4d97-b8e8-86a41f9f0546",
                             Name = "Staff",
                             NormalizedName = "STAFF"
                         });
@@ -1089,13 +1090,13 @@ namespace FourLeafCloverShoe.Migrations
 
             modelBuilder.Entity("FourLeafCloverShoe.Share.Models.Rate", b =>
                 {
-                    b.HasOne("FourLeafCloverShoe.Share.Models.OrderItem", "OrderItems")
-                        .WithMany()
-                        .HasForeignKey("OrderItemId")
+                    b.HasOne("FourLeafCloverShoe.Share.Models.OrderItem", "OrderItem")
+                        .WithOne("Rate")
+                        .HasForeignKey("FourLeafCloverShoe.Share.Models.Rate", "OrderItemId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("OrderItems");
+                    b.Navigation("OrderItem");
                 });
 
             modelBuilder.Entity("FourLeafCloverShoe.Share.Models.User", b =>
@@ -1193,6 +1194,11 @@ namespace FourLeafCloverShoe.Migrations
             modelBuilder.Entity("FourLeafCloverShoe.Share.Models.Order", b =>
                 {
                     b.Navigation("OrderItems");
+                });
+
+            modelBuilder.Entity("FourLeafCloverShoe.Share.Models.OrderItem", b =>
+                {
+                    b.Navigation("Rate");
                 });
 
             modelBuilder.Entity("FourLeafCloverShoe.Share.Models.Product", b =>
