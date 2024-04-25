@@ -228,7 +228,7 @@ namespace FourLeafCloverShoe.Controllers
             vnpay.AddRequestData("vnp_CurrCode", "VND");
             vnpay.AddRequestData("vnp_IpAddr", ipAddr);
             vnpay.AddRequestData("vnp_Locale", "vn");
-            vnpay.AddRequestData("vnp_OrderInfo", "Thanh toán đơn hàng :" + order.OrderCode);
+            vnpay.AddRequestData("vnp_OrderInfo", "Thanh toán đơn hàng: " + order.OrderCode);
             vnpay.AddRequestData("vnp_OrderType", "other"); //default value: other
             vnpay.AddRequestData("vnp_ReturnUrl", vnp_Returnurl);
             vnpay.AddRequestData("vnp_TxnRef", DateTime.Now.Ticks.ToString());
@@ -243,13 +243,13 @@ namespace FourLeafCloverShoe.Controllers
             string partnerCode = "MOMO5RGX20191128";
             string accessKey = "M8brj9K6E22vXoDB";
             string serectkey = "nqQiVSgDMy809JoPF6OzP5OdBUB550Y4";
-            string orderInfo = "Thanh toán đơn hàng :" + order.OrderCode;
+            string orderInfo = "Thanh toán đơn hàng : " + order.OrderCode;
             string redirectUrl = $"https://localhost:7116/Order/PaymentCallBack?orderId={order.Id}";
             string ipnUrl = $"https://localhost:7116/Order/PaymentCallBack?orderId={order.Id}";
             string requestType = "captureWallet";
 
             string amount = order.TotalAmout.ToString();
-            string orderId = Guid.NewGuid().ToString();
+            string orderId = order.OrderCode;
             string requestId = Guid.NewGuid().ToString();
             string extraData = "";
 
@@ -275,8 +275,8 @@ namespace FourLeafCloverShoe.Controllers
             JObject message = new JObject
             {
                 { "partnerCode", partnerCode },
-                { "partnerName", "Test" },
-                { "storeId", "MomoTestStore" },
+                { "partnerName", "Cỏ 4 lá store" },
+                { "storeId", "Cỏ 4 lá store" },
                 { "requestId", requestId },
                 { "amount", amount },
                 { "orderId", orderId },
@@ -360,7 +360,7 @@ namespace FourLeafCloverShoe.Controllers
                 }
                 if (order.PaymentType == "vnpay")
                 {
-                    string vnp_HashSecret = "KGUFENFAPPMWXGAYUBTNECEYOYEWEPWR"; //Secret Key
+                    string vnp_HashSecret = "CBVBDQZOHUERGMDHAQRWSINJIBSCCFTO"; //Secret Key
                     var vnpayData = Request.Query;
                     VnPayLibrary vnpay = new VnPayLibrary();
                     foreach (var s in vnpayData)
