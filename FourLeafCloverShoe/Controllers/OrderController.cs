@@ -69,7 +69,8 @@ namespace FourLeafCloverShoe.Controllers
             {
                 return false;
             }
-            var userVoucher = (await _userVoucherService.GetByUserId(userId)).FirstOrDefault(c=>c.VoucherId==voucherId);
+
+            var userVoucher = (await _userVoucherService.Gets()).FirstOrDefault(c => c.UserId == userId && c.VoucherId == voucherId);
             userVoucher.Status = 1;
             var resultUserVoucher = await _userVoucherService.Update(userVoucher);
             if (!resultUserVoucher)
@@ -174,7 +175,7 @@ namespace FourLeafCloverShoe.Controllers
                         var getVoucher = await _voucherService.GetById((Guid)(order.VoucherId));
                         if (getVoucher != null)
                         {
-                            getVoucher.Status =-1;
+                            getVoucher.Quantity -=1;
                             var resultUpdateQuantityVoucher = await _voucherService.Update(getVoucher);
                             if (!resultUpdateQuantityVoucher)
                             {
@@ -211,8 +212,8 @@ namespace FourLeafCloverShoe.Controllers
         {
             string vnp_Returnurl = $"https://localhost:7116/Order/PaymentCallBack?orderId={order.Id}"; //URL nhan ket qua tra ve 
             string vnp_Url = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html"; //URL thanh toan cua VNPAY 
-            string vnp_TmnCode = "IHE4U2JP"; //Ma định danh merchant kết nối (Terminal Id)
-            string vnp_HashSecret = "KGUFENFAPPMWXGAYUBTNECEYOYEWEPWR"; //Secret Key
+            string vnp_TmnCode = "AKU08817"; //Ma định danh merchant kết nối (Terminal Id)
+            string vnp_HashSecret = "CBVBDQZOHUERGMDHAQRWSINJIBSCCFTO"; //Secret Key
             string ipAddr = HttpContext.Connection.RemoteIpAddress?.ToString();
             //Get payment input
             //Save order to db
@@ -328,16 +329,21 @@ namespace FourLeafCloverShoe.Controllers
                         order.OrderStatus = 11; // đã huỷ
                         order.UpdateDate = DateTime.Now;
                         var result = await _orderService.Update(order);
-                            if (!( await ReturnVoucher(order.VoucherId,order.UserId)))
+                        if (!(await ReturnCoins(order.CoinsUsed)))
+                        {
+                            return Redirect($"Khong hoan duoc xu");
+                        }
+                        if (order.VoucherId!=null)
+                        {
+                            if (!(await ReturnVoucher(order.VoucherId, order.UserId)))
                             {
                                 return Redirect($"Khong hoan duoc voucher");
                             }
-                            if (!( await ReturnCoins(order.CoinsUsed)))
-                            {
-                                return Redirect($"Khong hoan duoc xu");
-                            }
-                            
-                            return Redirect($"/Order/CheckOutFailed");
+
+                        }
+                        
+
+                        return Redirect($"/Order/CheckOutFailed");
 
                     }
                     else
@@ -348,7 +354,7 @@ namespace FourLeafCloverShoe.Controllers
                         if (result)
                         {
 
-                            return Redirect($"/Order/CheckOutSuccess");
+                            return Redirect($"/Order/CheckOutFailed");
                         }
                     }
                 }
@@ -383,19 +389,36 @@ namespace FourLeafCloverShoe.Controllers
                                 return Redirect($"/Order/CheckOutSuccess");
                             }
                         }
-                        else if (vnp_ResponseCode== "24") //Giao dịch không thành công do: Khách hàng hủy giao dịch
+                    }
+                    if (vnp_ResponseCode == "24") //Giao dịch không thành công do: Khách hàng hủy giao dịch
+                    {
+                        order.OrderStatus = 11;
+                        order.UpdateDate = DateTime.Now;
+                        var result = await _orderService.Update(order);
+                        if (!(await ReturnCoins(order.CoinsUsed)))
                         {
-                            order.OrderStatus = 11;
-                            order.UpdateDate = DateTime.Now;
-                            var result = await _orderService.Update(order);
+                            return Redirect($"Khong hoan duoc xu");
+                        }
+                        if (order.VoucherId != null)
+                        {
                             if (!(await ReturnVoucher(order.VoucherId, order.UserId)))
                             {
                                 return Redirect($"Khong hoan duoc voucher");
                             }
-                            if (!(await ReturnCoins(order.CoinsUsed)))
-                            {
-                                return Redirect($"Khong hoan duoc xu");
-                            }
+
+                        }
+
+
+                        return Redirect($"/Order/CheckOutFailed");
+                    }
+                    else
+                    {
+                        order.OrderStatus = 0;
+                        order.PaymentDate = DateTime.Now;
+                        order.UpdateDate = DateTime.Now;
+                        var result = await _orderService.Update(order);
+                        if (result)
+                        {
                             return Redirect($"/Order/CheckOutFailed");
                         }
                     }

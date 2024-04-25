@@ -775,7 +775,7 @@
                     getTotalAmount();
                 },
                 error: function (reponse) {
-                    alert(reponse.responseText);
+                    console.log("line 778",reponse.responseText);
                 }
             });
         } else {
@@ -817,7 +817,7 @@
                         getTotalAmount();
                     },
                     error: function (reponse) {
-                        alert(reponse.responseText);
+                        console.log("line 820",reponse.responseText);
                     }
                 });
             }
@@ -830,7 +830,7 @@
             if (value1 != "" && value2 != "" && value1 != "Vui lòng chọn Xã" && value2 != "Vui lòng chọn huyện" && total > 0) {
                 $.ajax({
                     type: "GET",
-                    url: "https://online-gateway.ghn.vn/shiip/public-api/v2/shipping-order/fee?shop_id=4643378?to_ward_code=" + value1 + "&to_district_id=" + value2 + "&weight=" + "&height=12&length=30&weight=" + 400 * coutProduct + "&width=20" + "&service_type_id=2",
+                    url: "https://online-gateway.ghn.vn/shiip/public-api/v2/shipping-order/fee?shop_id=4643378?to_ward_code=" + value1 + "&to_district_id=" + value2 + "&height=12&length=30&weight=" + 400 * coutProduct + "&width=20" + "&service_type_id=2",
                     headers: { token: '9f4e42e4-fde8-11ed-a281-3aa62a37e0a5' },
                     contentType: "application/json; charset=utf-8",
                     dataType: "json",
@@ -845,7 +845,7 @@
                         getTotalAmount();
                     },
                     error: function (reponse) {
-                        alert(reponse.responseText);
+                        console.log("line 848",reponse.responseText);
                     }
                 });
             }
