@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Newtonsoft.Json;
 using System;
 using System.Net.Http;
@@ -24,7 +25,7 @@ namespace FourLeafCloverShoe.Controllers
         private readonly UserManager<User> _userManager;
         private readonly IUserVoucherService _userVoucherService;
 
-        public CartController(IAddressService addressService,IUserVoucherService userVoucherService,ICartService cartService, IProductService productService, ICartItemItemService cartItemItemService, IProductDetailService productDetailService, UserManager<User> userManager)
+        public CartController(IAddressService addressService, IUserVoucherService userVoucherService, ICartService cartService, IProductService productService, ICartItemItemService cartItemItemService, IProductDetailService productDetailService, UserManager<User> userManager)
         {
             _cartService = cartService;
             _addressService = addressService;
@@ -41,7 +42,7 @@ namespace FourLeafCloverShoe.Controllers
                 var user = await _userManager.GetUserAsync(HttpContext.User);
                 var cartItems = await _cartItemItemService.GetsByUserId(user.Id);
 
-                if (ViewBag.lstVoucher==null)
+                if (ViewBag.lstVoucher == null)
                 {
                     ViewBag.lstVoucher = new List<SelectListItem>();
 
@@ -50,105 +51,164 @@ namespace FourLeafCloverShoe.Controllers
                 // get list address
                 var lstAddress = await _addressService.GetByUserId(user.Id);
                 ViewBag.lstAddress = lstAddress;
-                var addressDefault = lstAddress.FirstOrDefault(c=>c.IsDefault==true);
-                //var options = new JsonSerializerOptions
-                //{
-                //    ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.Preserve
-                //};
+                var addressDefault = lstAddress.FirstOrDefault(c => c.IsDefault == true);
 
-                //// Tuần tự hóa đối tượng của bạn với các tùy chọn
-                //var json = System.Text.Json.JsonSerializer.Serialize(addressDefault, options);
                 ViewBag.addressDefault = addressDefault;
                 return View(cartItems);
             }
-            return View();
+            else
+            {
+
+                if (ViewBag.lstVoucher == null)
+                {
+                    ViewBag.lstVoucher = new List<SelectListItem>();
+
+                }
+                ViewBag.lstAddress = null;
+                var cartItems = SessionServices.GetCartItems(HttpContext.Session, "Cart");
+                foreach (var item in cartItems)
+                {
+                    item.ProductDetails = await _productDetailService.GetById((Guid)item.ProductDetailId);
+                }
+                return View(cartItems);
+
+            }
         }
         public async Task<IActionResult> addToCart(int quantity, Guid productDetailId)
         {
             var productDetailFromDb = await _productDetailService.GetById(productDetailId);
-            if (User.Identity.IsAuthenticated)
+
+            if (quantity <= 0) // số lượng phải hợp lệ
             {
-                var user = await _userManager.GetUserAsync(HttpContext.User);
-                var cartItems = await _cartItemItemService.GetsByUserId(user.Id);
-                var itemInCart = cartItems.Where(c => c.ProductDetailId == productDetailId);
-                if (quantity <= 0) // số lượng phải hợp lệ
-                {
-                    return Json(new { message = "Số lượng sản phẩm phải lớn hơn 0!", isSuccess = false });
+                return Json(new { message = "Số lượng sản phẩm phải lớn hơn 0!", isSuccess = false });
 
-                }
-                else if (productDetailId == Guid.Parse("00000000-0000-0000-0000-000000000000")) // sản phẩm chi tiết phải hợp lệ
+            }
+            else if (productDetailId == Guid.Parse("00000000-0000-0000-0000-000000000000")) // sản phẩm chi tiết phải hợp lệ
+            {
+                return Json(new { message = "Vui lòng chọn kích cỡ hợp lệ!", isSuccess = false });
+            }
+            else if (productDetailFromDb.Status == 0) // sản phẩm chi tiết phải hợp lệ về status
+            {
+                return Json(new { message = "Sản phẩm ngừng bán!", isSuccess = false });
+            }
+            else if (productDetailFromDb.Quantity <= 0) // sản phẩm chi tiết phải hợp lệ về số lượng
+            {
+                return Json(new { message = "Sản phẩm đã hết hàng!", isSuccess = false }); // kho hết hàng
+            }
+            else if (productDetailFromDb.Quantity < quantity)
+            {
+                return Json(new { message = "Kho không đủ số lượng yêu cầu!", isSuccess = false }); // kho hết hàng
+            }
+            else if (productDetailFromDb.Status != 1 && productDetailFromDb.Products.Status != true)
+            {
+                return Json(new { message = "Sản phẩm ngừng kinh doanh!", isSuccess = false }); // Done
+            }
+            else
+            {
+                if (User.Identity.IsAuthenticated)
                 {
-                    return Json(new { message = "Vui lòng chọn kích cỡ hợp lệ!", isSuccess = false });
-                }
-                else if (productDetailFromDb.Status == 0) // sản phẩm chi tiết phải hợp lệ về status
-                {
-                    return Json(new { message = "Sản phẩm ngừng bán!", isSuccess = false });
-                }
-                else if (productDetailFromDb.Quantity <= 0) // sản phẩm chi tiết phải hợp lệ về số lượng
-                {
-                    return Json(new { message = "Sản phẩm đã hết hàng!", isSuccess = false }); // kho hết hàng
-                }
-                else if (productDetailFromDb.Quantity < quantity)
-                {
-                    return Json(new { message = "Kho không đủ số lượng yêu cầu!", isSuccess = false }); // kho hết hàng
-                }
-               
-                else
-                {
-                    if (productDetailFromDb.Status==1&& productDetailFromDb.Products.Status==true)
+
+                    var user = await _userManager.GetUserAsync(HttpContext.User);
+                    var cartItems = await _cartItemItemService.GetsByUserId(user.Id);
+                    var itemInCart = cartItems.Where(c => c.ProductDetailId == productDetailId);
+
+                    if (itemInCart.Count() < 1)
                     {
-                        if (itemInCart.Count() < 1)
+                        var item = new CartItem()
                         {
-                            var item = new CartItem()
-                            {
-                                CartId = (await _cartService.GetByUserId(user.Id)).Id,
-                                ProductDetailId = productDetailId,
-                                Quantity = quantity,
-                            };
-                            var result = await _cartItemItemService.Add(item);
-                            if (result)
-                            {
-                                return Json(new { message = "Thêm sản phẩm thành công!", isSuccess = true }); // Done
+                            CartId = (await _cartService.GetByUserId(user.Id)).Id,
+                            ProductDetailId = productDetailId,
+                            Quantity = quantity,
+                        };
+                        var result = await _cartItemItemService.Add(item);
+                        if (result)
+                        {
+                            return Json(new { message = "Thêm sản phẩm thành công!", isSuccess = true }); // Done
 
-                            }
-                            return Json(new { message = "Lỗi thêm mới sản phẩm!", isSuccess = false });
+                        }
+                        return Json(new { message = "Lỗi thêm mới sản phẩm!", isSuccess = false });
+                    }
+                    else
+                    {
+                        var productInCart = cartItems.FirstOrDefault(c => c.ProductDetailId == productDetailId);
+                        if (productDetailFromDb.Quantity < quantity + productInCart.Quantity)
+                        {
+                            return Json(new { message = "Số lượng sản phẩm trong giỏ hàng và số lượng muốn thêm vào vượt quá số lượng tồn kho!", isSuccess = false }); // tổng hàng vượt quá kho
                         }
                         else
                         {
-                            var productInCart = cartItems.FirstOrDefault(c => c.ProductDetailId == productDetailId);
-                            if (productDetailFromDb.Quantity < quantity + productInCart.Quantity)
+                            productInCart.Quantity += quantity;
+                            var result = await _cartItemItemService.Update(productInCart);
+                            if (result)
                             {
-                                return Json(new { message = "Số lượng sản phẩm trong giỏ hàng và số lượng muốn thêm vào vượt quá số lượng tồn kho!", isSuccess = false }); // tổng hàng vượt quá kho
-                            }
-                            else
-                            {
-                                productInCart.Quantity += quantity;
-                                var result = await _cartItemItemService.Update(productInCart);
-                                if (result)
-                                {
 
-                                    return Json(new { message = "Thêm sản phẩm thành công!", isSuccess = true }); // Done
+                                return Json(new { message = "Thêm sản phẩm thành công!", isSuccess = true }); // Done
 
-                                }
-                                return Json(new { message = "Lỗi update giỏ hàng!", isSuccess = false }); // Done
                             }
+                            return Json(new { message = "Lỗi update giỏ hàng!", isSuccess = false }); // Done
                         }
                     }
-                    return Json(new { message = "Sản phẩm ngừng kinh doanh!", isSuccess = false }); // Done
+
                 }
+                else
+                {
+                    var cartitems = SessionServices.GetCartItems(HttpContext.Session, "Cart");
+                    if (!SessionServices.CheckExistProduct(productDetailId, cartitems))
+                    {
+                        var item = new CartItem()
+                        {
+                            Id = Guid.NewGuid(),
+                            ProductDetailId = productDetailId,
+                            Quantity = quantity,
+                        };
+                        cartitems.Add(item); // thêm bản ghi mới vào cart
+                        SessionServices.SetCartItems(HttpContext.Session, "Cart", cartitems); // lưu vào cart
+                        return Json(new { message = "Thêm sản phẩm thành công!", isSuccess = true }); // Done
+                    }
+                    else
+                    {
+                        var produdctDetailInSession = SessionServices.GetItemByProductDetailId(productDetailId, cartitems);
 
+
+                        if (productDetailFromDb.Quantity < quantity + produdctDetailInSession.Quantity)
+                        {
+                            return Json(new { message = "Số lượng sản phẩm trong giỏ hàng và số lượng muốn thêm vào vượt quá số lượng tồn kho!", isSuccess = false }); // tổng hàng vượt quá kho
+                        }
+                        else
+                        {
+                            produdctDetailInSession.Quantity += quantity;
+                            SessionServices.SetCartItems(HttpContext.Session, "Cart", cartitems); // lưu vào cart
+                            return Json(new { message = "Thêm sản phẩm thành công!", isSuccess = true }); // Done
+                        }
+                    }
+
+
+                }
             }
-
-            return Json(new { message = "Vui lòng đăng nhập!", isSuccess = false });
         }
         public async Task<IActionResult> getMiniCart()
         {
+            var cartItems = new List<CartItem>();
+            var user = new User();
             if (User.Identity.IsAuthenticated)
             {
-                var user = await _userManager.GetUserAsync(HttpContext.User);
-                var cartItems = await _cartItemItemService.GetsByUserId(user.Id);
-                var lstproductdetail = await _productDetailService.Gets();
-                var lstproductdetails = lstproductdetail.Where(c => cartItems.Any(p => p.ProductDetailId == c.Id));
+                user = await _userManager.GetUserAsync(HttpContext.User);
+                cartItems = await _cartItemItemService.GetsByUserId(user.Id);
+            }
+            else
+            {
+                user = await _userManager.FindByIdAsync("2FA6148D-B530-421F-878E-CE4D54BFC6AB");
+                cartItems = SessionServices.GetCartItems(HttpContext.Session, "Cart");
+                foreach (var item in cartItems)
+                {
+                    item.ProductDetails = await _productDetailService.GetById((Guid)item.ProductDetailId);
+                }
+            }
+            var lstproductdetail = await _productDetailService.Gets();
+            var lstproductdetails = lstproductdetail.Where(c => cartItems.Any(p => p.ProductDetailId == c.Id));
+
+            if (User.Identity.IsAuthenticated)
+            {
                 var settings = new JsonSerializerSettings
                 {
                     ReferenceLoopHandling = ReferenceLoopHandling.Ignore
@@ -159,7 +219,7 @@ cartItems.FirstOrDefault(c => c.ProductDetailId == productDetail.Id)?.Quantity *
 
                 // get voucher
                 List<SelectListItem> lstVoucher = new List<SelectListItem>();
-                foreach (var obj in( await _userVoucherService.GetByUserId(user.Id)).Where(c=>c.Vouchers.MinimumOrderValue<=tongtien))
+                foreach (var obj in (await _userVoucherService.GetByUserId(user.Id)).Where(c => c.Vouchers.MinimumOrderValue <= tongtien))
                 {
                     var giamToiDa = obj.Vouchers.MaximumOrderValue;
                     var giaTriVoucher = obj.Vouchers.VoucherValue?.ToString("0.##");
@@ -184,9 +244,58 @@ cartItems.FirstOrDefault(c => c.ProductDetailId == productDetail.Id)?.Quantity *
                 ViewBag.addressDefault = addressDefault;
                 var coutProduct = cartItems.Sum(c => c.Quantity);
                 //ViewBag.lstVoucher = lstVoucher;
-                return Json(new { lstproducts = serializedCartItems, tongtien = tongtien , lstVoucher = lstVoucher,myCoins = user.Coins ,coutProduct = coutProduct });
+                return Json(new { lstproducts = serializedCartItems, tongtien = tongtien, lstVoucher = lstVoucher, myCoins = user.Coins, coutProduct = coutProduct });
             }
-            return Json(new { lstproducts = new List<CartItem>(), tongtien = 0 });
+            else
+            {
+                cartItems = SessionServices.GetCartItems(HttpContext.Session, "Cart");
+                foreach (var item in cartItems)
+                {
+                    item.ProductDetails = await _productDetailService.GetById((Guid)item.ProductDetailId);
+                }
+                foreach (var item in lstproductdetails)
+                {
+                    item.CartItems = cartItems;
+                }
+                var settings = new JsonSerializerSettings
+                {
+                    ReferenceLoopHandling = ReferenceLoopHandling.Ignore
+                };
+                var serializedCartItems = JsonConvert.SerializeObject(lstproductdetails, settings);
+                var tongtien = lstproductdetails.Sum(productDetail =>
+cartItems.FirstOrDefault(c => c.ProductDetailId == productDetail.Id)?.Quantity * productDetail.PriceSale ?? 0);
+
+                // get voucher
+                List<SelectListItem> lstVoucher = new List<SelectListItem>();
+                foreach (var obj in (await _userVoucherService.GetByUserId(user.Id)).Where(c => c.Vouchers.MinimumOrderValue <= tongtien))
+                {
+                    var giamToiDa = obj.Vouchers.MaximumOrderValue;
+                    var giaTriVoucher = obj.Vouchers.VoucherValue?.ToString("0.##");
+                    if (obj.Vouchers.VoucherType == 1)
+                    {
+                        giaTriVoucher += " %";
+                    }
+                    else
+                    {
+                        giaTriVoucher = String.Format("N0", giaTriVoucher) + " đ";
+
+                    }
+                    lstVoucher.Add(new SelectListItem()
+                    {
+                        Text = $"Mã giảm {giaTriVoucher} tối đa {giamToiDa?.ToString("N0")} đ đơn từ {obj.Vouchers.MinimumOrderValue?.ToString("N0")}đ ",
+                        Value = obj.Id.ToString()
+                    });
+                }
+                var lstAddress = await _addressService.GetByUserId(user.Id);
+                ViewBag.lstAddress = lstAddress;
+                var addressDefault = lstAddress.FirstOrDefault(c => c.IsDefault == true);
+                ViewBag.addressDefault = addressDefault;
+                var coutProduct = cartItems.Sum(c => c.Quantity);
+                //ViewBag.lstVoucher = lstVoucher;
+                return Json(new { lstproducts = serializedCartItems, tongtien = tongtien, lstVoucher = lstVoucher, myCoins = user.Coins, coutProduct = coutProduct });
+            }
+
+
         }
         public async Task<IActionResult> removeMiniCartItem(Guid productDetailId)
         {
@@ -200,7 +309,17 @@ cartItems.FirstOrDefault(c => c.ProductDetailId == productDetail.Id)?.Quantity *
 
                 return Json(new { message = "Có lỗi xảy ra!", isSuccess = false });
             }
-            return Json(new { message = "Chưa đăng nhập!", isSuccess = false });
+            else
+            {
+                var cartItems = SessionServices.GetCartItems(HttpContext.Session, "Cart");
+                foreach (var item in cartItems)
+                {
+                    item.ProductDetails = await _productDetailService.GetById((Guid)item.ProductDetailId);
+                }
+                var result = cartItems.RemoveAll(c => c.ProductDetailId == productDetailId);
+                SessionServices.SetCartItems(HttpContext.Session, "Cart", cartItems); // lưu vào cart
+                return Json(new { message = "Xoá thành công!", isSuccess = true });
+            }
 
         }
         public async Task<IActionResult> removeCartItem(Guid productDetailId)
@@ -215,9 +334,20 @@ cartItems.FirstOrDefault(c => c.ProductDetailId == productDetail.Id)?.Quantity *
 
                 return Json(new { message = "Có lỗi xảy ra!", isSuccess = false });
             }
-            return Json(new { message = "Chưa đăng nhập!", isSuccess = false });
+            else
+            {
+                var cartItems = SessionServices.GetCartItems(HttpContext.Session, "Cart");
+                foreach (var item in cartItems)
+                {
+                    item.ProductDetails = await _productDetailService.GetById((Guid)item.ProductDetailId);
+                }
+                var result = cartItems.RemoveAll(c => c.ProductDetailId == productDetailId);
+                SessionServices.SetCartItems(HttpContext.Session, "Cart", cartItems); // lưu vào cart
+                return Json(new { message = "Xoá thành công!", isSuccess = true });
+            }
 
         }
+
 
         public async Task<IActionResult> getCountCart()
         {
@@ -226,21 +356,36 @@ cartItems.FirstOrDefault(c => c.ProductDetailId == productDetail.Id)?.Quantity *
                 var user = await _userManager.GetUserAsync(HttpContext.User);
                 var cartItems = await _cartItemItemService.GetsByUserId(user.Id);
                 var count = cartItems != null ? cartItems.Count() : 0;
-                return Json(new { message = "Lấy thành công!", isSuccess = true , count = count });
+                return Json(new { message = "Lấy thành công!", isSuccess = true, count = count });
             }
-            return Json(new { message = "Chưa đăng nhập!", isSuccess = false,count=0 });
+            else
+            {
+                var cartItems = SessionServices.GetCartItems(HttpContext.Session, "Cart");
+                var count = cartItems != null ? cartItems.Count() : 0;
+                return Json(new { message = "Lấy thành công!", isSuccess = true, count = count });
+
+            }
 
         }
-         public async Task<IActionResult> UpdateSLInCart()
+        public async Task<IActionResult> UpdateSLInCart()
         {
             if (User.Identity.IsAuthenticated)
             {
                 var user = await _userManager.GetUserAsync(HttpContext.User);
                 var cartItems = await _cartItemItemService.GetsByUserId(user.Id);
                 var count = cartItems != null ? cartItems.Count() : 0;
-                return Json(new { message = "Lấy thành công!", isSuccess = true , count = count });
+                return Json(new { message = "Lấy thành công!", isSuccess = true, count = count });
             }
-            return Json(new { message = "Chưa đăng nhập!", isSuccess = false,count=0 });
+            else
+            {
+                var cartItems = SessionServices.GetCartItems(HttpContext.Session, "Cart");
+                foreach (var item in cartItems)
+                {
+                    item.ProductDetails = await _productDetailService.GetById((Guid)item.ProductDetailId);
+                }
+                var count = cartItems != null ? cartItems.Count() : 0;
+                return Json(new { message = "Lấy thành công!", isSuccess = true, count = count });
+            }
 
         }
         [HttpPost]
@@ -250,11 +395,12 @@ cartItems.FirstOrDefault(c => c.ProductDetailId == productDetail.Id)?.Quantity *
             {
                 var user = await _userManager.GetUserAsync(HttpContext.User);
                 var lstCartItem = await _cartItemItemService.GetsByUserId(user.Id);
+
                 var cartItem = lstCartItem.FirstOrDefault(c => c.ProductDetailId == idProductDetail); // cartitemid
                 var ProductDetail = await _productDetailService.GetById(idProductDetail);
                 if (ProductDetail.Quantity < newQuantity)
                 {
-                    return Json(new { message = "Sản phẩm vượt quá giới hạn trong kho",oldQuantity = cartItem.Quantity, status = false });
+                    return Json(new { message = "Sản phẩm vượt quá giới hạn trong kho", oldQuantity = cartItem.Quantity, status = false });
                 }
                 if (newQuantity <= 0)
                 {
@@ -270,10 +416,32 @@ cartItems.FirstOrDefault(c => c.ProductDetailId == productDetail.Id)?.Quantity *
                 }
                 return Json(new { message = "Lỗi không xác định", oldQuantity = cartItem.Quantity, status = false });
             }
-            else//chưa đăng nhập
+            else
             {
+                var cartItems = SessionServices.GetCartItems(HttpContext.Session, "Cart");
+                foreach (var item in cartItems)
+                {
+                    item.ProductDetails = await _productDetailService.GetById((Guid)item.ProductDetailId);
+                }
+                var cartItem = cartItems.FirstOrDefault(c => c.ProductDetailId == idProductDetail);
+                var ProductDetail = await _productDetailService.GetById(idProductDetail);
+                if (ProductDetail.Quantity < newQuantity)
+                {
+                    return Json(new { message = "Sản phẩm vượt quá giới hạn trong kho", oldQuantity = cartItem.Quantity, status = false });
+                }
+                if (newQuantity <= 0)
+                {
+                    return Json(new { message = "Sản phẩm tối thiểu là 1", oldQuantity = cartItem.Quantity, status = false });
+                }
+                cartItem.Quantity = newQuantity;
+                var total = cartItems.Sum(c => c.Quantity * c.ProductDetails.PriceSale);
+                foreach (var item in cartItems)
+                {
+                    item.ProductDetails = null ;
+                }
+                SessionServices.SetCartItems(HttpContext.Session, "Cart", cartItems); // lưu vào cart
+                return Json(new { message = "OK", total = total, status = true });
 
-                return Json(new { message = "OK", status = true });
             }
 
         }
@@ -282,9 +450,9 @@ cartItems.FirstOrDefault(c => c.ProductDetailId == productDetail.Id)?.Quantity *
         {
             if (uservoucherId != new Guid())
             {
-            var voucherSelected = (await _userVoucherService.GetById(uservoucherId)).Vouchers;
+                var voucherSelected = (await _userVoucherService.GetById(uservoucherId)).Vouchers;
 
-            return Json(new { Id = voucherSelected.Id,voucherType = voucherSelected.VoucherType,voucherValue = voucherSelected.VoucherValue,maxDiscount = voucherSelected.MaximumOrderValue ,isSuccess=true});
+                return Json(new { Id = voucherSelected.Id, voucherType = voucherSelected.VoucherType, voucherValue = voucherSelected.VoucherValue, maxDiscount = voucherSelected.MaximumOrderValue, isSuccess = true });
             }
             return Json(new { isSuccess = false });
         }
@@ -292,7 +460,7 @@ cartItems.FirstOrDefault(c => c.ProductDetailId == productDetail.Id)?.Quantity *
         public async Task<JsonResult> getAddress(Guid id)
         {
             var address = await _addressService.GetById(id);
-            return Json(new { ProvinceID=address.ProvinceID, ProvinceName=address.ProvinceName, DistrictID  = address.DistrictID, WardName=address.WardName, DistrictName= address.DistrictName   , WardCode =address.WardCode , RecipientPhone = address.RecipientPhone , RecipientName = address.RecipientName, Description=address.Description});
+            return Json(new { ProvinceID = address.ProvinceID, ProvinceName = address.ProvinceName, DistrictID = address.DistrictID, WardName = address.WardName, DistrictName = address.DistrictName, WardCode = address.WardCode, RecipientPhone = address.RecipientPhone, RecipientName = address.RecipientName, Description = address.Description });
         }
 
 

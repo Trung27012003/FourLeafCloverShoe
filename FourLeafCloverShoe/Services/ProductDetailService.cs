@@ -9,6 +9,10 @@ namespace FourLeafCloverShoe.Services
     {
         private readonly MyDbContext _myDbContext;
 
+        public ProductDetailService()
+        {
+        }
+
         public ProductDetailService(MyDbContext myDbContext)
         {
             _myDbContext = myDbContext;

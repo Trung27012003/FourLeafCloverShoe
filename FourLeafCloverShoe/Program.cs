@@ -99,8 +99,11 @@ builder.Services.AddRazorPages();
 //add AddSignalR
 builder.Services.AddSignalR();
 // add session
-builder.Services.AddSession();
 
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromDays(7);
+});
 
 var app = builder.Build();
 app.UseCors(builder => builder
