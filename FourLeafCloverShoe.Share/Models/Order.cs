@@ -27,18 +27,17 @@ namespace FourLeafCloverShoe.Share.Models
 
         // 4 --> đang giao hàng                                      ----> (user)đang giao   --> admin duyệt yêu cầu huỷ
         // 5  --> khách yêu cầu huỷ (trong khi giao hàng)
-
-
         // 6--> giao hàng thất bại   
-        // 7--> giao hàng thành công                                 --> admin duyệt trạng thái
-        // 8-> thanh toán tại quầy
-        // 8 -->yêu cầu đổi trả
-        // 9 --> chấp nhận đổi trả
-        // 10 --> từ chối đổi trả
+        // 7 --> yêu cầu huỷ đơn thất bại
 
-        // 11 --> khách huỷ đơn                                          ---- > đã huỷ
-        // 12 --> chấp nhận huỷ đơn
-        // 13 --> yêu cầu huỷ đơn thất bại
+        // 8--> giao hàng thành công                                 --> admin duyệt trạng thái
+        // 9-> thanh toán tại quầy
+        // 10 -->yêu cầu đổi trả
+        // 11 --> chấp nhận đổi trả
+        // 12 --> từ chối đổi trả
+
+        // 13 --> khách huỷ đơn                                          ---- > đã huỷ
+        // 14 --> chấp nhận huỷ đơn
 
 
 
