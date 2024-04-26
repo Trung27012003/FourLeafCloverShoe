@@ -414,7 +414,7 @@ namespace FourLeafCloverShoe.Controllers
                         else if (resultCode == "1006") //Giao dịch thất bại do người dùng đã từ chối xác nhận thanh toán.
                         {
 
-                            order.OrderStatus = 11; // đã huỷ
+                            order.OrderStatus =13; // đã huỷ
                             order.UpdateDate = DateTime.Now;
                             var result = await _orderService.Update(order);
                             if (!(await ReturnCoins(order.CoinsUsed)))
@@ -480,7 +480,7 @@ namespace FourLeafCloverShoe.Controllers
                         }
                         if (vnp_ResponseCode == "24") //Giao dịch không thành công do: Khách hàng hủy giao dịch
                         {
-                            order.OrderStatus = 11;
+                            order.OrderStatus =13;
                             order.UpdateDate = DateTime.Now;
                             var result = await _orderService.Update(order);
                             if (!(await ReturnCoins(order.CoinsUsed)))
@@ -533,7 +533,7 @@ namespace FourLeafCloverShoe.Controllers
                         else 
                         {
 
-                            order.OrderStatus = 11; // đã huỷ
+                            order.OrderStatus =13; // đã huỷ
                             order.UpdateDate = DateTime.Now;
                             var result = await _orderService.Update(order);
                             return Redirect($"/Order/CheckOutFailed");
@@ -576,7 +576,7 @@ namespace FourLeafCloverShoe.Controllers
                         }
                         else
                         {
-                            order.OrderStatus = 11;
+                            order.OrderStatus =13;
                             order.UpdateDate = DateTime.Now;
                             var result = await _orderService.Update(order);
                             

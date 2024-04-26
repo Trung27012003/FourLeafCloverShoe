@@ -91,6 +91,7 @@ namespace FourLeafCloverShoe.Services
                     .Include(c => c.OrderItems)
                         .ThenInclude(c => c.ProductDetails)
                             .ThenInclude(c => c.Products)
+                            .ThenInclude(c=>c.ProductImages)
                     .Include(c => c.OrderItems)
                         .ThenInclude(c => c.ProductDetails)
                             .ThenInclude(c => c.Size)
