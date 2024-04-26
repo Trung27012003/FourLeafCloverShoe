@@ -22,10 +22,11 @@ namespace FourLeafCloverShoe.Controllers
         private readonly ICartItemItemService _cartItemItemService;
         private readonly IUserVoucherService _userVoucherService;
         private readonly IVoucherService _voucherService;
+        private readonly IProductDetailService _productDetailService;
         private readonly IHubContext<Hubs> _hubContext;
 
 
-        public OrderController(IHubContext<Hubs> hubContext, UserManager<User> userManager,IVoucherService voucherService,IUserVoucherService userVoucherService , IOrderService orderService, IOrderItemService orderItemService, ICartItemItemService cartItemItemService)
+        public OrderController(IHubContext<Hubs> hubContext, IProductDetailService productDetailService, UserManager<User> userManager,IVoucherService voucherService,IUserVoucherService userVoucherService , IOrderService orderService, IOrderItemService orderItemService, ICartItemItemService cartItemItemService)
         {
             _userManager = userManager;
             _orderItemService = orderItemService;
@@ -33,6 +34,7 @@ namespace FourLeafCloverShoe.Controllers
             _cartItemItemService = cartItemItemService;
             _userVoucherService = userVoucherService;
             _voucherService = voucherService;
+            _productDetailService = productDetailService;
             _hubContext = hubContext;
 
         }
@@ -94,119 +96,201 @@ namespace FourLeafCloverShoe.Controllers
         public async Task<string> CheckOutAsync(Order order)
         {
 
-            var user = await _userManager.GetUserAsync(HttpContext.User);
-            var lstCartItem = await _cartItemItemService.GetsByUserId(user.Id);
-            order.UserId = user.Id;
-            order.VoucherId = order.VoucherId;
-            order.OrderCode = GenerateInvoiceCode(order.PaymentType);
-            order.PaymentType = order.PaymentType;
-            if (order.PaymentType == "vnpay" || order.PaymentType == "momo" || order.PaymentType == "off")
+            if (User.Identity.IsAuthenticated) // đã đăng nhập
             {
-                order.OrderStatus = 0; // chờ thanh toán
-            }
-            else
-            {
-                order.OrderStatus = 2; // chờ xác nhận
-            }
-            order.RecipientName = order.RecipientName;
-            order.RecipientAddress = order.RecipientAddress;
-            order.RecipientPhone = order.RecipientPhone;
-            order.CoinsUsed = order.CoinsUsed;
-            order.TotalAmout = order.TotalAmout;
-            order.VoucherValue = order.VoucherValue;
-            order.ShippingFee = order.ShippingFee;
-            order.CreateDate = DateTime.Now;
+                var user = await _userManager.GetUserAsync(HttpContext.User);
 
-            var result = await _orderService.Add(order); // tạo hoá đơn
-            if (result)
-            {
-                var lstOrderItems = new List<OrderItem>();
-                foreach (var item in lstCartItem)
+                var lstCartItem = await _cartItemItemService.GetsByUserId(user.Id);
+                order.UserId = user.Id;
+                order.VoucherId = order.VoucherId;
+                order.OrderCode = GenerateInvoiceCode(order.PaymentType);
+                order.PaymentType = order.PaymentType;
+                if (order.PaymentType == "vnpay" || order.PaymentType == "momo" || order.PaymentType == "off")
                 {
-                    var orderItems = new OrderItem()
-                    {
-                        OrderId = order.Id,
-                        ProductDetailId = item.ProductDetailId,
-                        Quantity = item.Quantity,
-                        Price = item.ProductDetails.PriceSale,
-                    };
-                    lstOrderItems.Add(orderItems);
+                    order.OrderStatus = 0; // chờ thanh toán
                 }
-                var resultCreateOrderItems = await _orderItemService.AddMany(lstOrderItems);
-                if (resultCreateOrderItems)
+                else
                 {
-                    // tạo đơn hàng thành công
+                    order.OrderStatus = 2; // chờ xác nhận
+                }
+                order.RecipientName = order.RecipientName;
+                order.RecipientAddress = order.RecipientAddress;
+                order.RecipientPhone = order.RecipientPhone;
+                order.CoinsUsed = order.CoinsUsed;
+                order.TotalAmout = order.TotalAmout;
+                order.VoucherValue = order.VoucherValue;
+                order.ShippingFee = order.ShippingFee;
+                order.CreateDate = DateTime.Now;
 
-                    var cartItems = await _cartItemItemService.GetsByUserId(user.Id);
-                    var resultDeleteCartItems = await _cartItemItemService.DeleteMany(cartItems);
-                    if (!resultDeleteCartItems) // xoá giỏ hàng
+                var result = await _orderService.Add(order); // tạo hoá đơn
+                if (result)
+                {
+                    var lstOrderItems = new List<OrderItem>();
+                    foreach (var item in lstCartItem)
                     {
-                        return "xoa gio hang khong thanh cong";
-                    }
-                    // tru coins
-                    if (order.CoinsUsed>0)
-                    {
-                        user.Coins -= order.CoinsUsed;
-                        var resultUpdateUser = await _userManager.UpdateAsync(user);
-                        if (!resultUpdateUser.Succeeded)
+                        var orderItems = new OrderItem()
                         {
-                            return "Tru coins khong thanh cong";
+                            OrderId = order.Id,
+                            ProductDetailId = item.ProductDetailId,
+                            Quantity = item.Quantity,
+                            Price = item.ProductDetails.PriceSale,
+                        };
+                        lstOrderItems.Add(orderItems);
+                    }
+                    var resultCreateOrderItems = await _orderItemService.AddMany(lstOrderItems);
+                    if (resultCreateOrderItems)
+                    {
+                        // tạo đơn hàng thành công
+
+                        var cartItems = await _cartItemItemService.GetsByUserId(user.Id);
+                        var resultDeleteCartItems = await _cartItemItemService.DeleteMany(cartItems);
+                        if (!resultDeleteCartItems) // xoá giỏ hàng
+                        {
+                            return "xoa gio hang khong thanh cong";
                         }
-                    }
-                    // tru sl ma giam gia
-                    // cap nhat trang thai ma giam gia
-                    if (order.VoucherId!=null)
-                    {
-                        var getUserVoucherbyUserId = await _userVoucherService?.GetByUserId(user.Id);
-                        if (getUserVoucherbyUserId != null)
+                        // tru coins
+                        if (order.CoinsUsed > 0)
                         {
-                            var getUserVoucher =  getUserVoucherbyUserId.FirstOrDefault(c => c.VoucherId == order.VoucherId);
-                            if (getUserVoucher!=null)
+                            user.Coins -= order.CoinsUsed;
+                            var resultUpdateUser = await _userManager.UpdateAsync(user);
+                            if (!resultUpdateUser.Succeeded)
                             {
-                                getUserVoucher.Status = -1;
-                                var resultStatusUserVoucher = await _userVoucherService.Update(getUserVoucher);
-                                if (!resultStatusUserVoucher)
+                                return "Tru coins khong thanh cong";
+                            }
+                        }
+                        // tru sl ma giam gia
+                        // cap nhat trang thai ma giam gia
+                        if (order.VoucherId != null)
+                        {
+                            var getUserVoucherbyUserId = await _userVoucherService?.GetByUserId(user.Id);
+                            if (getUserVoucherbyUserId != null)
+                            {
+                                var getUserVoucher = getUserVoucherbyUserId.FirstOrDefault(c => c.VoucherId == order.VoucherId);
+                                if (getUserVoucher != null)
                                 {
-                                    return "cap nhat status uservoucher fail";
+                                    getUserVoucher.Status = -1;
+                                    var resultStatusUserVoucher = await _userVoucherService.Update(getUserVoucher);
+                                    if (!resultStatusUserVoucher)
+                                    {
+                                        return "cap nhat status uservoucher fail";
+                                    }
+                                }
+
+                            }
+                            var getVoucher = await _voucherService.GetById((Guid)(order.VoucherId));
+                            if (getVoucher != null)
+                            {
+                                getVoucher.Quantity -= 1;
+                                var resultUpdateQuantityVoucher = await _voucherService.Update(getVoucher);
+                                if (!resultUpdateQuantityVoucher)
+                                {
+                                    return "cap nhat so luong voucher fail";
                                 }
                             }
-                           
                         }
-                        var getVoucher = await _voucherService.GetById((Guid)(order.VoucherId));
-                        if (getVoucher != null)
+                        if (order.PaymentType == "cod" || order.PaymentType == "momo" || order.PaymentType == "vnpay")
                         {
-                            getVoucher.Quantity -=1;
-                            var resultUpdateQuantityVoucher = await _voucherService.Update(getVoucher);
-                            if (!resultUpdateQuantityVoucher)
-                            {
-                                return "cap nhat so luong voucher fail";
-                            }
-                        }
-                    }
-                   if (order.PaymentType == "cod"||order.PaymentType == "momo" || order.PaymentType == "vnpay")
-                    {
-                        await _hubContext.Clients.All.SendAsync("alertToAdmin", $"Bạn có đơn hàng mới từ {user.FullName}", true);
+                            await _hubContext.Clients.All.SendAsync("alertToAdmin", $"Bạn có đơn hàng mới từ {user.FullName}", true);
 
-                        if (order.PaymentType == "cod")
-                        {
-                            return $"/Order/CheckOutSuccess";
-                        }
-                        else if (order.PaymentType == "momo")
-                        {
-                            return await UrlCheckOutMoMo(order);
+                            if (order.PaymentType == "cod")
+                            {
+                                return $"/Order/CheckOutSuccess";
+                            }
+                            else if (order.PaymentType == "momo")
+                            {
+                                return await UrlCheckOutMoMo(order);
+                            }
+                            else
+                            {
+                                return await UrlCheckOutVnPay(order);
+                            }
                         }
                         else
                         {
-                            return await UrlCheckOutVnPay(order);
+                            return "thanh toán tại quầy";
                         }
                     }
-                    else
+                }
+                return $"/Order/CheckOutFailed";
+            }
+            else
+            {
+                var user = await _userManager.FindByIdAsync("2FA6148D-B530-421F-878E-CE4D54BFC6AB");
+            var lstCartItem  = SessionServices.GetCartItems(HttpContext.Session, "Cart");
+                for (int i = lstCartItem.Count - 1; i >= 0; i--)
+                {
+                    lstCartItem.RemoveAt(i);
+                }
+                SessionServices.SetCartItems(HttpContext.Session, "Cart", lstCartItem);
+                order.UserId = user.Id;
+                order.VoucherId = order.VoucherId;
+                order.OrderCode = GenerateInvoiceCode(order.PaymentType);
+                order.PaymentType = order.PaymentType;
+                if (order.PaymentType == "vnpay" || order.PaymentType == "momo" || order.PaymentType == "off")
+                {
+                    order.OrderStatus = 0; // chờ thanh toán
+                }
+                else
+                {
+                    order.OrderStatus = 2; // chờ xác nhận
+                }
+                order.RecipientName = order.RecipientName;
+                order.RecipientAddress = order.RecipientAddress;
+                order.RecipientPhone = order.RecipientPhone;
+                order.CoinsUsed = order.CoinsUsed;
+                order.TotalAmout = order.TotalAmout;
+                order.VoucherValue = order.VoucherValue;
+                order.ShippingFee = order.ShippingFee;
+                order.CreateDate = DateTime.Now;
+                order.UpdateDate = DateTime.Now;
+
+                var result = await _orderService.Add(order); // tạo hoá đơn
+                if (result)
+                {
+                    var lstOrderItems = new List<OrderItem>();
+                    foreach (var item in lstCartItem)
                     {
-                        return "thanh toán tại quầy";
+                        var orderItems = new OrderItem()
+                        {
+                            OrderId = order.Id,
+                            ProductDetailId = item.ProductDetailId,
+                            Quantity = item.Quantity,
+                            Price = item.ProductDetails.PriceSale,
+                        };
+                        lstOrderItems.Add(orderItems);
+                    }
+                    var resultCreateOrderItems = await _orderItemService.AddMany(lstOrderItems);
+                    if (resultCreateOrderItems)
+                    {
+                        
+                        
+                        if (order.PaymentType == "cod" || order.PaymentType == "momo" || order.PaymentType == "vnpay")
+                        {
+                            await _hubContext.Clients.All.SendAsync("alertToAdmin", $"Bạn có đơn hàng mới từ {user.FullName}", true);
+
+                            if (order.PaymentType == "cod")
+                            {
+                                return $"/Order/CheckOutSuccess?orderId={order.Id}";
+
+                            }
+                            else if (order.PaymentType == "momo")
+                            {
+                                return await UrlCheckOutMoMo(order);
+                            }
+                            else
+                            {
+                                return await UrlCheckOutVnPay(order);
+                            }
+                        }
+                        else
+                        {
+                            return "thanh toán tại quầy";
+                        }
                     }
                 }
+                return $"/Order/CheckOutFailed";
             }
-            return $"/Order/CheckOutFailed";
+            
         }
         public async Task<string> UrlCheckOutVnPay(Order order)
         {
@@ -293,9 +377,10 @@ namespace FourLeafCloverShoe.Controllers
             JObject jmessage = JObject.Parse(responseFromMomo);
             return (jmessage.GetValue("payUrl").ToString());
         }
-        public async Task<IActionResult> CheckOutSuccess()
+        public async Task<IActionResult> CheckOutSuccess(Guid orderId)
         {
-            return View();
+            var order = await _orderService.GetById(orderId);
+            return View(order);
         }
         public async Task<IActionResult> CheckOutFailed()
         {
@@ -308,119 +393,198 @@ namespace FourLeafCloverShoe.Controllers
         {
             if (Request.Query.Count > 0)
             {
-                var order = await _orderService.GetById(orderId);
-                if (order.PaymentType == "momo")
+                if (User.Identity.IsAuthenticated)
                 {
-                    var resultCode = Request.Query["resultCode"];
-                    if (resultCode=="0")
+                    var order = await _orderService.GetById(orderId);
+                    if (order.PaymentType == "momo")
                     {
-                        order.OrderStatus = 1; // chờ xác nhận
-                        order.PaymentDate = DateTime.Now;
-                        order.UpdateDate = DateTime.Now;
-                        var result = await _orderService.Update(order);
-                        if (result)
+                        var resultCode = Request.Query["resultCode"];
+                        if (resultCode == "0")
                         {
-
-                            return Redirect($"/Order/CheckOutSuccess");
-                        }
-                    }else if (resultCode== "1006") //Giao dịch thất bại do người dùng đã từ chối xác nhận thanh toán.
-                    {
-                        
-                        order.OrderStatus = 11; // đã huỷ
-                        order.UpdateDate = DateTime.Now;
-                        var result = await _orderService.Update(order);
-                        if (!(await ReturnCoins(order.CoinsUsed)))
-                        {
-                            return Redirect($"Khong hoan duoc xu");
-                        }
-                        if (order.VoucherId!=null)
-                        {
-                            if (!(await ReturnVoucher(order.VoucherId, order.UserId)))
-                            {
-                                return Redirect($"Khong hoan duoc voucher");
-                            }
-
-                        }
-                        
-
-                        return Redirect($"/Order/CheckOutFailed");
-
-                    }
-                    else
-                    {
-                        order.OrderStatus = 0;// chờ thanh toán
-                        order.UpdateDate = DateTime.Now;
-                        var result = await _orderService.Update(order);
-                        if (result)
-                        {
-
-                            return Redirect($"/Order/CheckOutFailed");
-                        }
-                    }
-                }
-                if (order.PaymentType == "vnpay")
-                {
-                    string vnp_HashSecret = "CBVBDQZOHUERGMDHAQRWSINJIBSCCFTO"; //Secret Key
-                    var vnpayData = Request.Query;
-                    VnPayLibrary vnpay = new VnPayLibrary();
-                    foreach (var s in vnpayData)
-                    {
-                        //get all querystring data
-                        if (!string.IsNullOrEmpty(s.Key) && s.Key.StartsWith("vnp_"))
-                        {
-                            vnpay.AddResponseData(s.Key, vnpayData[s.Key]);
-                        }
-                    }
-                    string vnp_ResponseCode = vnpay.GetResponseData("vnp_ResponseCode");
-                    string vnp_TransactionStatus = vnpay.GetResponseData("vnp_TransactionStatus");
-                    String vnp_SecureHash = Request.Query["vnp_SecureHash"];
-                    bool checkSignature = vnpay.ValidateSignature(vnp_SecureHash, vnp_HashSecret);
-                    if (checkSignature)
-                    {
-                        if (vnp_ResponseCode == "00" && vnp_TransactionStatus == "00")
-                        {
-
-                            order.OrderStatus = 1;
+                            order.OrderStatus = 1; // chờ xác nhận
                             order.PaymentDate = DateTime.Now;
                             order.UpdateDate = DateTime.Now;
                             var result = await _orderService.Update(order);
                             if (result)
                             {
+
                                 return Redirect($"/Order/CheckOutSuccess");
                             }
                         }
-                    }
-                    if (vnp_ResponseCode == "24") //Giao dịch không thành công do: Khách hàng hủy giao dịch
-                    {
-                        order.OrderStatus = 11;
-                        order.UpdateDate = DateTime.Now;
-                        var result = await _orderService.Update(order);
-                        if (!(await ReturnCoins(order.CoinsUsed)))
+                        else if (resultCode == "1006") //Giao dịch thất bại do người dùng đã từ chối xác nhận thanh toán.
                         {
-                            return Redirect($"Khong hoan duoc xu");
-                        }
-                        if (order.VoucherId != null)
-                        {
-                            if (!(await ReturnVoucher(order.VoucherId, order.UserId)))
+
+                            order.OrderStatus = 11; // đã huỷ
+                            order.UpdateDate = DateTime.Now;
+                            var result = await _orderService.Update(order);
+                            if (!(await ReturnCoins(order.CoinsUsed)))
                             {
-                                return Redirect($"Khong hoan duoc voucher");
+                                return Redirect($"Khong hoan duoc xu");
+                            }
+                            if (order.VoucherId != null)
+                            {
+                                if (!(await ReturnVoucher(order.VoucherId, order.UserId)))
+                                {
+                                    return Redirect($"Khong hoan duoc voucher");
+                                }
+
                             }
 
+
+                            return Redirect($"/Order/CheckOutFailed");
+
                         }
-
-
-                        return Redirect($"/Order/CheckOutFailed");
-                    }
-                    else
-                    {
-                        order.OrderStatus = 0;
-                        order.PaymentDate = DateTime.Now;
-                        order.UpdateDate = DateTime.Now;
-                        var result = await _orderService.Update(order);
-                        if (result)
+                        else
                         {
+                            order.OrderStatus = 0;// chờ thanh toán
+                            order.UpdateDate = DateTime.Now;
+                            var result = await _orderService.Update(order);
+                            if (result)
+                            {
+
+                                return Redirect($"/Order/CheckOutFailed");
+                            }
+                        }
+                    }
+                    if (order.PaymentType == "vnpay")
+                    {
+                        string vnp_HashSecret = "CBVBDQZOHUERGMDHAQRWSINJIBSCCFTO"; //Secret Key
+                        var vnpayData = Request.Query;
+                        VnPayLibrary vnpay = new VnPayLibrary();
+                        foreach (var s in vnpayData)
+                        {
+                            //get all querystring data
+                            if (!string.IsNullOrEmpty(s.Key) && s.Key.StartsWith("vnp_"))
+                            {
+                                vnpay.AddResponseData(s.Key, vnpayData[s.Key]);
+                            }
+                        }
+                        string vnp_ResponseCode = vnpay.GetResponseData("vnp_ResponseCode");
+                        string vnp_TransactionStatus = vnpay.GetResponseData("vnp_TransactionStatus");
+                        String vnp_SecureHash = Request.Query["vnp_SecureHash"];
+                        bool checkSignature = vnpay.ValidateSignature(vnp_SecureHash, vnp_HashSecret);
+                        if (checkSignature)
+                        {
+                            if (vnp_ResponseCode == "00" && vnp_TransactionStatus == "00")
+                            {
+
+                                order.OrderStatus = 1;
+                                order.PaymentDate = DateTime.Now;
+                                order.UpdateDate = DateTime.Now;
+                                var result = await _orderService.Update(order);
+                                if (result)
+                                {
+                                    return Redirect($"/Order/CheckOutSuccess");
+                                }
+                            }
+                        }
+                        if (vnp_ResponseCode == "24") //Giao dịch không thành công do: Khách hàng hủy giao dịch
+                        {
+                            order.OrderStatus = 11;
+                            order.UpdateDate = DateTime.Now;
+                            var result = await _orderService.Update(order);
+                            if (!(await ReturnCoins(order.CoinsUsed)))
+                            {
+                                return Redirect($"Khong hoan duoc xu");
+                            }
+                            if (order.VoucherId != null)
+                            {
+                                if (!(await ReturnVoucher(order.VoucherId, order.UserId)))
+                                {
+                                    return Redirect($"Khong hoan duoc voucher");
+                                }
+
+                            }
+
+
                             return Redirect($"/Order/CheckOutFailed");
                         }
+                        else
+                        {
+                            order.OrderStatus = 0;
+                            order.PaymentDate = DateTime.Now;
+                            order.UpdateDate = DateTime.Now;
+                            var result = await _orderService.Update(order);
+                            if (result)
+                            {
+                                return Redirect($"/Order/CheckOutFailed");
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    var order = await _orderService.GetById(orderId);
+                    if (order.PaymentType == "momo")
+                    {
+                        var resultCode = Request.Query["resultCode"];
+                        if (resultCode == "0")
+                        {
+                            order.OrderStatus = 1; // chờ xác nhận
+                            order.PaymentDate = DateTime.Now;
+                            order.UpdateDate = DateTime.Now;
+                            var result = await _orderService.Update(order);
+                            if (result)
+                            {
+
+                                return Redirect($"/Order/CheckOutSuccess?orderId={order.Id}");
+                            }
+                        }
+                        else 
+                        {
+
+                            order.OrderStatus = 11; // đã huỷ
+                            order.UpdateDate = DateTime.Now;
+                            var result = await _orderService.Update(order);
+                            return Redirect($"/Order/CheckOutFailed");
+
+                        }
+                      
+                    }
+                    if (order.PaymentType == "vnpay")
+                    {
+                        string vnp_HashSecret = "CBVBDQZOHUERGMDHAQRWSINJIBSCCFTO"; //Secret Key
+                        var vnpayData = Request.Query;
+                        VnPayLibrary vnpay = new VnPayLibrary();
+                        foreach (var s in vnpayData)
+                        {
+                            //get all querystring data
+                            if (!string.IsNullOrEmpty(s.Key) && s.Key.StartsWith("vnp_"))
+                            {
+                                vnpay.AddResponseData(s.Key, vnpayData[s.Key]);
+                            }
+                        }
+                        string vnp_ResponseCode = vnpay.GetResponseData("vnp_ResponseCode");
+                        string vnp_TransactionStatus = vnpay.GetResponseData("vnp_TransactionStatus");
+                        String vnp_SecureHash = Request.Query["vnp_SecureHash"];
+                        bool checkSignature = vnpay.ValidateSignature(vnp_SecureHash, vnp_HashSecret);
+                        if (checkSignature)
+                        {
+                            if (vnp_ResponseCode == "00" && vnp_TransactionStatus == "00")
+                            {
+
+                                order.OrderStatus = 1;
+                                order.PaymentDate = DateTime.Now;
+                                order.UpdateDate = DateTime.Now;
+                                var result = await _orderService.Update(order);
+                                if (result)
+                                {
+                                    return Redirect($"/Order/CheckOutSuccess?orderId={order.Id}");
+
+                                }
+                            }
+                        }
+                        else
+                        {
+                            order.OrderStatus = 11;
+                            order.UpdateDate = DateTime.Now;
+                            var result = await _orderService.Update(order);
+                            
+
+
+                            return Redirect($"/Order/CheckOutFailed");
+                        }
+                      
                     }
                 }
             }
@@ -432,7 +596,7 @@ namespace FourLeafCloverShoe.Controllers
             try
             {
                 var order = await _orderService.GetById(orderId);
-                var view = new ViewAsPdf("ExportHD", order.OrderCode)
+                var view = new ViewAsPdf("ExportPDF", order)
                 {
                     FileName = $"{order.OrderCode}.pdf",
                     PageOrientation = Rotativa.AspNetCore.Options.Orientation.Portrait,

@@ -455,11 +455,6 @@
     var coutProduct = 1; // chua
     $(document).ready(function () {
         $("#btnDatHang").click(function () {
-            //RecipientName =;
-            //RecipientAddress = $("#Description").val() + ", " + $("#WardName").val() + ", " + $("#DistrictName").val() + ", " + $("#ProvinceName").val();
-            //RecipientPhone = ;
-            
-            
            if (ShippingFee == 0) {
                 showToast("Vui lòng kiểm tra lại địa chỉ nhận hàng!", false);
             }
@@ -512,9 +507,15 @@
 
                     else if ($("#RecipientPhone").val() == "") {
                         showToast("Vui lòng kiểm tra lại số điện thoại nhận hàng!", false);
+                    }else{
+                        $('#modalHDSIZE').modal('show');
+
                     }
+
                 }
-                $('#modalHDSIZE').modal('show');
+                else{
+                    $('#modalHDSIZE').modal('show');
+                }
             }
         });
     });

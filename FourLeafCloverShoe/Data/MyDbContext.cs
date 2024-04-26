@@ -34,7 +34,7 @@ namespace FourLeafCloverShoe.Data
                 new IdentityRole { Id = "2FA6148D-B530-421F-878E-CE4D54BFC6AB", Name = "Staff", NormalizedName = "STAFF" }
             );
             builder.Entity<User>().HasData(
-                    new User() { Id = "2FA6148D-B530-421F-878E-CE4D54BFC6AB", Points = 0, UserName = "Guest", AccessFailedCount = 0, RankId = Guid.Parse("2FA0118D-B530-421F-878E-CE4D54BFC6AB"), LockoutEnabled = true, TwoFactorEnabled = false, PhoneNumberConfirmed = false, EmailConfirmed = false, NormalizedUserName = "GUEST" }
+                    new User() { Id = "2FA6148D-B530-421F-878E-CE4D54BFC6AB",Coins=0, Points = 0, UserName = "Guest", AccessFailedCount = 0, RankId = Guid.Parse("2FA0118D-B530-421F-878E-CE4D54BFC6AB"), LockoutEnabled = true, TwoFactorEnabled = false, PhoneNumberConfirmed = false, EmailConfirmed = false, NormalizedUserName = "GUEST" }
                 );
             builder.Entity<IdentityUserRole<string>>().HasData(
                     new IdentityUserRole<string>() { UserId = "2FA6148D-B530-421F-878E-CE4D54BFC6AB", RoleId = "2FA6148D-B530-421F-878E-CE4D54BFC6AB" }
