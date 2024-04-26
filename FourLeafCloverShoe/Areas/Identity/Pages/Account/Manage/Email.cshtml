@@ -5,7 +5,6 @@
     ViewData["ActivePage"] = ManageNavPages.Email;
 }
 
-<h3>@ViewData["Title"]</h3>
 <partial name="_StatusMessage" for="StatusMessage" />
 <form id="change-password-form" method="post">
     <div class="account-forgot-password-form">
@@ -69,7 +68,6 @@
                 </div>
             </div>
         </div>
-    </div>
 </form>
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
