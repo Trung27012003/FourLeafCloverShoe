@@ -4,6 +4,10 @@ using FourLeafCloverShoe.Share.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.CodeAnalysis;
+using System.Drawing;
+using System.Net.NetworkInformation;
+using ZXing;
+using ZXing.QrCode.Internal;
 
 namespace FourLeafCloverShoe.Areas.Admin.Controllers
 {
@@ -16,14 +20,16 @@ namespace FourLeafCloverShoe.Areas.Admin.Controllers
         private readonly IProductImageService _productImageService;
         private readonly ICategoryService _categoryService;
         private readonly IProductDetailService _productDetailService;
+        private readonly IWebHostEnvironment _webHostEnvironment;
         private List<IFormFile> _lstIFormFile;
 
-        public ProductsController(  IProductService productService,
+        public ProductsController(IProductService productService,
                                     ISizeService sizeService,
                                     IBrandService brandService,
                                     IProductImageService productImageService,
                                     IProductDetailService productDetailService,
-                                    ICategoryService categoryService)
+                                    ICategoryService categoryService,
+                                    IWebHostEnvironment webHostEnvironment)
         {
             _productService = productService;
             _sizeService = sizeService;
@@ -32,13 +38,13 @@ namespace FourLeafCloverShoe.Areas.Admin.Controllers
             _categoryService = categoryService;
             _productDetailService = productDetailService;
             _lstIFormFile = new List<IFormFile>();
-
+            _webHostEnvironment = webHostEnvironment;
         }
         public async Task<IActionResult> Index()
         {
             await _productService.UpdateStatusQuantity();
             var lstObj = await _productService.Gets();
-            return View(  lstObj.OrderByDescending(c => c.Status)) ; // trạng thái đang bán (True);
+            return View(lstObj.OrderByDescending(c => c.Status)); // trạng thái đang bán (True);
         }
         public async Task<IActionResult> CreateNewProduct()
         {
@@ -280,12 +286,12 @@ namespace FourLeafCloverShoe.Areas.Admin.Controllers
             await _productService.UpdateStatusQuantity();
             var lstObj = await _productDetailService.GetByProductId(productId);
             ViewBag.productId = productId;
-            return View(lstObj); 
+            return View(lstObj);
         }
         public async Task<IActionResult> CreateProductDetail(Guid productId)
         {
             List<SelectListItem> ListSizeitems = new List<SelectListItem>();
-            foreach (var obj in ((await _sizeService.Gets()).OrderBy(c=>c.Name)))
+            foreach (var obj in ((await _sizeService.Gets()).OrderBy(c => c.Name)))
             {
                 ListSizeitems.Add(new SelectListItem()
                 {
@@ -295,14 +301,14 @@ namespace FourLeafCloverShoe.Areas.Admin.Controllers
             }
             ViewBag.productId = productId;
             ViewBag.ListSizeitems = ListSizeitems;
-            return View(); 
+            return View();
         }
         [HttpPost]
         public async Task<IActionResult> CreateProductDetail(ProductDetail productDetail)
         {
-                List<SelectListItem> ListSizeitems = new List<SelectListItem>();
+            List<SelectListItem> ListSizeitems = new List<SelectListItem>();
             foreach (var obj in ((await _sizeService.Gets()).OrderBy(c => c.Name)))
-                {
+            {
                 ListSizeitems.Add(new SelectListItem()
                 {
                     Text = obj.Name,
@@ -315,7 +321,7 @@ namespace FourLeafCloverShoe.Areas.Admin.Controllers
                 var product = await _productService.GetById(productDetail.ProductId);
                 var size = await _sizeService.GetById(productDetail.SizeId);
                 productDetail.CreateAt = DateTime.Now;
-                productDetail.SKU = product.ProductCode +  "-" + size.Name.Trim().Replace(" ", "_").ToUpper();
+                productDetail.SKU = product.ProductCode + "-" + size.Name.Trim().Replace(" ", "_").ToUpper();
                 productDetail.Status = productDetail.Status;
                 var result = await _productDetailService.Add(productDetail);
                 if (result)
@@ -330,7 +336,7 @@ namespace FourLeafCloverShoe.Areas.Admin.Controllers
         {
             List<SelectListItem> ListSizeitems = new List<SelectListItem>();
             foreach (var obj in ((await _sizeService.Gets()).OrderBy(c => c.Name)))
-                {
+            {
                 ListSizeitems.Add(new SelectListItem()
                 {
                     Text = obj.Name,
@@ -347,10 +353,10 @@ namespace FourLeafCloverShoe.Areas.Admin.Controllers
         public async Task<IActionResult> EditProductDetail(ProductDetail productDetail)
         {
             List<SelectListItem> ListSizeitems = new List<SelectListItem>();
-           foreach (var obj in ((await _sizeService.Gets()).OrderBy(c => c.Name)))
+            foreach (var obj in ((await _sizeService.Gets()).OrderBy(c => c.Name)))
 
-                {
-                    ListSizeitems.Add(new SelectListItem()
+            {
+                ListSizeitems.Add(new SelectListItem()
                 {
                     Text = obj.Name,
                     Value = obj.Id.ToString()
@@ -374,10 +380,37 @@ namespace FourLeafCloverShoe.Areas.Admin.Controllers
             return RedirectToAction("EditProductDetail", null, new { @productId = productDetail.Id });
         }
 
-        public async Task<IActionResult> DeleteProductDetail(Guid Id,Guid productId)
+        public async Task<IActionResult> DeleteProductDetail(Guid Id, Guid productId)
         {
             var result = await _productDetailService.Delete(Id);
             return RedirectToAction("ProductDetail", new { productId = productId });
+        }
+        public async Task<IActionResult> DownloadQrCode(Guid productDetailId)
+        {
+            var writer = new ZXing.QrCode.QRCodeWriter();
+            var resultBit = writer.encode(productDetailId.ToString(), BarcodeFormat.QR_CODE, 100, 100);
+            var matrix = resultBit;
+            int scale = 2;
+            var result = new Bitmap(matrix.Width * scale, matrix.Height * scale);
+            for (int i = 0; i < matrix.Height; i++)
+            {
+                for (int j = 0; j < matrix.Width; j++)
+                {
+                    Color pixel = matrix[i, j] ? Color.Black : Color.White;
+                    for (int n = 0; n < scale; n++)
+                    {
+                        for (int m = 0; m < scale; m++)
+                        {
+                            result.SetPixel(i * scale + n, j * scale + m, pixel);
+                        }
+                    }
+                }
+            }
+            string webRootPath = _webHostEnvironment.WebRootPath;
+            string imagePath = Path.Combine(webRootPath, "images", "qrcode", $"QRCode{productDetailId}.png");
+            result.Save(imagePath);
+            byte[] imageBytes = System.IO.File.ReadAllBytes(imagePath);
+            return File(imageBytes, "image/png"); // Trả về hình ảnh dưới dạng nội dung của tệp
         }
     }
 }

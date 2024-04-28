@@ -86,8 +86,6 @@ namespace FourLeafCloverShoe.Controllers
                         }
                     }
                 }
-
-
             }
             string webRootPath = _webHostEnvironment.WebRootPath;
             string qrCodeFolderPath = Path.Combine(webRootPath, "images", "qrcode");
