@@ -641,7 +641,8 @@
                             </div>
                         </div>
                     </div>
-
+                    
+                        <img src="#" id="imgQrCode" hidden/>
                     <div class="product-single__policy">
                         <div class="product-policy">
                             <div class="product-policy__item">
@@ -850,6 +851,8 @@
                 }else{
                     $('.product-availibleQuantity').text("Sản phẩm ngừng kinh doanh");
                 }
+                $('#imgQrCode').attr('src', response.imgQrCode);
+                $('#imgQrCode').removeAttr('hidden');
             },
             error: function (error) {
                 console.log(error);
