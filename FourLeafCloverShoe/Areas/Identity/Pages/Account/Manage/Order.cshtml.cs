@@ -22,7 +22,7 @@ namespace FourLeafCloverShoe.Areas.Identity.Pages.Account.Manage
         public async Task<IActionResult> OnGetAsync()
         {
             var user = await _userManager.GetUserAsync(User);
-            ListOrder = (await _orderService.Gets()).Where(c=>c.UserId==user.Id).OrderByDescending(c => c.UpdateDate);
+            ListOrder = (await _orderService.Gets()).Where(c=>c.UserId==user.Id&& c.OrderStatus!=-1).OrderByDescending(c => c.UpdateDate);
             return Page();
         }
         public async Task<IActionResult> OnPostAsync(int type)

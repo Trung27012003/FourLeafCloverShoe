@@ -17,13 +17,15 @@
     var dataTable1 = new simpleDatatables.DataTable('#pc-dt-simple');
 </script>
 <script>
-
     document.addEventListener('DOMContentLoaded', function () {
         var resetMultiple = new Choices('#reset-multiple', {
             removeItemButton: true
-        });
-    });
 
+        });
+
+       
+    });
+  
     (function () {
         ClassicEditor.create(document.querySelector('#classic-editor')).catch((error) => {
             console.log(error);
@@ -62,6 +64,13 @@
 
         var toastContainer = document.querySelector('.toast-container');
 
+        // Check the number of current toasts
+        var currentToasts = toastContainer.getElementsByClassName('toast');
+        if (currentToasts.length >= 2) {
+            // If there are already 3 toasts, remove the oldest one
+            currentToasts[0].remove();
+        }
+
         var toastEl = document.createElement('div');
         toastEl.classList.add('toast');
         toastEl.setAttribute('role', 'alert');
@@ -93,4 +102,5 @@
         var toast = new bootstrap.Toast(toastEl);
         toast.show();
     }
+
 </script>

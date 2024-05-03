@@ -165,5 +165,20 @@ namespace FourLeafCloverShoe.Services
                 return false;
             }
         }
+
+        public async Task<bool> UpdateMany(List<ProductDetail> lstobj)
+        {
+            try
+            {
+                 _myDbContext.ProductDetails.UpdateRange(lstobj);
+                await _myDbContext.SaveChangesAsync();
+                return true;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                return false;
+            }
+        }
     }
 }
