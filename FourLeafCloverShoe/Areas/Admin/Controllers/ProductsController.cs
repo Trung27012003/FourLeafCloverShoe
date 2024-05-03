@@ -410,7 +410,7 @@ namespace FourLeafCloverShoe.Areas.Admin.Controllers
             string imagePath = Path.Combine(webRootPath, "images", "qrcode", $"QRCode{productDetailId}.png");
             result.Save(imagePath);
             byte[] imageBytes = System.IO.File.ReadAllBytes(imagePath);
-            return File(imageBytes, "image/png"); // Trả về hình ảnh dưới dạng nội dung của tệp
+            return File(imageBytes, "image/png", $"QRCode{productDetailId}.png"); // Trả về hình ảnh dưới dạng nội dung của tệp
         }
     }
 }

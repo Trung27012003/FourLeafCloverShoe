@@ -265,8 +265,8 @@ namespace FourLeafCloverShoe.Areas.Admin.Controllers
                     protocol: Request.Scheme      // Protocol (http or https)
                 );
                 // Send email confirmation email 
-                await _emailSender.SendEmailAsync(usermodel.Email, "Confirm your email",
-                    $"Please confirm your account by <a href='{callbackUrl}'>clicking here</a>.");
+                await _emailSender.SendEmailAsync(usermodel.Email, "Xác nhận email",
+                    $"Vui lòng xác nhận email của bạn bằng cách <a href='{callbackUrl}'>Nhấn vào đây</a>.");
 
             return RedirectToAction(nameof(Index));
             }

@@ -71,7 +71,7 @@
                                                     </a>
                                                 </li>
                                                 <li class="list-inline-item align-bottom" data-bs-toggle="tooltip" title="Tải xuống QR code">
-                                                    <a id="downloadQrCode" href="#" data-product-detail-id="@item.Id" class="avtar avtar-xs btn-link-danger btn-pc-default">
+                                                        <a  href="@Url.Action("DownloadQrCode", "Products", new { productDetailId = item.Id })" data-product-detail-id="@item.Id" class="avtar avtar-xs btn-link-danger btn-pc-default">
                                                         <i class="fas fa-qrcode"></i>
                                                     </a>
                                                 </li>
@@ -89,25 +89,3 @@
     </div>
     <!-- [ sample-page ] end -->
 </div>
-<script>
-    document.addEventListener("DOMContentLoaded", function () {
-        var downloadQrCodeLink = document.getElementById("downloadQrCode");
-        downloadQrCodeLink.addEventListener("click", function (e) {
-            e.preventDefault(); // Ngăn chặn hành động mặc định khi nhấp vào liên kết
-
-            // Lấy productDetailId từ thuộc tính data của liên kết
-            var productDetailId = downloadQrCodeLink.getAttribute("data-product-detail-id");
-
-            // Tạo một đường dẫn URL đến action DownloadQrCode trong controller và kèm theo productDetailId
-            var url = '@Url.Action("DownloadQrCode", "Products")' + "?productDetailId=" + productDetailId;
-
-            // Tạo một thẻ <a> ẩn với đường dẫn URL và tự động kích hoạt sự kiện click để bắt đầu quá trình tải xuống
-            var downloadLink = document.createElement("a");
-            downloadLink.href = url;
-            downloadLink.download = "QRCode.png"; // Thiết lập tên tệp tải xuống
-            document.body.appendChild(downloadLink);
-            downloadLink.click(); // Tự động kích hoạt sự kiện click để bắt đầu tải xuống
-            document.body.removeChild(downloadLink); // Xóa thẻ <a> sau khi đã tải xong
-        });
-    });
-</script>

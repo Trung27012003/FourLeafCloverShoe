@@ -56,8 +56,13 @@
     }
 
 </div>
-<div class ="modal fade" id="cameraModal" tabindex="-1" aria-labelledby="cameraModalLabel" aria-hidden="true">
-    <div class ="modal-dialog modal-lg modal-dialog-scrollable">
+
+<div data-pc-direction="ltr">
+    <div class="toast-container position-fixed top-0 end-0 p-3 " style="z-index: 99999"></div>
+</div>
+
+<div class="modal fade" id="cameraModal" tabindex="-1" aria-labelledby="cameraModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="cameraModalLabel">Chọn camera</h5>
@@ -73,11 +78,9 @@
         </div>
     </div>
 </div>
-<div data-pc-direction="ltr">
-    <div class="toast-container position-fixed top-0 end-0 p-3 " style="z-index: 99999"></div>
-</div>
 <video id="video" width="300" height="200" hidden></video>
 <canvas id="canvas" width="300" height="200" hidden></canvas>
+
 <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 
 <script>
