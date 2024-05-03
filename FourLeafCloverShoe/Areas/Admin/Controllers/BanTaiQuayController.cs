@@ -1,13 +1,21 @@
 ﻿using FourLeafCloverShoe.Controllers;
+using FourLeafCloverShoe.Helper;
 using FourLeafCloverShoe.IServices;
+using FourLeafCloverShoe.Services;
 using FourLeafCloverShoe.Share.Models;
 using FourLeafCloverShoe.Share.ViewModels;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json.Linq;
+using System.Drawing;
+using System.Net.Mail;
 using System.Net.WebSockets;
+using System.Text;
+using ZXing.Windows.Compatibility;
 using static System.Net.Mime.MediaTypeNames;
 
 namespace FourLeafCloverShoe.Areas.Admin.Controllers
@@ -21,13 +29,19 @@ namespace FourLeafCloverShoe.Areas.Admin.Controllers
         private readonly IOrderItemService _orderItemService;
         private readonly IUserVoucherService _userVoucherService;
         private readonly IVoucherService _voucherService;
+        private readonly RoleManager<IdentityRole> _roleManager;
+        private readonly ICartService _cartService;
+        private readonly IEmailSender _emailSender;
 
         public BanTaiQuayController(UserManager<User> userManager,
             IProductDetailService productDetailService,
             IOrderService orderService,
+             RoleManager<IdentityRole> roleManager,
             IOrderItemService orderItemService,
             IUserVoucherService userVoucherService,
-            IVoucherService voucherService
+            IVoucherService voucherService,
+             IEmailSender emailSender,
+            ICartService cartService
             )
         {
             _userManager = userManager;
@@ -36,6 +50,9 @@ namespace FourLeafCloverShoe.Areas.Admin.Controllers
             _orderItemService = orderItemService;
             _userVoucherService = userVoucherService;
             _voucherService = voucherService;
+            _roleManager = roleManager;
+            _cartService = cartService;
+            _emailSender = emailSender;
         }
         public IActionResult Index()
         {
@@ -124,6 +141,7 @@ namespace FourLeafCloverShoe.Areas.Admin.Controllers
                 var orderItems = (await _orderItemService.Gets()).Where(c => c.OrderId == orderId);
                 var total = orderItems.Sum(c => c.Quantity * c.Price);
                 var userVouchers = (await _userVoucherService.Gets()).Where(c => c.UserId == order.UserId && c.Status ==1);
+                var productQuantity = orderItems.Sum(c => c.Quantity);
                 var lstVoucher = new List<SelectListItem>();
                 if (order.UserId != null)
                 {
@@ -150,9 +168,9 @@ namespace FourLeafCloverShoe.Areas.Admin.Controllers
                             Value = obj.Id.ToString()
                         });
                     }
-                    return Json(new {fullName  = user.FullName, phoneNumber = user.PhoneNumber, coins = user.Coins, total = total, lstVoucher= lstVoucher, voucherValue = order.VoucherValue });
+                    return Json(new {fullName  = user.FullName, phoneNumber = user.PhoneNumber, coins = user.Coins, total = total, lstVoucher= lstVoucher, voucherValue = order.VoucherValue, productQuantity= productQuantity });
                 }
-                return Json(new { fullName = "", phoneNumber = "", coins = 0, total = total, lstVoucher = lstVoucher, voucherValue = order.VoucherValue });
+                return Json(new { fullName = "", phoneNumber = "", coins = 0, total = total, lstVoucher = lstVoucher, voucherValue = order.VoucherValue , productQuantity = productQuantity });
             }
             return Json(new { message = "Order null!", isSuccess = false });
         }
@@ -230,10 +248,14 @@ namespace FourLeafCloverShoe.Areas.Admin.Controllers
         [HttpPost]
         public async Task<IActionResult> AddProductDetailToOrderAsync(Guid orderId, Guid productDetailId) // cần - số lượng trong db
         {
+
             if (orderId==null||orderId ==new Guid())
             {
-
                 return Json(new { isSuccess = false, message = "Bạn chưa tạo đơn hàng mới!" });
+            }
+            if (productDetailId == null || productDetailId == new Guid())
+            {
+                return Json(new { isSuccess = false, message = "Mã QR không hợp lệ!" });
             }
             var order = await _orderService.GetById(orderId);
             var productDetail = await _productDetailService.GetById(productDetailId);
@@ -321,6 +343,68 @@ namespace FourLeafCloverShoe.Areas.Admin.Controllers
             }
             return Json(new { message = "Lỗi không xác định", isSuccess = false });
         }
+        [HttpPost]
+       public async Task<IActionResult> Register(string phoneNumber,string email,string fullName)
+        {
+            var password = GenerateRandomString();
+            var usermodel = new User()
+            {
+                UserName = new MailAddress(email).User,
+                Email = email,
+                FullName = fullName,
+                PhoneNumber = phoneNumber,
+                Points = 0,
+                Coins = 0,
+                EmailConfirmed=true,
+                RankId = Guid.Parse("2FA0118D-B530-421F-878E-CE4D54BFC6AB")
+            };
+            var result = await _userManager.CreateAsync(usermodel, password);
+            if (result.Succeeded)
+            {
+                var role = await _roleManager.FindByNameAsync("User");
+                if (role != null)
+                {
+                    var roleResult = await _userManager.AddToRoleAsync(usermodel, role.Name);
+                    if (roleResult.Succeeded)
+                    {
+                        var createCartResult = await _cartService.Add(new Cart() { Id = Guid.NewGuid(), UserId = usermodel.Id });
+
+                        if (createCartResult)
+                        {
+                            // Send email confirmation email
+                            await _emailSender.SendEmailAsync(email, "Đăng kí tài khoản thành công",
+                                $"Mật khẩu của bạn tại Four Leaf Clover Store là : {password} .");
+                            return Json(new {isSuccess = true, message = "Đăng kí tài khoản thành viên thành công!"});
+                        }
+                    }
+                }
+            }
+            return NotFound();
+        }
+        public string GenerateRandomString()
+        {
+            var random = new Random();
+            var lowerCaseChars = "abcdefghijklmnopqrstuvwxyz";
+            var upperCaseChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+            var numberChars = "1234567890";
+            var specialChars = "!@#$%^&*()";
+
+            var stringChars = new char[8];
+            stringChars[0] = lowerCaseChars[random.Next(lowerCaseChars.Length)];
+            stringChars[1] = upperCaseChars[random.Next(upperCaseChars.Length)];
+            stringChars[2] = numberChars[random.Next(numberChars.Length)];
+            stringChars[3] = specialChars[random.Next(specialChars.Length)];
+
+            var allChars = lowerCaseChars + upperCaseChars + numberChars + specialChars;
+            for (int i = 4; i < stringChars.Length; i++)
+            {
+                stringChars[i] = allChars[random.Next(allChars.Length)];
+            }
+
+            // Trộn các ký tự trong mảng để tạo mật khẩu ngẫu nhiên
+            return new string(stringChars.OrderBy(x => random.Next()).ToArray());
+        }
+
 
 
     }
