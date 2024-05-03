@@ -63,6 +63,21 @@ namespace FourLeafCloverShoe.Services
             }
         }
 
+        public async Task<bool> DeleteMany(List<OrderItem> lstobj)
+        {
+            try
+            {
+                 _myDbContext.OrderItems.RemoveRange(lstobj);
+                await _myDbContext.SaveChangesAsync();
+                return true;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                return false;
+            }
+        }
+
         public async Task<OrderItem> GetById(Guid Id)
         {
             try
@@ -86,7 +101,13 @@ namespace FourLeafCloverShoe.Services
         {
             try
             {
-                var obj = await _myDbContext.OrderItems.ToListAsync();
+                var obj = await _myDbContext.OrderItems
+                    .Include(c=>c.ProductDetails)
+                        .ThenInclude(c=>c.Products)
+                            .ThenInclude(c=>c.ProductImages)
+                    .Include(c=>c.ProductDetails)
+                        .ThenInclude(c=>c.Size)
+                    .ToListAsync();
                 if (obj != null)
                 {
 

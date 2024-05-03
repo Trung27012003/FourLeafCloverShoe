@@ -16,7 +16,7 @@ namespace FourLeafCloverShoe.Share.Models
         public string? OrderCode { get; set; }//
         public string? PaymentType { get; set; }//
         public int? OrderStatus { get; set; }//
-
+        // -1 --> đơn chờ
         // 0 --> chờ thanh toán
         // 1 --> đã thanh toán                                       ----> (user)chờ xác nhận  --> admin duyệt ( nhấn nút : xác nhận đơn)
         // 2 --> chờ xác nhận

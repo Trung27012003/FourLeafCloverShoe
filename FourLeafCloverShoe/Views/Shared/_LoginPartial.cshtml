@@ -56,12 +56,29 @@
     }
 
 </div>
-
+<div class ="modal fade" id="cameraModal" tabindex="-1" aria-labelledby="cameraModalLabel" aria-hidden="true">
+    <div class ="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="cameraModalLabel">Chọn camera</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <select id="cameraSelect" class="form-select"></select>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                <button type="button" class="btn btn-primary" id="applyCamera">Áp dụng</button>
+            </div>
+        </div>
+    </div>
+</div>
 <div data-pc-direction="ltr">
     <div class="toast-container position-fixed top-0 end-0 p-3 " style="z-index: 99999"></div>
 </div>
 <video id="video" width="300" height="200" hidden></video>
 <canvas id="canvas" width="300" height="200" hidden></canvas>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 
 <script>
     var video = document.getElementById('video');
@@ -71,51 +88,78 @@
     var intervalId; // Biến để lưu ID của hàm setInterval
 
 
+$(document).ready(function() {
+        $('#start').click(function () {
+            if (!scanning) {
+                if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                    navigator.mediaDevices.enumerateDevices().then(function (devices) {
+                        var videoDevices = devices.filter(function (device) {
+                            return device.kind === 'videoinput';
+                        });
+                        if (videoDevices.length > 0) {
+                            // Fill the select with the list of cameras
+                            var select = $('#cameraSelect');
+                            select.empty();
+                            videoDevices.forEach(function (device) {
+                                select.append($('<option/>', { value: device.deviceId, text: device.label }));
+                            });
+                            // Show the modal
+                            $('#cameraModal').modal('show');
+                            $('.modal-backdrop').remove();
+                            $('body').removeClass('modal-open');
 
-    document.getElementById('start').addEventListener('click', function () {
-        if (!scanning) { // Kiểm tra xem liệu quá trình quét đang diễn ra hay không
-            if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-                navigator.mediaDevices.getUserMedia({ video: true }).then(function (stream) {
-                    video.srcObject = stream;
-                    video.play();
-                    video.hidden = false;
-                    scanning = true;
-                });
-            }
-            intervalId = setInterval(scanAndSend, 500); // Lên lịch cho hàm scanAndSend được gọi mỗi 100ms
-        } else { // Nếu quá trình quét đang diễn ra, dừng nó lại
-            stopScanning();
-            video.hidden = true;
-        }
-    });
-
-
-    function scanAndSend() {
-        if (!scanning) {
-            return;
-        }
-
-        context.drawImage(video, 0, 0, 300, 200);
-        var imageData = canvas.toDataURL('image/png');
-        $.post('/Home/DecodeQRCode', { imageData: imageData }, function (data) {
-            if (data) {
+                        } else {
+                            alert("Không tìm thấy camera!");
+                        }
+                    });
+                }
+                intervalId = setInterval(scanAndSend, 500);
+            } else {
                 stopScanning();
                 video.hidden = true;
-                console.log('QR Code found: ' + data);
             }
         });
-    }
 
-    function stopScanning() {
-        scanning = false;
-        clearInterval(intervalId); // Dừng hàm setInterval
-        video.pause();
-        if (video.srcObject) {
-            let tracks = video.srcObject.getTracks();
-            tracks.forEach(track => track.stop());
+        $('#applyCamera').click(function () {
+            var selectedDeviceId = $('#cameraSelect').val();
+            navigator.mediaDevices.getUserMedia({ video: { deviceId: selectedDeviceId } }).then(function (stream) {
+                video.srcObject = stream;
+                video.play();
+                video.hidden = false;
+                scanning = true;
+                var modal = bootstrap.Modal.getInstance($('#cameraModal')[0]);
+                modal.hide();
+            });
+        });
+        function scanAndSend() {
+            if (!scanning) {
+                return;
+            }
 
+            context.drawImage(video, 0, 0, 300, 200);
+            var imageData = canvas.toDataURL('image/png');
+            $.post('/Home/DecodeQRCode', { imageData: imageData }, function (data) {
+                if (data) {
+                    stopScanning();
+                    video.hidden = true;
+                    console.log('QR Code found: ' + data);
+                }
+            });
         }
-    }
+
+        function stopScanning() {
+            scanning = false;
+            clearInterval(intervalId); // Dừng hàm setInterval
+            video.pause();
+            if (video.srcObject) {
+                let tracks = video.srcObject.getTracks();
+                tracks.forEach(track => track.stop());
+
+            }
+        }
+});
+
+
 
 </script>
 
@@ -130,6 +174,13 @@
 
         var toastContainer = document.querySelector('.toast-container');
 
+        // Check the number of current toasts
+        var currentToasts = toastContainer.getElementsByClassName('toast');
+        if (currentToasts.length >= 2) {
+            // If there are already 3 toasts, remove the oldest one
+            currentToasts[0].remove();
+        }
+
         var toastEl = document.createElement('div');
         toastEl.classList.add('toast');
         toastEl.setAttribute('role', 'alert');
@@ -141,8 +192,8 @@
         toastHeader.classList.add('text-white');
         toastHeader.classList.add(statusmessage);
         toastHeader.innerHTML = `<strong class="me-auto"> <i class="mwc-icon-bell-o " style="width: 20px"></i> Thông báo</strong>
-                        <small>0 phút trước</small>
-                        <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>`;
+                                <small>0 phút trước</small>
+                                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>`;
         var toastBody = document.createElement('div');
 
         toastBody.classList.add('toast-body');
