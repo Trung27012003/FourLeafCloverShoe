@@ -305,7 +305,7 @@ namespace FourLeafCloverShoe.Controllers
             vnpay.AddRequestData("vnp_Version", VnPayLibrary.VERSION);
             vnpay.AddRequestData("vnp_Command", "pay");
             vnpay.AddRequestData("vnp_TmnCode", vnp_TmnCode);
-            vnpay.AddRequestData("vnp_Amount", (order.TotalAmout * 100).ToString());
+            vnpay.AddRequestData("vnp_Amount", (order.TotalAmout * 100)?.ToString("G29"));
             vnpay.AddRequestData("vnp_CreateDate", DateTime.Now.ToString("yyyyMMddHHmmss"));
             vnpay.AddRequestData("vnp_CurrCode", "VND");
             vnpay.AddRequestData("vnp_IpAddr", ipAddr);
@@ -330,8 +330,8 @@ namespace FourLeafCloverShoe.Controllers
             string ipnUrl = $"https://localhost:7116/Order/PaymentCallBack?orderId={order.Id}";
             string requestType = "captureWallet";
 
-            string amount = order.TotalAmout.ToString();
-            string orderId = order.OrderCode;
+            string amount = order.TotalAmout?.ToString("G29");
+            string orderId = DateTime.Now.ToString("yyyyMMddHHmmssfff");
             string requestId = Guid.NewGuid().ToString();
             string extraData = "";
 
@@ -608,12 +608,22 @@ namespace FourLeafCloverShoe.Controllers
                 return RedirectToAction("index", "Home");
             }
         }
-        //In hóa đơn
-        
-        //public async Task<IActionResult> PrintHD(Guid idhd)
-        //{
-        //    var cthd = await _httpClient.GetFromJsonAsync<QLHDViewModel>($"https://localhost:7007/api/order/GetQLHDWithDetails?orderId={idhd}");
-        //    return View("ExportHD", cthd);
-        //}
+
+
+        [HttpPost]
+        public async Task<string> ContinuePayment(Guid orderId)
+        {
+            var order = await _orderService.GetById(orderId);
+
+             if (order.PaymentType == "momo")
+            {
+                return await UrlCheckOutMoMo(order);
+            }
+            if (order.PaymentType == "vnpay")
+            {
+                return await UrlCheckOutVnPay(order);
+            }
+            return "";
+        }
     }
 }

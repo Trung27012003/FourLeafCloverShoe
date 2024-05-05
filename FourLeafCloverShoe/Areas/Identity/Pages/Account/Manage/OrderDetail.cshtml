@@ -239,6 +239,14 @@
     </div>
     @if (Model.Order.OrderStatus == 0 || Model.Order.OrderStatus == 1 ||Model.Order.OrderStatus==2)
     {
+        if (Model.Order.OrderStatus == 0)
+        {
+            <div>
+                <div class="order-item-calc-inner">
+                    <button class="btn btn-solid-primary btn--m btn--inline" id="btnContinuePayment" aria-disabled="true">Tiếp tục thanh toán</button>
+                </div>
+            </div>
+        }
         <div>
             <div class="order-item-calc-inner">
                 <button class="btn btn-solid-primary btn--m btn--inline" id="btnHuyDon" aria-disabled="true">Huỷ đơn</button>
@@ -380,7 +388,20 @@
         $("#btnYeuCauHoanDon").click(function () {
             $('#modalYeuCauHoanDon').modal('show');
             });
-
+        $("#btnContinuePayment").click(function () {
+            var orderId = '@Model.Order.Id';
+            $.ajax({
+                url: '/order/ContinuePayment',
+                type: 'POST',
+                data: {
+                    orderId: orderId,
+                },
+                success: function (result) {
+                    window.location.href = result;
+                }
+            });
+            });
+        
         });
 
 
