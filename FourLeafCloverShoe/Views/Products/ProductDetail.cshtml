@@ -716,7 +716,7 @@
                                     data-bs-toggle="tab" data-bs-target="#product-detail-review"
                                     type="button" role="tab" aria-controls="product-detail-review"
                                     aria-selected="true">
-                                Bình luận
+                                Đánh giá
                             </button>
                         </li>
                     </ul>
@@ -730,7 +730,7 @@
                             <br>
                             <div class="be-comment-block" id="product-detail-comments">
                                 <input type="hidden" id="TotalRow" name="TotalRow" value="0">
-                                <h1 class="comments-title">Không có bình luận</h1>
+                                <h1 class="comments-title">Không có đánh giá</h1>
                             </div>
 
                         </div>
@@ -846,9 +846,13 @@
                 // Sử dụng jQuery để tìm phần tử có class "product-grid-price-new-text" và gán giá trị quantity vào nội dung của nó
                 $('.product-grid-price-new-text').text(priceValue.toLocaleString('en-US', { minimumFractionDigits: 0 }) + " đ");
                 if(response.status==1){
+                    var availibleQuantity = '@ViewBag.availibleQuantity';
+                    var content = 'Còn lại <span id="availibleQuantity">' + availibleQuantity + '</span> sản phẩm';
+                    $('.product-availibleQuantity').html(content);
                     $('#availibleQuantity').text(quantityValue);
 
-                }else{
+                }
+                if (response.status == 0) {
                     $('.product-availibleQuantity').text("Sản phẩm ngừng kinh doanh");
                 }
                 $('#imgQrCode').attr('src', response.imgQrCode);

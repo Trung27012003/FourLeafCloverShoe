@@ -89,7 +89,7 @@ namespace FourLeafCloverShoe.Controllers
             }
             else if (productDetailFromDb.Status == 0) // sản phẩm chi tiết phải hợp lệ về status
             {
-                return Json(new { message = "Sản phẩm ngừng bán!", isSuccess = false });
+                return Json(new { message = "Sản phẩm ngừng kinh doanh!", isSuccess = false });
             }
             else if (productDetailFromDb.Quantity <= 0) // sản phẩm chi tiết phải hợp lệ về số lượng
             {
