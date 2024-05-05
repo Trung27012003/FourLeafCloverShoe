@@ -31,6 +31,7 @@
     .tab {
         background-color: transparent;
         border: none;
+        border-radius: solid 1px;
         cursor: pointer;
         outline: none;
         padding: 10px 20px;
@@ -45,7 +46,8 @@
 
         .tab.active {
             border-bottom: 2px solid blue;
-            background-color: #f0f0f0;
+            background-color: #04A9F5;
+            color: white;
         }
 
     .tab-close {
@@ -69,6 +71,25 @@
     }
 
 </style>
+
+
+<div class="modal fade" id="paymentModal" tabindex="-1" aria-labelledby="paymentModal" aria-hidden="true">
+    <div class="modal-dialog modal-fullscreen">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title h4" id="exampleModalFullscreenLabel">Thanh toán đơn hàng </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"> </button>
+            </div>
+            <div class="modal-body">
+                <iframe id="paymentUrl" src=""
+                        width="100%" height="100%"></iframe>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+            </div>
+        </div>
+    </div>
+</div>
 <!-- Modal -->
 <div class="modal fade" id="registerModal" tabindex="-1" aria-labelledby="registerModalLabel" aria-hidden="true">
     <div class="modal-dialog">
@@ -130,7 +151,6 @@
             </button>
 
         </div>
-
         <div class="dropdown">
             <ul class="dropdown-menu" id="searchResults" aria-labelledby="dropdownMenuButton">
             </ul>
@@ -271,7 +291,7 @@
                                         <div>
                                             <div>
                                                 <select id="paymentType" class="shadow-none border-0">
-                                                    <option value="cash" selected>Tiền mặt</option>
+                                                    <option value="off" selected>Tiền mặt</option>
                                                     <option value="momo">Momo QR</option>
                                                     <option value="vnpay">VNPay</option>
                                                 </select>
@@ -286,8 +306,13 @@
 
                                 </ul>
                                 <hr />
-                                <div class="d-grid mb-3">
-                                    <button class="btn btn-primary">Thanh toán</button>
+                                <div class="d-grid mb-3 row">
+                                    <div>
+                                        <button class="btn btn-outline-danger"  id="huyDon">Huỷ đơn</button>
+                                        <button class="btn btn-primary col-md-7 float-end" id="checkOut">Thanh toán</button>
+                                    </div>
+
+
                                 </div>
                             </div>
                         </div>
@@ -302,7 +327,6 @@
     <!-- [ sample-page ] end -->
 </div>
 <input type="text" id="orderIdInput" hidden />
-<video id="preview" autoplay></video>
 <video id="video" width="300" height="200" autoplay hidden></video>
 
 <!-- [ Main Content ] end -->
@@ -366,6 +390,87 @@
             var searchTerm = event.target.value;
             searchNumberPhone(searchTerm);
         });
+        connection.on("ReceiveNotification", (message, status) => {
+            showToast(message, status);
+            var orderId = $("#orderIdInput").val();
+            $.ajax({
+                url: '/order/ExportPDF',
+                type: 'GET',
+                data: {
+                    orderId: orderId,
+
+                },
+                success: function (result) {
+
+                }
+            });
+
+            loadDataUserOrder($("#orderIdInput").val());
+        });
+        $('#checkOut').on('click', function () {
+            if (totalAmount > $("#moneyGiven").val()) {
+                showToast("Vui lòng nhập số tiền khách trả!", false);
+            } else {
+                var paymentType = $("#paymentType").val();
+                var orderId = $("#orderIdInput").val();
+                var voucherId = $("#discount-select").val();
+                $.ajax({
+                    url: '/Admin/BanTaiQuay/CheckOut',
+                    type: 'POST',
+                    data: {
+                        orderId: orderId,
+                        coinUsed: coinUsed,
+                        voucherValue: voucherValue,
+                        voucherId: voucherId,
+                        paymentType: paymentType
+                    },
+                    success: function (result) {
+                        if (result.isSuccess) {
+                            if (result.paymentType == "off") {
+                                showToast(result.message, result.isSuccess);
+                                $.ajax({
+                                    url: '/order/ExportPDF',
+                                    type: 'GET',
+                                    data: {
+                                        orderId: orderId,
+
+                                    },
+                                    success: function (result) {
+
+                                    }
+                                });
+                                loadDataUserOrder($("#orderIdInput").val());
+                            }
+                            else {
+                                window.open(result.url, '_blank');
+                            }
+                        } else {
+                            showToast(result.message, false);
+                        }
+                    },
+                    error: function (error) {
+                        showToast("Có lỗi xảy ra, vui lòng thử lại!", false);
+                    }
+                });
+            }
+        });
+        $('#huyDon').on('click', function () {
+            var orderId = $("#orderIdInput").val();
+            $.ajax({
+                url: '/Admin/BanTaiQuay/huyDon',
+                type: 'POST',
+                data: {
+                    orderId: orderId,
+                },
+                success: function (result) {
+                    loadDataUserOrder($("#orderIdInput").val());
+                    showToast(result.message, result.isSuccess);
+                },
+                error: function (error) {
+                    showToast("Có lỗi xảy ra, vui lòng thử lại!", false);
+                }
+            });
+        });
         $('#themKhachHang').on('click', function () {
             $("#registerModal").modal('show');
         });
@@ -411,23 +516,23 @@
             else {
                 isValid = true;
             }
-         
+
             if (isValid == false)
                 e.preventDefault();
-            else{
+            else {
                 $("#registerModal").modal('hide');
                 $.ajax({
                     url: '/Admin/BanTaiQuay/Register',
                     type: 'POST',
                     data: {
-                        fullName :fullName,
+                        fullName: fullName,
                         email: email,
                         phoneNumber: phoneNumber
                     },
                     success: function (results) {
-                        showToast(results.message, isSuccess);
+                        showToast(results.message, results.isSuccess);
                     },
-                       error: function (error) {
+                    error: function (error) {
                         showToast("Có lỗi xảy ra, vui lòng thử lại!", false);
                     }
                 });
@@ -744,6 +849,16 @@
             });
         };
         function loadDataUserOrder(orderId) {
+            $("#checkOut").attr('disabled', false);
+            $("#checkOut").text("Thanh toán");
+            $("#checkOut").attr('hidden', false);
+            $("#huyDon").text("Huỷ đơn");
+            $("#huyDon").attr('hidden', false);
+            $("#huyDon").attr('disabled', false);
+            $("#moneyGiven").attr('readonly', false);
+            $("#coinsUsed").attr('readonly', false);
+            $("#discount-select").attr('disabled', false);
+            $("#paymentType").attr('disabled', false);
             $.ajax({
                 type: "GET",
                 url: "/Admin/BanTaiQuay/loadDataUserOrder",
@@ -755,13 +870,43 @@
                     myCoins = result.coins;
                     total = result.total;
                     var xuTichDuoc = Math.round(total / 100);
+                    if (result.orderStatus == 9) { // thanh toán thành công
+                        $("#checkOut").attr('disabled', true);
+                        $("#checkOut").text("Đã thanh toán");
+                        $(".tab.active").css({
+                            "background-color": "#1DE9B6",
+                            "color": "white"
+                        });
+                        $("#huyDon").attr('hidden', true);
+                        $("#huyDon").attr('disabled', true);
+                        $("#moneyGiven").attr('readonly', true);
+                        $("#coinsUsed").attr('readonly', true);
+                        $("#discount-select").attr('disabled', true);
+                        $("#paymentType").attr('disabled', true);
 
-
+                    }
+                    if (result.orderStatus == 13) {  // huỷ đơn
+                        $("#checkOut").attr('disabled', true);
+                        $("#checkOut").attr('hidden', true);
+                        $(".tab.active").css({
+                            "background-color": "#F0C2C3",
+                            "color": "white"
+                        });
+                        $("#huyDon").attr('disabled', true);
+                        $("#huyDon").text("Đơn hàng đã huỷ");
+                        $("#moneyGiven").attr('readonly', true);
+                        $("#coinsUsed").attr('readonly', true);
+                        $("#discount-select").attr('disabled', true);
+                        $("#paymentType").attr('disabled', true);
+                    }
+                    if (result.phoneNumber == "") {
+                        xuTichDuoc = 0;
+                    }
                     console.log(result)
                     $("#fullName").text(result.fullName);
                     $("#phoneNumber").text(result.phoneNumber);
                     $("#searchNumberPhone").val(result.phoneNumber);
-                    $("#coins").text(result.coins.toLocaleString('en-US', { minimumFractionDigits: 0 }) + " xu");
+                    $("#coins").text(result.coins.toLocaleString("en-US", { minimumFractionDigits: 0 }) + " xu");
                     $("#total").text(result.total.toLocaleString("en-US", { minimumFractionDigits: 0 }) + " đ");
                     $("#xuTichDuoc").text(xuTichDuoc.toLocaleString("en-US", { minimumFractionDigits: 0 }) + " xu");
                     $("#productQuantity").val(result.productQuantity).change();

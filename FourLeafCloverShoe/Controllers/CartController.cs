@@ -197,7 +197,6 @@ namespace FourLeafCloverShoe.Controllers
             }
             else
             {
-                user = await _userManager.FindByIdAsync("2FA6148D-B530-421F-878E-CE4D54BFC6AB");
                 cartItems = SessionServices.GetCartItems(HttpContext.Session, "Cart");
                 foreach (var item in cartItems)
                 {
@@ -267,32 +266,14 @@ cartItems.FirstOrDefault(c => c.ProductDetailId == productDetail.Id)?.Quantity *
 
                 // get voucher
                 List<SelectListItem> lstVoucher = new List<SelectListItem>();
-                foreach (var obj in (await _userVoucherService.GetByUserId(user.Id)).Where(c => c.Vouchers.MinimumOrderValue <= tongtien))
-                {
-                    var giamToiDa = obj.Vouchers.MaximumOrderValue;
-                    var giaTriVoucher = obj.Vouchers.VoucherValue?.ToString("0.##");
-                    if (obj.Vouchers.VoucherType == 1)
-                    {
-                        giaTriVoucher += " %";
-                    }
-                    else
-                    {
-                        giaTriVoucher = String.Format("N0", giaTriVoucher) + " đ";
 
-                    }
-                    lstVoucher.Add(new SelectListItem()
-                    {
-                        Text = $"Mã giảm {giaTriVoucher} tối đa {giamToiDa?.ToString("N0")} đ đơn từ {obj.Vouchers.MinimumOrderValue?.ToString("N0")}đ ",
-                        Value = obj.Id.ToString()
-                    });
-                }
-                var lstAddress = await _addressService.GetByUserId(user.Id);
+                var lstAddress = new List<Address>();
                 ViewBag.lstAddress = lstAddress;
                 var addressDefault = lstAddress.FirstOrDefault(c => c.IsDefault == true);
                 ViewBag.addressDefault = addressDefault;
                 var coutProduct = cartItems.Sum(c => c.Quantity);
                 //ViewBag.lstVoucher = lstVoucher;
-                return Json(new { lstproducts = serializedCartItems, tongtien = tongtien, lstVoucher = lstVoucher, myCoins = user.Coins, coutProduct = coutProduct });
+                return Json(new { lstproducts = serializedCartItems, tongtien = tongtien, lstVoucher = lstVoucher, myCoins = 0, coutProduct = coutProduct });
             }
 
 
@@ -437,7 +418,7 @@ cartItems.FirstOrDefault(c => c.ProductDetailId == productDetail.Id)?.Quantity *
                 var total = cartItems.Sum(c => c.Quantity * c.ProductDetails.PriceSale);
                 foreach (var item in cartItems)
                 {
-                    item.ProductDetails = null ;
+                    item.ProductDetails = null;
                 }
                 SessionServices.SetCartItems(HttpContext.Session, "Cart", cartItems); // lưu vào cart
                 return Json(new { message = "OK", total = total, status = true });

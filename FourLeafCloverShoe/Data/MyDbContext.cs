@@ -30,7 +30,6 @@ namespace FourLeafCloverShoe.Data
             builder.Entity<IdentityRole>().HasData(
                 new IdentityRole { Id = "2FA6148D-B530-421F-878E-CE1D54BFC6AB", Name = "Admin", NormalizedName = "ADMIN" },
                 new IdentityRole { Id = "2FA6148D-B530-421F-878E-CE2D54BFC6AB", Name = "User", NormalizedName = "USER" },
-                new IdentityRole { Id = "2FA6148D-B530-421F-878E-CE3D54BFC6AB", Name = "Guest", NormalizedName = "GUEST" },
                 new IdentityRole { Id = "2FA6148D-B530-421F-878E-CE4D54BFC6AB", Name = "Staff", NormalizedName = "STAFF" }
             );
             builder.Entity<User>().HasData(
