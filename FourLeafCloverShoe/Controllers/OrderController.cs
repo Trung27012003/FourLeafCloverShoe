@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Newtonsoft.Json.Linq;
 using Rotativa.AspNetCore;
+using Rotativa.AspNetCore.Options;
 using System.Net.Http;
 using System.Net.WebSockets;
 
@@ -194,7 +195,7 @@ namespace FourLeafCloverShoe.Controllers
 
                             if (order.PaymentType == "cod")
                             {
-                                return $"/Order/CheckOutSuccess";
+                                return $"/Order/CheckOutSuccess?orderId={order.Id}";
                             }
                             else if (order.PaymentType == "momo")
                             {
@@ -215,15 +216,12 @@ namespace FourLeafCloverShoe.Controllers
             }
             else
             {
-                var user = await _userManager.FindByIdAsync("2FA6148D-B530-421F-878E-CE4D54BFC6AB");
-            var lstCartItem  = SessionServices.GetCartItems(HttpContext.Session, "Cart");
+                var lstCartItem  = SessionServices.GetCartItems(HttpContext.Session, "Cart");
                 for (int i = lstCartItem.Count - 1; i >= 0; i--)
                 {
                     lstCartItem.RemoveAt(i);
                 }
                 SessionServices.SetCartItems(HttpContext.Session, "Cart", lstCartItem);
-                order.UserId = user.Id;
-                order.VoucherId = order.VoucherId;
                 order.OrderCode = GenerateInvoiceCode(order.PaymentType);
                 order.PaymentType = order.PaymentType;
                 if (order.PaymentType == "vnpay" || order.PaymentType == "momo" || order.PaymentType == "off")
@@ -266,7 +264,7 @@ namespace FourLeafCloverShoe.Controllers
                         
                         if (order.PaymentType == "cod" || order.PaymentType == "momo" || order.PaymentType == "vnpay")
                         {
-                            await _hubContext.Clients.All.SendAsync("alertToAdmin", $"Bạn có đơn hàng mới từ {user.FullName}", true);
+                            await _hubContext.Clients.All.SendAsync("alertToAdmin", $"Bạn có đơn hàng mới từ khách vãng lai", true);
 
                             if (order.PaymentType == "cod")
                             {
@@ -408,7 +406,7 @@ namespace FourLeafCloverShoe.Controllers
                             if (result)
                             {
 
-                                return Redirect($"/Order/CheckOutSuccess");
+                                return Redirect($"/Order/CheckOutSuccess?orderId={order.Id}");
                             }
                         }
                         else if (resultCode == "1006") //Giao dịch thất bại do người dùng đã từ chối xác nhận thanh toán.
@@ -474,7 +472,7 @@ namespace FourLeafCloverShoe.Controllers
                                 var result = await _orderService.Update(order);
                                 if (result)
                                 {
-                                    return Redirect($"/Order/CheckOutSuccess");
+                                    return Redirect($"/Order/CheckOutSuccess?orderId={order.Id}");
                                 }
                             }
                         }
@@ -599,8 +597,9 @@ namespace FourLeafCloverShoe.Controllers
                 var view = new ViewAsPdf("ExportPDF", order)
                 {
                     FileName = $"{order.OrderCode}.pdf",
-                    PageOrientation = Rotativa.AspNetCore.Options.Orientation.Portrait,
+                    PageOrientation = Orientation.Portrait,
                     PageSize = Rotativa.AspNetCore.Options.Size.A4,
+                    
                 };
                 return view;
             }
@@ -610,7 +609,7 @@ namespace FourLeafCloverShoe.Controllers
             }
         }
         //In hóa đơn
-        //[HttpGet("/Bill/PrintBill/{idhd}")]
+        
         //public async Task<IActionResult> PrintHD(Guid idhd)
         //{
         //    var cthd = await _httpClient.GetFromJsonAsync<QLHDViewModel>($"https://localhost:7007/api/order/GetQLHDWithDetails?orderId={idhd}");

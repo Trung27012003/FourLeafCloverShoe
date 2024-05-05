@@ -135,7 +135,7 @@
         <td rowspan="2" class="client-name">
             @Model.RecipientName
             <br />
-            Điện thoại: @Model.RecipientPhone<br />
+            Điện thoại:(+84) @Model.RecipientPhone<br />
             Đia chỉ: @Model.RecipientAddress;
         </td>
         <td>
@@ -227,7 +227,7 @@
                     Tiền ship:
                 </td>
                 <td>
-                    @Model.CoinsUsed?.ToString("n0") đ
+                   + @Model.ShippingFee?.ToString("n0") đ
                 </td>
             </tr>
 
@@ -239,7 +239,7 @@
                 </td>
                     <td class="bold right">
                         <b>
-                            @Model.TotalAmout?.ToString("n0")
+                            @Model.TotalAmout?.ToString("n0") đ
                         </b>
                     </td>
                 
@@ -258,10 +258,8 @@
         <tr>
             <th>Phương thức thanh toán</th>
             <th>Ngày đặt hàng</th>
-            <th>Tổng tiền cần thanh toán</th>
-            <th>Đã trả</th>
-            <th>Còn lại</th>
-            <th>Trạng thái</th>
+            <th>Tổng tiền thanh toán</th>
+            <th>Trạng thái đơn hàng</th>
         </tr>
     </thead>
     <tbody>
@@ -271,18 +269,97 @@
                     @if (Model.PaymentType == "off")
                     {
                         <strong>Tại quầy</strong>
-                    }else
+                    }
+                    else if (Model.PaymentType == "cod")
                     {
-                        <strong>@Model.PaymentType</strong>
+                        <strong>Ship Cod</strong>
+                    }
+                    else if (Model.PaymentType == "momo")
+                    {
+                        <strong>Momo</strong>
+                    }
+                    else 
+                    {
+                        <strong>VnPay</strong>
                     }
                 </div>
             </td>
             
             <td>@Model.CreateDate?.ToString("HH:mm dd-MM-yyyy")</td>
                 <td>@Model.TotalAmout?.ToString("n0") đ</td>
-                <td class="large total">0 đ</td>
-                <td class="large total">0 đ</td>
-                <td class="large total">Done</td>
+                @{
+                string status;
+                if (Model.OrderStatus == -1)
+                {
+                    status = "Đơn Chờ";
+                }
+                else if (Model.OrderStatus == 0)
+                {
+                    status = "Chờ Thanh Toán";
+                }
+                else if (Model.OrderStatus == 1)
+                {
+                    status = "Đã Thanh Toán";
+                }
+                else if (Model.OrderStatus == 2)
+                {
+                    status = "Chờ Xác Nhận";
+                }
+                else if (Model.OrderStatus == 3)
+                {
+                    status = "Chờ Lấy Hàng";
+                }
+                else if (Model.OrderStatus == 4)
+                {
+                    status = "Đang Giao Hàng";
+                }
+                else if (Model.OrderStatus == 5)
+                {
+                    status = "Khách Yêu Cầu Huỷ";
+                }
+                else if (Model.OrderStatus == 6)
+                {
+                    status = "Giao Hàng Thất Bại";
+                }
+                else if (Model.OrderStatus == 7)
+                {
+                    status = "Yêu Cầu Huỷ Đơn Thất Bại";
+                }
+                else if (Model.OrderStatus == 8)
+                {
+                    status = "Giao Hàng Thành Công";
+                }
+                else if (Model.OrderStatus == 9)
+                {
+                    status = "Thanh Toán Tại Quầy";
+                }
+                else if (Model.OrderStatus == 10)
+                {
+                    status = "Yêu Cầu Đổi Trả";
+                }
+                else if (Model.OrderStatus == 11)
+                {
+                    status = "Chấp Nhận Đổi Trả";
+                }
+                else if (Model.OrderStatus == 12)
+                {
+                    status = "Từ Chối Đổi Trả";
+                }
+                else if (Model.OrderStatus == 13)
+                {
+                    status = "Khách Huỷ Đơn";
+                }
+                else if (Model.OrderStatus == 14)
+                {
+                    status = "Chấp Nhận Huỷ Đơn";
+                }
+                else
+                {
+                    status = "Trạng thái không xác định";
+                }
+
+                }
+            <td class="large total">@status</td>
         </tr>
     </tbody>
 </table>

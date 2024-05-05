@@ -8,5 +8,9 @@ namespace FourLeafCloverShoe.Helper
         {
             await Clients.All.SendAsync("alertToAdmin", message,status);
         }
+        public async Task SendNotification(string message, bool status)
+        {
+            await Clients.All.SendAsync("ReceiveNotification", message, status);
+        }
     }
 }
