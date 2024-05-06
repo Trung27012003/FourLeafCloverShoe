@@ -133,13 +133,13 @@ namespace FourLeafCloverShoe.Controllers
             }
             var sortOptions = new List<SelectListItem>
             {
-                new SelectListItem { Value = "PRICEASC", Text = "Sắp xếp theo giá: từ thấp đến cao" },
-                new SelectListItem { Value = "PRICEDESC", Text = "Sắp xếp theo giá: từ cao đến thấp" },
-                new SelectListItem { Value = "NAMEAZ", Text = "Sắp xếp theo tên từ: A-Z" },
-                new SelectListItem { Value = "NAMEZA", Text = "Sắp xếp theo tên từ: Z-A" },
-                new SelectListItem { Value = "DATENEW", Text = "Sắp xếp theo ngày: từ mới đến cũ" },
-                new SelectListItem { Value = "DATEOLD", Text = "Sắp xếp theo ngày: từ mới đến cũ" },
-                new SelectListItem { Value = "BESTSALE", Text = "Sắp xếp theo bán chạy nhất" }
+                new SelectListItem { Value = "PRICEASC", Text = "Theo giá: từ thấp đến cao" },
+                new SelectListItem { Value = "PRICEDESC", Text = "Theo giá: từ cao đến thấp" },
+                new SelectListItem { Value = "NAMEAZ", Text = "Theo tên từ: A-Z" },
+                new SelectListItem { Value = "NAMEZA", Text = "Theo tên từ: Z-A" },
+                new SelectListItem { Value = "DATENEW", Text = "Sản phẩm mới nhất" },
+                new SelectListItem { Value = "DATEOLD", Text = "Sản phẩm cũ" },
+                new SelectListItem { Value = "BESTSALE", Text = "Sản phẩm bán chạy" }
                 // Thêm các tùy chọn khác tại đây
             };
             ViewBag.SortSelect = new SelectList(sortOptions, "Value", "Text", sortSelect); // Tạo SelectList với giá trị đã chọn
