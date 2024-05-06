@@ -372,12 +372,11 @@
                     <div class="no-padding col-xs-12 hidden-sm hidden-xs col-md-2 d-none d-lg-block">
                         <div class="searchFormHeader">
                             <form class="searchHeader searchDesktop ng-pristine ng-valid"
-                                  action="#">
+                                  asp-controller="Products"  asp-action="Index" method="get">
 
                                 <div class="searchBox">
-                                    <input type="hidden" name="page" value="1" autocomplete="off">
-                                    <input autocomplete="off" type="text" name="s" class="searchInput"
-                                           placeholder="Tìm kiếm" value="">
+                                    <input autocomplete="off" type="text" name="searchString" class="searchInput"
+                                           placeholder="Tìm kiếm" value="@ViewBag.SearchString">
                                     <button type="submit" class="btnSearch" style="background:none;">
                                         <svg width="14" height="13" viewBox="0 0 14 13" fill="none"
                                              xmlns="http://www.w3.org/2000/svg">
