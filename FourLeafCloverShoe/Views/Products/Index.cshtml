@@ -1,5 +1,5 @@
-﻿@model IEnumerable<FourLeafCloverShoe.Share.Models.Product>
-
+﻿@model X.PagedList.IPagedList<FourLeafCloverShoe.Share.Models.Product>;
+@using X.PagedList.Mvc.Core;
 <style>
     .filter-sidebar-body {
         overflow-y: auto;
@@ -99,7 +99,43 @@
 
                         </div>
                     </div>
-                    <div class="section-view-more">
+                    <div class="col-lg-12 mt-3 p-3 pagin-history">
+                        <div class="shadow-sm">
+                            <div class="row">
+                                <div class="col-12 d-flex justify-content-center align-items-center">
+                                    <!-- Đây là phần mới -->
+                                    <div class="pagin-left font-weight-lighter">
+                                        Trang @(Model.PageCount < Model.PageNumber ? 0 : Model.PageNumber) / @Model.PageCount
+                                    </div>
+                                    <div class="pagin-right ml-auto">
+                                        @Html.PagedListPager(Model, page => Url.Action("Index", new { page = page, searchString = ViewBag.SearchString, category_group = ViewBag.SelectedCategory, size_group = ViewBag.SelectedSize, brand_group = ViewBag.SelectedBrand, price_range = ViewBag.PriceRange, sortSelect = ViewBag.SortSelect }),
+                                                 new PagedListRenderOptions
+                                        {
+
+                                            DisplayLinkToFirstPage = PagedListDisplayMode.IfNeeded,
+                                            DisplayLinkToLastPage = PagedListDisplayMode.IfNeeded,
+                                            DisplayLinkToPreviousPage = PagedListDisplayMode.IfNeeded,
+                                            DisplayLinkToNextPage = PagedListDisplayMode.IfNeeded,
+                                            DisplayLinkToIndividualPages = true,
+                                            MaximumPageNumbersToDisplay = 5, // Số lượng trang tối đa hiển thị
+                                            DisplayEllipsesWhenNotShowingAllPageNumbers = true, // Hiển thị dấu ba chấm khi không hiển thị tất cả các số trang
+                                            LinkToFirstPageFormat = "Trang đầu", // Định dạng liên kết đến trang đầu tiên
+                                            LinkToPreviousPageFormat = "<",
+                                            LinkToNextPageFormat = ">",
+                                            LinkToLastPageFormat = "Trang cuối", // Định dạng liên kết đến trang cuối cùng
+                                            ContainerDivClasses = new string[] { "section-view-more" }, // Class cho div bao ngoài
+                                            UlElementClasses = new string[] { "pagination" }, // Class cho thẻ ul
+                                            LiElementClasses = new string[] { "pagination-item" }, // Class cho thẻ li
+                                            PageClasses = new string[] { "pagination-link" }, // Class cho các liên kết trang
+                                            // ActiveLiElementClass = "btn-solid-primary",
+                                        })
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                @*     <div class="section-view-more">
                         <ul class="pagination">
                             <li class="pagination-item">
                                 <a href="#" class="pagination-link pagination-link-prev pagination-link-disabled">
@@ -127,8 +163,9 @@
                                 </a>
                             </li>
                         </ul>
-                    </div>
+                    </div> *@
                 </div>
+
                 <div class="filter-sidebar1" id="filter-sidebar1">
 
                     <div class="filter-sidebar-header">
@@ -248,11 +285,16 @@
         </div>
     </div>
 </form>
+
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 <script>
     $(document).ready(function () {
         $('#sortSelect').change(function () {
             $(this).closest('form').submit();
+        });
+        $('.active.pagination-item').on('click', function () {
+            $('.pagination-link').removeClass('pagination-link-active'); // Xóa class 'pagination-link-active' khỏi tất cả các liên kết
+            $(this).find('.pagination-link').addClass('pagination-link-active'); // Thêm class 'pagination-link-active' vào liên kết được nhấp
         });
     });
 </script>
