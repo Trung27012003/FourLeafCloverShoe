@@ -13,6 +13,7 @@ using FourLeafCloverShoe.Services;
 using FourLeafCloverShoe.Share.Models;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.CodeAnalysis.Options;
+using X.PagedList;
 
 namespace FourLeafCloverShoe.Controllers
 {
@@ -107,8 +108,12 @@ namespace FourLeafCloverShoe.Controllers
             return lstProduct;
         }
 
-        public async Task<IActionResult> Index(string searchString, string sortSelect, string[] size_group, string[] brand_group, string[] category_group, string price_range)
+        public async Task<IActionResult> Index(int? page,string searchString, string sortSelect, string[] size_group, string[] brand_group, string[] category_group, string price_range)
         {
+            if (page == null) page = 1;
+            int pageSize = 24;
+            int pageNumber = (page ?? 1);
+
             var lstProduct = (await _productService.Gets()).Where(c => c.Status == true && c.ProductDetails.Where(p => p.Status == 1).Count() > 0).ToList();
             var Size = new List<string>();
             foreach (var size in await _sizeService.Gets())
@@ -131,6 +136,7 @@ namespace FourLeafCloverShoe.Controllers
             {
                 Category.Add(cate.Name);
             }
+            ViewBag.Category = Category;
             var sortOptions = new List<SelectListItem>
             {
                 new SelectListItem { Value = "PRICEASC", Text = "Theo giá: từ thấp đến cao" },
@@ -143,13 +149,12 @@ namespace FourLeafCloverShoe.Controllers
                 // Thêm các tùy chọn khác tại đây
             };
             ViewBag.SortSelect = new SelectList(sortOptions, "Value", "Text", sortSelect); // Tạo SelectList với giá trị đã chọn
-            ViewBag.Category = Category;
             ViewBag.SelectedCategory = category_group.ToList(); // Lưu trữ các category đã chọn
             ViewBag.PriceRange = price_range;
             ViewBag.SearchString = searchString;
 
             lstProduct = await Filter(searchString, sortSelect, size_group, brand_group, category_group, price_range, lstProduct); // lọc theo size, brand, category, range price
-            return View(lstProduct);
+            return View(lstProduct.ToPagedList(pageNumber, pageSize));
         }
 
         public async Task<IActionResult> ProductDetail(Guid productId)
