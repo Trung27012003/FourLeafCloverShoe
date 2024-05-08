@@ -1,4 +1,5 @@
 ﻿using FourLeafCloverShoe.IServices;
+using FourLeafCloverShoe.Services;
 using FourLeafCloverShoe.Share.Models;
 using FourLeafCloverShoe.Share.ViewModels;
 using Microsoft.AspNetCore.Identity;
@@ -17,7 +18,7 @@ namespace FourLeafCloverShoe.Areas.Admin.Controllers
         private readonly IRanksService _ranksService;
         private readonly UserManager<User> _userManager;
 
-        public VoucherController(IVoucherService voucherService,IUserVoucherService userVoucherService,IRanksService ranksService,UserManager<User> userManager)
+        public VoucherController(IVoucherService voucherService, IUserVoucherService userVoucherService, IRanksService ranksService, UserManager<User> userManager)
         {
             _userVoucherService = userVoucherService;
             _voucherService = voucherService;
@@ -27,7 +28,7 @@ namespace FourLeafCloverShoe.Areas.Admin.Controllers
         }
         public async Task<IActionResult> Index()
         {
-            return View((await _voucherService.Gets()).OrderByDescending(c=>c.CreateDate));
+            return View((await _voucherService.Gets()).OrderByDescending(c => c.CreateDate));
         }
         public async Task<IActionResult> Create()
         {
@@ -49,11 +50,47 @@ namespace FourLeafCloverShoe.Areas.Admin.Controllers
                 Value = r.Name
             }).ToList();
             ViewBag.Ranks = ranks;
-            if ( !lstVoucherDb.Any(c=>c.VoucherCode== voucherViewModel.VoucherCode))
+            if (!lstVoucherDb.Any(c => c.VoucherCode == voucherViewModel.VoucherCode))
             {
-                if (voucherViewModel.Ranks.Count()<=0)
+                if (voucherViewModel.VoucherCode == null ||
+                    voucherViewModel.VoucherCode == "" ||
+                    voucherViewModel.MinimumOrderValue == null ||
+                    voucherViewModel.MaximumOrderValue == null ||
+                    voucherViewModel.Quantity == null ||
+                    voucherViewModel.Status == null ||
+                    voucherViewModel.StartDate == null ||
+                    voucherViewModel.EndDate == null ||
+                    voucherViewModel.VoucherType == null
+                    )
                 {
-                    ModelState.AddModelError("Thong bao", "Vui long chon doi tuong ap dung");
+                    TempData["ErrorMessage"] = "Bạn phải nhập đầy đủ thông tin";
+                    return View(voucherViewModel);
+                }
+                if (voucherViewModel.Ranks == null)
+                {
+                    TempData["ErrorMessage"] = "Bạn phải chọn rank";
+
+                    return View(voucherViewModel);
+                }
+                if (voucherViewModel.StartDate >= voucherViewModel.EndDate)
+                {
+                    TempData["ErrorMessage"] = "Ngày bắt đầu lớn hơn ngày kết thúc";
+                    return View(voucherViewModel);
+                }
+                if (voucherViewModel.StartDate <= DateTime.Now)
+                {
+                    TempData["ErrorMessage"] = "Ngày bắt đầu phải lớn hơn ht";
+                    return View(voucherViewModel);
+                }
+                if (voucherViewModel.Quantity == 0 && voucherViewModel.Quantity == null)
+                {
+                    TempData["ErrorMessage"] = "Số lượng của vocher phải lơn hơn 0";
+                    return View(voucherViewModel);
+                }
+
+                if (voucherViewModel.MaximumOrderValue > voucherViewModel.VoucherValue)
+                {
+                    TempData["ErrorMessage"] = "Giá trị giảm tối đa > giá trị";
                     return View(voucherViewModel);
                 }
                 var voucherNew = new Voucher()
@@ -86,14 +123,37 @@ namespace FourLeafCloverShoe.Areas.Admin.Controllers
                         };
                         lstUserVoucher.Add(newUserVoucher);
                     }
+                    voucherNew.UserVouchers = lstUserVoucher;
                     var resultAddUserVoucher = await _userVoucherService.AddMany(lstUserVoucher);
+                    var updateVoucher = await _voucherService.Update(voucherNew);
+                    TempData["SuccessMessage"] = "Thêm thành công";
                     return RedirectToAction("Index");
 
                 }
             }
-            ModelState.AddModelError("Thong bao","Loi trung ma voucher");
+            TempData["ErrorMessage"] = "Mã voucher bị trùng rồi";
             return View(voucherViewModel);
         }
 
+        public async Task<IActionResult> Delete(Guid Id)
+        {
+            var findListUserVoucher = await _userVoucherService.GetByVoucherId(Id);
+            if (findListUserVoucher.Count == 0)
+            {
+                await _voucherService.Delete(Id);
+            }
+            else
+            {
+                foreach (var item in findListUserVoucher)
+                {
+                    var deleteUserVoucher = await _userVoucherService.Delete(item.Id);
+                }
+                var result = await _voucherService.Delete(Id);
+                TempData["SuccessMessage"] = "Xóa thành công";
+                return RedirectToAction("Index");
+            }
+
+            return RedirectToAction("Index");
+        }
     }
 }
