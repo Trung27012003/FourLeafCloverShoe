@@ -95,16 +95,22 @@
                             }
                             else
                             {
-                                foreach (var role in ViewBag.Ranks)
+                                if (ViewBag.Ranks == null)
                                 {
-                                    <option value="@role.Value">@role.Text</option>
+                                }
+                                else
+                                {
+                                    foreach (var role in ViewBag.Ranks)
+                                    {
+                                        <option value="@role.Value">@role.Text</option>
+                                    }
                                 }
                             }
                         </select>
-                    </div>        
+                    </div>
                     <div class="col-sm-12">
                         <div class="card-body text-end btn-page">
-                            <button type="submit" class="btn btn-primary mb-0">Thêm mới</button>
+                            <button type="submit" class="btn btn-primary mb-0">Sửa</button>
                         </div>
                     </div>
                 </div>

@@ -201,8 +201,7 @@ namespace FourLeafCloverShoe.Areas.Admin.Controllers
                 Value = r
             }).ToList();
             ViewBag.Ranks = ranks;
-            DanhsachRankcuaUser.Distinct();
-            vcview.Ranks = DanhsachRankcuaUser;
+            vcview.Ranks = DanhsachRankcuaUser.Distinct();
             return View(vcview);
         }
         [HttpPost]

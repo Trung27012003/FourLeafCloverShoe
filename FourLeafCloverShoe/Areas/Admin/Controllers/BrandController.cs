@@ -26,7 +26,7 @@ namespace FourLeafCloverShoe.Areas.Admin.Controllers
         public async Task<IActionResult> Create(Brand s)
         {
             var Brand = await _brandService.Gets();
-            if (Brand.Any(c => c.Name == s.Name))
+            if (Brand.Any(c => c.Name.Trim().ToLower() == s.Name.Trim().ToLower()))
             {
                 TempData["ErrorMessage"] = "Hãng đã tồn tại";
                 return View();
@@ -58,7 +58,7 @@ namespace FourLeafCloverShoe.Areas.Admin.Controllers
             var Brand = await _brandService.Gets();
             if (Brand.Any(c => c.Name == obj.Name))
             {
-                TempData["ErrorMessage"] = "Bạn cần phải sửa gì đó :)";
+                TempData["ErrorMessage"] = "Hãng này đã có trong hệ thống";
                 return View();
             }
             else if (obj.Name == null)
