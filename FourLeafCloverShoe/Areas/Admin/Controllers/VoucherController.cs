@@ -223,6 +223,14 @@ namespace FourLeafCloverShoe.Areas.Admin.Controllers
                 TempData["ErrorMessage"] = "Bạn phải nhập đầy đủ thông tin";
                 return View(voucherViewModel);
             }
+            if (voucherViewModel.VoucherType == 1)
+            {
+                if (voucherViewModel.VoucherValue > 100)
+                {
+                    TempData["ErrorMessage"] = "giá trị không được qúa 100%";
+                    return View(voucherViewModel);
+                }
+            }
             if (voucherViewModel.Ranks == null)
             {
                 TempData["ErrorMessage"] = "Bạn phải chọn rank";
@@ -249,11 +257,9 @@ namespace FourLeafCloverShoe.Areas.Admin.Controllers
                 TempData["ErrorMessage"] = "Số lượng của vocher phải lơn hơn 0";
                 return View(voucherViewModel);
             }
-
-            if (voucherViewModel.MaximumOrderValue > voucherViewModel.VoucherValue)
+            if (voucherViewModel.VoucherType == 1)
             {
-                TempData["ErrorMessage"] = "Giá trị giảm tối đa > giá trị";
-                return View(voucherViewModel);
+                voucherViewModel.MaximumOrderValue = (int)voucherViewModel.VoucherValue;
             }
             // UPDATE VOUCHER
             if (findVoucher != null)

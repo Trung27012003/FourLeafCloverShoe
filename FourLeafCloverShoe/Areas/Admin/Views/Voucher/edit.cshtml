@@ -47,9 +47,9 @@
                         <span asp-validation-for="MinimumOrderValue" class="text-danger"></span>
                     </div>
 
-                    <div class="form-group">
+                    <div class="form-group" id="giamtoida">
                         <label class="form-label">Giảm tối đa </label>
-                        <input asp-for="MaximumOrderValue" type="number" class="form-control">
+                        <input asp-for="MaximumOrderValue" type="number"  class="form-control">
                         <span asp-validation-for="MaximumOrderValue" class="text-danger"></span>
                     </div>
                     <div class="form-group">
@@ -88,9 +88,15 @@
                                 {
                                     <option value="@rank">@rank</option>
                                 }
-                                foreach (var role in ViewBag.Ranks)
+                                if (ViewBag.Ranks == null)
                                 {
-                                    <option value="@role.Value">@role.Text</option>
+                                }
+                                else
+                                {
+                                    foreach (var role in ViewBag.Ranks)
+                                    {
+                                        <option value="@role.Value">@role.Text</option>
+                                    }
                                 }
                             }
                             else
@@ -119,4 +125,15 @@
         <!-- [ sample-page ] end -->
     </div>
 </div>
+<script>
+    document.getElementById('btnrdolite13').addEventListener('click', function () {
+        document.getElementById('giamtoida').style.display = 'none';
+    });
+
+    document.getElementById('btnrdolite11').addEventListener('click', function () {
+        document.getElementById('giamtoida').style.display = 'block';
+    });
+
+
+</script>
 @Html.Partial("~/Areas/Admin/Shared/_ErrorMessage.cshtml")
