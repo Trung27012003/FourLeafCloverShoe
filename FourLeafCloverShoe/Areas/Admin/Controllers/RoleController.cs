@@ -33,6 +33,11 @@ namespace FourLeafCloverShoe.Areas.Admin.Controllers
         [HttpPost]
         public async Task<IActionResult> Create(IdentityRole role)
         {
+            if (await _roleManager.RoleExistsAsync(role.Name))
+            {
+                TempData["ErrorMessage"] = "Đã có role này";
+                return RedirectToAction(nameof(Index));
+            }
             await _roleManager.CreateAsync(role);
             return RedirectToAction("Index");
         }
@@ -56,6 +61,7 @@ namespace FourLeafCloverShoe.Areas.Admin.Controllers
         {
             if (await _roleManager.RoleExistsAsync(roleObj.Name))
             {
+                TempData["ErrorMessage"] = "Đã có role này";
                 return RedirectToAction(nameof(Index));
             }
 

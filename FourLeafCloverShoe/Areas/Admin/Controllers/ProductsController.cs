@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.CodeAnalysis;
 using System.Drawing;
 using System.Net.NetworkInformation;
+using System.Text.RegularExpressions;
 using ZXing;
 using ZXing.QrCode.Internal;
 
@@ -51,6 +52,7 @@ namespace FourLeafCloverShoe.Areas.Admin.Controllers
             List<SelectListItem> ListCategoryitems = new List<SelectListItem>();
             foreach (var obj in (await _categoryService.Gets()))
             {
+                
                 ListCategoryitems.Add(new SelectListItem()
                 {
                     Text = obj.Name,
@@ -76,7 +78,7 @@ namespace FourLeafCloverShoe.Areas.Admin.Controllers
         {
             //var listTags = tags.Split(',').ToList(); // thêm vào chuỗi string 
 
-
+           
             List<SelectListItem> ListCategoryitems = new List<SelectListItem>();
             // Giả sử myList là danh sách dữ liệu của bạn
             foreach (var obj in (await _categoryService.Gets()))
@@ -100,6 +102,14 @@ namespace FourLeafCloverShoe.Areas.Admin.Controllers
             }
             ViewBag.ListBranditems = ListBranditems;
 
+            var pro = await _productService.Gets();
+            var pros = pro.FirstOrDefault(p => p.ProductName.Trim().ToLower() == product.ProductName.Trim().ToLower());
+            bool containsSpaceInMiddle = Regex.IsMatch(product.ProductName, @"^.+ .+$");
+            if (pros != null && containsSpaceInMiddle == true)
+            {
+                ModelState.AddModelError("", "Vui lòng nhập tên sản phẩm khác");
+                return View(product);
+            }
 
             string imageList = HttpContext.Session.GetString("ImageList");
             if (ModelState.IsValid)
@@ -110,6 +120,7 @@ namespace FourLeafCloverShoe.Areas.Admin.Controllers
                     ModelState.AddModelError("", "Vui lòng thêm ảnh.");
                     return View(product);
                 }
+                
                 product.CreateAt = DateTime.Now;
                 product.Description = product.Description;
                 product.ProductCode = GetInitials(product.ProductName) + DateTime.Now.ToString("yyMMddHHmmss");
@@ -291,18 +302,25 @@ namespace FourLeafCloverShoe.Areas.Admin.Controllers
         public async Task<IActionResult> CreateProductDetail(Guid productId)
         {
             List<SelectListItem> ListSizeitems = new List<SelectListItem>();
-            foreach (var obj in ((await _sizeService.Gets()).OrderBy(c => c.Name)))
+            var productDetails = await _productDetailService.GetByProductId(productId);
+
+            foreach (var obj in (await _sizeService.Gets()).OrderBy(c => c.Name))
             {
-                ListSizeitems.Add(new SelectListItem()
+                if (productDetails.FirstOrDefault(p => p.SizeId == obj.Id) == null)
                 {
-                    Text = obj.Name,
-                    Value = obj.Id.ToString()
-                });
+                    ListSizeitems.Add(new SelectListItem()
+                    {
+                        Text = obj.Name,
+                        Value = obj.Id.ToString()
+                    });
+                }
             }
+
             ViewBag.productId = productId;
             ViewBag.ListSizeitems = ListSizeitems;
             return View();
         }
+
         [HttpPost]
         public async Task<IActionResult> CreateProductDetail(ProductDetail productDetail)
         {
@@ -334,21 +352,29 @@ namespace FourLeafCloverShoe.Areas.Admin.Controllers
         }
         public async Task<IActionResult> EditProductDetail(Guid productDetailId)
         {
-            List<SelectListItem> ListSizeitems = new List<SelectListItem>();
-            foreach (var obj in ((await _sizeService.Gets()).OrderBy(c => c.Name)))
-            {
-                ListSizeitems.Add(new SelectListItem()
-                {
-                    Text = obj.Name,
-                    Value = obj.Id.ToString()
-                });
-            }
-            ViewBag.ListSizeitems = ListSizeitems;
             var productDetail = await _productDetailService.GetById(productDetailId);
+            var productDetails = await _productDetailService.GetByProductId(productDetail.ProductId);
+
+            List<SelectListItem> ListSizeitems = new List<SelectListItem>();
+            foreach (var obj in (await _sizeService.Gets()).OrderBy(c => c.Name))
+            {
+                if (productDetails.FirstOrDefault(p => p.SizeId == obj.Id) == null || obj.Id == productDetail.SizeId)
+                {
+                    ListSizeitems.Add(new SelectListItem()
+                    {
+                        Text = obj.Name,
+                        Value = obj.Id.ToString(),
+                        Selected = obj.Id == productDetail.SizeId
+                    });
+                }
+            }
+
+            ViewBag.ListSizeitems = ListSizeitems;
             ViewBag.productId = productDetail.ProductId;
 
             return View(productDetail);
         }
+
         [HttpPost]
         public async Task<IActionResult> EditProductDetail(ProductDetail productDetail)
         {
