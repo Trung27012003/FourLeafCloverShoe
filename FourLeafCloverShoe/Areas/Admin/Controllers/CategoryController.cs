@@ -26,7 +26,7 @@ namespace FourLeafCloverShoe.Areas.Admin.Controllers
         public async Task<IActionResult> CreateAsync(Category category)
         {
             var categories = await _categoryService.Gets();
-            if (categories.Any(c => c.Name == category.Name))
+            if (categories.Any(c => c.Name.Trim().ToLower() == category.Name.Trim().ToLower()))
             {
                 TempData["ErrorMessage"] = "Loại này đã có";
                 return View();
