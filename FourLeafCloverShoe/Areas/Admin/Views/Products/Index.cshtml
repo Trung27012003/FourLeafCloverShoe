@@ -78,13 +78,14 @@
                                         }
                                         else if (minprice == maxprice)
                                         {
-                                            <span>@minprice VNĐ</span>
+                                            <span>@minprice?.ToString("N0") VNĐ</span>
                                         }
                                         else
                                         {
-                                            <span>@minprice VNĐ - <span>@maxprice VNĐ</span></span>
+                                            <span>@minprice?.ToString("N0") VNĐ -> @maxprice?.ToString("N0") VNĐ</span>
                                         }
                                     </td>
+
                                     <td>@item.AvailableQuantity</td>
                                     <td class="text-center">
                                         @if (item.Status == true)

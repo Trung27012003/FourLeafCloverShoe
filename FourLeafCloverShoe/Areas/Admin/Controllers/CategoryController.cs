@@ -28,7 +28,7 @@ namespace FourLeafCloverShoe.Areas.Admin.Controllers
             var categories = await _categoryService.Gets();
             if (categories.Any(c => c.Name == category.Name))
             {
-                TempData["ErrorMessage"] = "Kích cỡ đã có";
+                TempData["ErrorMessage"] = "Loại này đã có";
                 return View();
             }
             else if (category.Name == null)
@@ -57,7 +57,7 @@ namespace FourLeafCloverShoe.Areas.Admin.Controllers
             var cate = await _categoryService.Gets();
             if (cate.Any(c => c.Name == obj.Name))
             {
-                TempData["ErrorMessage"] = "Kích cỡ đã có";
+                TempData["ErrorMessage"] = "Loại này đã có";
                 return View();
             }
             else if (obj.Name == null)
