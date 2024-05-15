@@ -99,6 +99,23 @@ namespace FourLeafCloverShoe.Services
             }
         }
 
+        public async Task<List<UserVoucher>> GetByVoucherId(Guid voucherId)
+        {
+            try
+            {
+                var userVouchers = await _myDbContext.UserVouchers
+                                        .Include(c => c.Vouchers).ToListAsync();
+                var lstObjValid = userVouchers.Where(c => c.VoucherId == voucherId);
+                return lstObjValid.ToList();
+
+            }
+            catch (Exception)
+            {
+
+                return new List<UserVoucher>();
+            }
+        }
+
         public async Task<List<UserVoucher>> Gets()
         {
             try

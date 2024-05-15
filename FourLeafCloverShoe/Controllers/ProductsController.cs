@@ -13,9 +13,7 @@ using FourLeafCloverShoe.Services;
 using FourLeafCloverShoe.Share.Models;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.CodeAnalysis.Options;
-using FourLeafCloverShoe.Data;
-using FourLeafCloverShoe.Share.ViewModels;
-using Microsoft.AspNetCore.Identity;
+using X.PagedList;
 
 namespace FourLeafCloverShoe.Controllers
 {
@@ -27,11 +25,8 @@ namespace FourLeafCloverShoe.Controllers
         private readonly ICategoryService _categoryService;
         private readonly IBrandService _brandService;
         private readonly IOrderItemService _orderItemService;
-        private readonly IOrderService _orderService;
         private readonly IWebHostEnvironment _webHostEnvironment;
-        private readonly IRateService _rateService;
-        private readonly UserManager<User> _userManager;
-        public ProductsController(IProductService productService, IOrderItemService orderItemService, IBrandService brandService, ICategoryService categoryService, IProductDetailService productDetailService, ISizeService sizeService, IWebHostEnvironment webHostEnvironment, IRateService rateService, IOrderService orderService, UserManager<User> userManager)
+        public ProductsController(IProductService productService, IOrderItemService orderItemService, IBrandService brandService, ICategoryService categoryService, IProductDetailService productDetailService, ISizeService sizeService, IWebHostEnvironment webHostEnvironment)
         {
             _productService = productService;
             _productDetailService = productDetailService;
@@ -40,9 +35,6 @@ namespace FourLeafCloverShoe.Controllers
             _brandService = brandService;
             _orderItemService = orderItemService;
             _webHostEnvironment = webHostEnvironment;
-            _rateService = rateService;
-            _orderService = orderService;
-            _userManager = userManager;
         }
         public async Task<List<Product>> Filter(string searchString, string sortSelect, string[] size_group, string[] brand_group, string[] category_group, string price_range, List<Product> lstProduct)
         {
@@ -116,8 +108,12 @@ namespace FourLeafCloverShoe.Controllers
             return lstProduct;
         }
 
-        public async Task<IActionResult> Index(string searchString, string sortSelect, string[] size_group, string[] brand_group, string[] category_group, string price_range)
+        public async Task<IActionResult> Index(int? page,string searchString, string sortSelect, string[] size_group, string[] brand_group, string[] category_group, string price_range)
         {
+            if (page == null) page = 1;
+            int pageSize = 24;
+            int pageNumber = (page ?? 1);
+
             var lstProduct = (await _productService.Gets()).Where(c => c.Status == true && c.ProductDetails.Where(p => p.Status == 1).Count() > 0).ToList();
             var Size = new List<string>();
             foreach (var size in await _sizeService.Gets())
@@ -140,25 +136,25 @@ namespace FourLeafCloverShoe.Controllers
             {
                 Category.Add(cate.Name);
             }
+            ViewBag.Category = Category;
             var sortOptions = new List<SelectListItem>
             {
-                new SelectListItem { Value = "PRICEASC", Text = "Sắp xếp theo giá: từ thấp đến cao" },
-                new SelectListItem { Value = "PRICEDESC", Text = "Sắp xếp theo giá: từ cao đến thấp" },
-                new SelectListItem { Value = "NAMEAZ", Text = "Sắp xếp theo tên từ: A-Z" },
-                new SelectListItem { Value = "NAMEZA", Text = "Sắp xếp theo tên từ: Z-A" },
-                new SelectListItem { Value = "DATENEW", Text = "Sắp xếp theo ngày: từ mới đến cũ" },
-                new SelectListItem { Value = "DATEOLD", Text = "Sắp xếp theo ngày: từ mới đến cũ" },
-                new SelectListItem { Value = "BESTSALE", Text = "Sắp xếp theo bán chạy nhất" }
+                new SelectListItem { Value = "PRICEASC", Text = "Theo giá: từ thấp đến cao" },
+                new SelectListItem { Value = "PRICEDESC", Text = "Theo giá: từ cao đến thấp" },
+                new SelectListItem { Value = "NAMEAZ", Text = "Theo tên từ: A-Z" },
+                new SelectListItem { Value = "NAMEZA", Text = "Theo tên từ: Z-A" },
+                new SelectListItem { Value = "DATENEW", Text = "Sản phẩm mới nhất" },
+                new SelectListItem { Value = "DATEOLD", Text = "Sản phẩm cũ" },
+                new SelectListItem { Value = "BESTSALE", Text = "Sản phẩm bán chạy" }
                 // Thêm các tùy chọn khác tại đây
             };
             ViewBag.SortSelect = new SelectList(sortOptions, "Value", "Text", sortSelect); // Tạo SelectList với giá trị đã chọn
-            ViewBag.Category = Category;
             ViewBag.SelectedCategory = category_group.ToList(); // Lưu trữ các category đã chọn
             ViewBag.PriceRange = price_range;
             ViewBag.SearchString = searchString;
 
             lstProduct = await Filter(searchString, sortSelect, size_group, brand_group, category_group, price_range, lstProduct); // lọc theo size, brand, category, range price
-            return View(lstProduct);
+            return View(lstProduct.ToPagedList(pageNumber, pageSize));
         }
 
         public async Task<IActionResult> ProductDetail(Guid productId)
@@ -177,24 +173,7 @@ namespace FourLeafCloverShoe.Controllers
             ViewBag.priceMin = priceMin;
             ViewBag.priceMax = priceMax;
             ViewBag.availibleQuantity = availibleQuantity;
-            //lấy sao đánh giá để tính tổng dựa theo id product
-            var productServiceGets = await _productService.Gets();
-            var productDetailServiceGets = await _productDetailService.Gets();
-            var orderItemServiceGets = await _orderItemService.Gets();
-            var rateServiceGets = await _rateService.Gets();
-            List<RateViewModel> lstRate = (from sp in productServiceGets
-                                           join ctsp in productDetailServiceGets on sp.Id equals ctsp.ProductId
-                                           join cthd in orderItemServiceGets on ctsp.Id equals cthd.ProductDetailId
-                                           join dg in rateServiceGets on cthd.Id equals dg.OrderItemId
-                                           where sp.Id == productId && dg.Status == 1
-                                           select new RateViewModel
-                                           {
-                                               ID = dg.Id,
-                                               IDPro = sp.Id,
-                                               Rating = dg.Rating,
-                                               Status = dg.Status,
-                                           }).ToList();
-            ViewBag.lstRate = lstRate;
+
             return View(product);
         }
         [HttpPost]
@@ -251,53 +230,6 @@ namespace FourLeafCloverShoe.Controllers
             return Json(new { productDetailId = productDetail.Id, priceSale = productDetail.PriceSale, quantity = productDetail.Quantity, status = status, imgQrCode = imgQrCode });
         }
 
-        [HttpGet]
-        public async Task<IActionResult> ReviewProducts(Guid idCTHD)
-        {
-            //var revi = (await _orderItemService.Gets()).FirstOrDefault(c => c.Id == idCTHD);
-            return Redirect($"/Identity/Account/Manage/ReviewProducts?idCTHD={idCTHD}");//Dcm mãi ms sang view blazor dc cú vl
-        }
-        [HttpPost]
-        public async Task<IActionResult> RateProducts(Guid id,Guid idCTHD, float rating, string? danhGia, Guid idHD)
-        {
-            var ratePr = await _rateService.UpdateDanhGia(id, idCTHD, rating, danhGia);
-            if (ratePr)
-            {
-                return Redirect($"/Identity/Account/Manage/orderdetail?orderId={idHD}");//chuyển sang trang đơn chi tiết
-            }
-            return Redirect($"/Identity/Account/Manage/orderdetail?orderId={idHD}");
-        }
-        [HttpGet]
-        public async Task<IActionResult> ShowRateByIdProduct(Guid IdPro)
-        {
-            var productServiceGets = await _productService.Gets();
-            var productDetailServiceGets = await _productDetailService.Gets();
-            var orderItemServiceGets = await _orderItemService.Gets();
-            var rateServiceGets = await _rateService.Gets();
-            var orderServiceGets = await _orderService.Gets();
-            var sizeServiceGets = await _sizeService.Gets();
-
-            List<RateViewModel> lstRate = (from sp in productServiceGets
-                                           
-                                           join ctsp in productDetailServiceGets on sp.Id equals ctsp.ProductId
-                                           join cthd in orderItemServiceGets on ctsp.Id equals cthd.ProductDetailId
-                                           join dg in rateServiceGets on cthd.Id equals dg.OrderItemId
-                                           join hd in orderServiceGets on cthd.OrderId equals hd.Id
-                                           join kc in sizeServiceGets on ctsp.SizeId equals kc.Id
-                                           where sp.Id == IdPro && dg.Status == 1
-                                           select new RateViewModel
-                                           {
-                                               ID = dg.Id,
-                                               Rating = dg.Rating,
-                                               Contents = dg.Contents,
-                                               Status = dg.Status,
-                                               CreateDate = dg.CreateDate.GetValueOrDefault().ToString("dd/MM/yyyyy HH:mm:ss"),
-                                               TenKH = _userManager.Users.FirstOrDefault(c => c.Id == hd.UserId).FullName,
-                                               AnhKh = _userManager.Users.FirstOrDefault(c => c.Id == hd.UserId).ProfilePicture,
-                                               Size = kc.Name
-                                           }).ToList();
-            return Json(lstRate);
-        }
 
     }
 }

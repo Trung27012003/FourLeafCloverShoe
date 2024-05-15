@@ -72,7 +72,7 @@ namespace FourLeafCloverShoe.Services
 
                 var lstObj = await _myDbContext.Products
                    .Include(c => c.ProductDetails)
-                     .Include(c => c.ProductDetails)
+                    .Include(c => c.ProductDetails)
                        .ThenInclude(c => c.Size)
                    .Include(c => c.Categories)
                    .Include(c => c.Brands)

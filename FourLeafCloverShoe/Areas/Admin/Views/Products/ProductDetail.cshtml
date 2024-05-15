@@ -43,7 +43,7 @@
                                     <td>@item.Products.ProductName</td>
                                     <td>@item.Size.Name</td>
                                     <td>@item.Quantity</td>
-                                    <td>@item.PriceSale</td>
+                                    <td>@item.PriceSale?.ToString("N0")</td>
                                     <td class="text-center">
                                         @if (item.Status == 1)
                                         {

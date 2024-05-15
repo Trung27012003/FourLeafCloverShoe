@@ -464,7 +464,7 @@
             }
             else if (TotalAmout == 0) {
                 if (confirm("Bạn có chắc chắn muốn đặt hàng không?")) {
-                    PaymentType = type;
+                    PaymentType = "cod";
                     $.ajax({
                         type: "POST",
                         url: "/Order/CheckOut",
