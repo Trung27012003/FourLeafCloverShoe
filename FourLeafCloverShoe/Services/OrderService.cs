@@ -13,7 +13,7 @@ namespace FourLeafCloverShoe.Services
         {
             _myDbContext = myDbContext;
         }
-        public async Task<bool> Add(OrderIterm obj)
+        public async Task<bool> Add(Order obj)
         {
             try
             {
@@ -29,7 +29,7 @@ namespace FourLeafCloverShoe.Services
             }
         }
 
-        public async Task<bool> AddMany(List<OrderIterm> lstobj)
+        public async Task<bool> AddMany(List<Order> lstobj)
         {
             try
             {
@@ -64,7 +64,7 @@ namespace FourLeafCloverShoe.Services
             }
         }
 
-        public async Task<bool> DeleteMany(List<OrderIterm> lstobj)
+        public async Task<bool> DeleteMany(List<Order> lstobj)
         {
             try
             {
@@ -79,7 +79,7 @@ namespace FourLeafCloverShoe.Services
             }
         }
 
-        public async Task<OrderIterm> GetById(Guid Id)
+        public async Task<Order> GetById(Guid Id)
         {
             try
             {
@@ -89,16 +89,16 @@ namespace FourLeafCloverShoe.Services
 
                     return obj;
                 }
-                return new OrderIterm();
+                return new Order();
             }
             catch (Exception e)
             {
                 Console.WriteLine(e.Message);
-                return new OrderIterm();
+                return new Order();
             }
         }
 
-        public async Task<List<OrderIterm>> Gets()
+        public async Task<List<Order>> Gets()
         {
             try
             {
@@ -118,16 +118,16 @@ namespace FourLeafCloverShoe.Services
 
                     return obj;
                 }
-                return new List<OrderIterm>();
+                return new List<Order>();
             }
             catch (Exception e)
             {
                 Console.WriteLine(e.Message);
-                return new List<OrderIterm>();
+                return new List<Order>();
             }
         }
 
-        public async Task<bool> Update(OrderIterm obj)
+        public async Task<bool> Update(Order obj)
         {
             try
             {

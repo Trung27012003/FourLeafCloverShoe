@@ -15,7 +15,7 @@ namespace FourLeafCloverShoe.Share.Models
         public int? Quantity { get; set; }
         public decimal? Price { get; set; }
         [ForeignKey("OrderId")]
-        public OrderIterm? Orders { get; set; }
+        public Order? Orders { get; set; }
         [ForeignKey("ProductDetailId")]
         public ProductDetail? ProductDetails { get; set; }
         // Thêm thuộc tính navigation để thiết lập quan hệ 1-1

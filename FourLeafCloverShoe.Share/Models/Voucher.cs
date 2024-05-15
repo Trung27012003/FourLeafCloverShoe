@@ -20,7 +20,7 @@ namespace FourLeafCloverShoe.Share.Models
         public DateTime? StartDate { get; set; }
         public DateTime? EndDate { get; set; }
         public int? Status { get; set; } // 1: hoat dong, -1: het han or ngung hoat dong
-        public virtual List<OrderIterm>? Orders { get; set; }
+        public virtual List<Order>? Orders { get; set; }
         public virtual List<UserVoucher>? UserVouchers { get; set; }
     }
 }

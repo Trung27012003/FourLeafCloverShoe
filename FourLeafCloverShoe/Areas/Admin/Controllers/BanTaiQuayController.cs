@@ -246,7 +246,7 @@ namespace FourLeafCloverShoe.Areas.Admin.Controllers
         public async Task<IActionResult> CreateNewOrderAsync()
         {
             var user = await _userManager.GetUserAsync(HttpContext.User);
-            var order = new OrderIterm()
+            var order = new Order()
             {
                 Id = Guid.NewGuid(),
                 TotalAmout = 0,
@@ -552,7 +552,7 @@ namespace FourLeafCloverShoe.Areas.Admin.Controllers
                 return Json(new { isSuccess = true, message = "Mua hàng vnpay", paymentType = paymentType, url = await UrlCheckOutVnPay(order) });
             }
         }
-        public async Task<string> UrlCheckOutVnPay(OrderIterm order)
+        public async Task<string> UrlCheckOutVnPay(Order order)
         {
             string vnp_Returnurl = $"https://localhost:7116/Admin/BanTaiQuay/PaymentCallBack?orderId={order.Id}"; //URL nhan ket qua tra ve 
             string vnp_Url = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html"; //URL thanh toan cua VNPAY 
@@ -580,7 +580,7 @@ namespace FourLeafCloverShoe.Areas.Admin.Controllers
             //log.InfoFormat("VNPAY URL: {0}", paymentUrl);
             return paymentUrl;
         }
-        public async Task<string> UrlCheckOutMoMo(OrderIterm order)
+        public async Task<string> UrlCheckOutMoMo(Order order)
         {
             //request params need to request to MoMo system
             string endpoint = "https://test-payment.momo.vn/v2/gateway/api/create";

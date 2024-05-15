@@ -12,7 +12,7 @@ namespace FourLeafCloverShoe.Areas.Identity.Pages.Account.Manage
         private readonly UserManager<User> _userManager;
         private readonly IOrderService _orderService;
         private readonly IRateService _rateService;
-        public OrderIterm Order { get; set; }
+        public Order Order { get; set; }
         public Rate Rate { get; set; }
         public OrderDetailModel(UserManager<User> userManager, IOrderService orderService, IRateService rateService)
         {

@@ -4,12 +4,12 @@ namespace FourLeafCloverShoe.IServices
 {
     public interface IOrderService
     {
-        public Task<bool> Add(OrderIterm obj);
-        public Task<bool> AddMany(List<OrderIterm> lstobj);
-        public Task<bool> Update(OrderIterm obj);
+        public Task<bool> Add(Order obj);
+        public Task<bool> AddMany(List<Order> lstobj);
+        public Task<bool> Update(Order obj);
         public Task<bool> Delete(Guid Id);
-        public Task<bool> DeleteMany(List<OrderIterm> lstobj);
-        public Task<OrderIterm> GetById(Guid Id);
-        public Task<List<OrderIterm>> Gets();
+        public Task<bool> DeleteMany(List<Order> lstobj);
+        public Task<Order> GetById(Guid Id);
+        public Task<List<Order>> Gets();
     }
 }

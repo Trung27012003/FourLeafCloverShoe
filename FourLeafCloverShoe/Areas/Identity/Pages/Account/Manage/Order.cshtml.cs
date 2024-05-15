@@ -18,7 +18,7 @@ namespace FourLeafCloverShoe.Areas.Identity.Pages.Account.Manage
             _userManager = userManager;
             _orderService = orderService;
         }
-        public IEnumerable<OrderIterm> ListOrder { get; set; }
+        public IEnumerable<Order> ListOrder { get; set; }
         public async Task<IActionResult> OnGetAsync()
         {
             var user = await _userManager.GetUserAsync(User);
