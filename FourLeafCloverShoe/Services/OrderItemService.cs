@@ -107,6 +107,7 @@ namespace FourLeafCloverShoe.Services
                             .ThenInclude(c=>c.ProductImages)
                     .Include(c=>c.ProductDetails)
                         .ThenInclude(c=>c.Size)
+                    .Include(c=>c.Rate)
                     .ToListAsync();
                 if (obj != null)
                 {

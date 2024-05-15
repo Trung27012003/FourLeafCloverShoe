@@ -77,6 +77,9 @@ namespace FourLeafCloverShoe.Services
                    .Include(c => c.Categories)
                    .Include(c => c.Brands)
                    .Include(c => c.ProductImages)
+                   .Include(c=>c.ProductDetails)
+                   .ThenInclude(c=>c.OrderItems)
+                   .ThenInclude(c=>c.Rate)
                    .ToListAsync();
                 var obj = lstObj.FirstOrDefault(c => c.Id == Id);
                 if (obj != null)
@@ -106,6 +109,9 @@ namespace FourLeafCloverShoe.Services
                    .Include(c => c.Categories)
                    .Include(c => c.Brands)
                    .Include(c => c.ProductImages)
+                    .Include(c => c.ProductDetails)
+                   .ThenInclude(c => c.OrderItems)
+                   .ThenInclude(c => c.Rate)
                    .ToListAsync();
                 if (obj != null)
                 {

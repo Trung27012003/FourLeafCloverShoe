@@ -24,10 +24,11 @@ namespace FourLeafCloverShoe.Controllers
         private readonly IUserVoucherService _userVoucherService;
         private readonly IVoucherService _voucherService;
         private readonly IProductDetailService _productDetailService;
+        private readonly IRateService _rateService;
         private readonly IHubContext<Hubs> _hubContext;
 
 
-        public OrderController(IHubContext<Hubs> hubContext, IProductDetailService productDetailService, UserManager<User> userManager,IVoucherService voucherService,IUserVoucherService userVoucherService , IOrderService orderService, IOrderItemService orderItemService, ICartItemItemService cartItemItemService)
+        public OrderController(IHubContext<Hubs> hubContext, IProductDetailService productDetailService, UserManager<User> userManager,IVoucherService voucherService,IUserVoucherService userVoucherService , IOrderService orderService, IOrderItemService orderItemService, ICartItemItemService cartItemItemService, IRateService rateService)
         {
             _userManager = userManager;
             _orderItemService = orderItemService;
@@ -37,6 +38,7 @@ namespace FourLeafCloverShoe.Controllers
             _voucherService = voucherService;
             _productDetailService = productDetailService;
             _hubContext = hubContext;
+            _rateService = rateService;
 
         }
         public static string GenerateInvoiceCode(string paymentType)
@@ -94,7 +96,7 @@ namespace FourLeafCloverShoe.Controllers
             return false;
         }
         [HttpPost]
-        public async Task<string> CheckOutAsync(Order order)
+        public async Task<string> CheckOutAsync(OrderIterm order)
         {
 
             if (User.Identity.IsAuthenticated) // đã đăng nhập
@@ -131,12 +133,24 @@ namespace FourLeafCloverShoe.Controllers
                     {
                         var orderItems = new OrderItem()
                         {
+                            Id = Guid.NewGuid(),//them
                             OrderId = order.Id,
                             ProductDetailId = item.ProductDetailId,
                             Quantity = item.Quantity,
                             Price = item.ProductDetails.PriceSale,
                         };
+                        //tạo đánh giá
+                        Rate rate = new Rate();
+                        rate.Id = Guid.NewGuid();
+                        rate.OrderItemId = orderItems.Id;
+                        //rate.Contents = null;
+                        //rate.Reply = null;
+                        //rate.ImageUrl = null;
+                        //rate.Rating = null;
+                        rate.Status = 0;
+                        _rateService.Add(rate);
                         lstOrderItems.Add(orderItems);
+
                     }
                     var resultCreateOrderItems = await _orderItemService.AddMany(lstOrderItems);
                     if (resultCreateOrderItems)
@@ -290,7 +304,7 @@ namespace FourLeafCloverShoe.Controllers
             }
             
         }
-        public async Task<string> UrlCheckOutVnPay(Order order)
+        public async Task<string> UrlCheckOutVnPay(OrderIterm order)
         {
             string vnp_Returnurl = $"https://localhost:7116/Order/PaymentCallBack?orderId={order.Id}"; //URL nhan ket qua tra ve 
             string vnp_Url = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html"; //URL thanh toan cua VNPAY 
@@ -318,7 +332,7 @@ namespace FourLeafCloverShoe.Controllers
             //log.InfoFormat("VNPAY URL: {0}", paymentUrl);
             return paymentUrl;
         }
-        public async Task<string> UrlCheckOutMoMo(Order order)
+        public async Task<string> UrlCheckOutMoMo(OrderIterm order)
         {
             //request params need to request to MoMo system
             string endpoint = "https://test-payment.momo.vn/v2/gateway/api/create";
@@ -625,5 +639,6 @@ namespace FourLeafCloverShoe.Controllers
             }
             return "";
         }
+        
     }
 }

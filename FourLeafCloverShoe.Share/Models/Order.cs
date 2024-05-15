@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace FourLeafCloverShoe.Share.Models
 {
-    public class Order
+    public class OrderIterm
     {
         public Guid Id { get; set; }
         public string? UserId { get; set; }//

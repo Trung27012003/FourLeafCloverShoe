@@ -1,6 +1,9 @@
 ﻿@using FourLeafCloverShoe.Share.Models;
+@using FourLeafCloverShoe.Share.ViewModels
 @model FourLeafCloverShoe.Share.Models.Product
-
+@{
+    var lstRate = ViewBag.lstRate as List<RateViewModel>;
+}
 <link href="~/fileuser/lib/jquery-pagination/simplePagination.css" rel="stylesheet">
 <style>
     .input-group.input-spinner {
@@ -409,25 +412,24 @@
                     <p class="product-code">@Model.ProductCode</p>
                     <div class="product-top-info">
                         <div class="product-grid-rating">
-                            <div class="product-grid-star product-grid-star-active">
-                                <i class="mwc-icon-mwc-star"></i>
-                            </div>
-                            <div class="product-grid-star product-grid-star-active">
-                                <i class="mwc-icon-mwc-star"></i>
-                            </div>
-                            <div class="product-grid-star product-grid-star-active">
-                                <i class="mwc-icon-mwc-star"></i>
-                            </div>
-                            <div class="product-grid-star product-grid-star-active">
-                                <i class="mwc-icon-mwc-star"></i>
-                            </div>
-                            <div class="product-grid-star product-grid-star-active">
-                                <i class="mwc-icon-mwc-star"></i>
-                            </div>
+                            @{
+                                var averageRating = lstRate.Average(rate => rate.Rating);
+                                // Hiển thị số sao theo số điểm trung bình
+                                for (var i = 1; i <= 5; i++)
+                                {
+                                    <div class="product-grid-star @(i <= averageRating ? "product-grid-star-active" : "")">
+                                        <i class="mwc-icon-mwc-star"></i>
+                                    </div>
+                                }
+                            }
                         </div>
                         <div class="product-top-review">
-                            <span class="product-top-review-count">1</span> Đánh giá
+                            @{
+                                var count = lstRate.Count(c => c.IDPro == Model.Id);
+                            }
+                            <span class="product-top-review-count">@count</span> Đánh giá
                         </div>
+                       
                         <div class="product-availibleQuantity">
                             @{
                                 decimal priceMax = ViewBag.priceMax??0;
@@ -701,41 +703,39 @@
             </div>
             <div class="row">
                 <div class="col-12 col-lg-12 mb-32px dt-pro">
+
+
                     <ul class="nav nav-tabs" id="ProductTab" role="tablist">
                         <li class="nav-item" role="presentation">
-                            <button class="nav-link" id="product-detail-des-tab"
-                                    data-bs-toggle="tab" data-bs-target="#product-detail-des"
-                                    type="button" role="tab" aria-controls="product-detail-des"
-                                    aria-selected="false">
-                                Chi tiết sản phẩm
-                            </button>
+                            <button class="nav-link active" id="product-detail-des-tab" data-bs-toggle="tab" data-bs-target="#product-detail-des" type="button" role="tab" aria-controls="product-detail-des" aria-selected="false"> Chi tiết sản phẩm</button>
                         </li>
 
                         <li class="nav-item" role="presentation">
-                            <button class="nav-link active" id="product-detail-review-tab"
-                                    data-bs-toggle="tab" data-bs-target="#product-detail-review"
-                                    type="button" role="tab" aria-controls="product-detail-review"
-                                    aria-selected="true">
-                                Đánh giá
-                            </button>
+                            <button class="nav-link" id="product-detail-review-tab" data-bs-toggle="tab" data-bs-target="#product-detail-review" type="button" role="tab" aria-controls="product-detail-review" aria-selected="false" onclick="loadComments()"> Bình luận </button>
                         </li>
+
                     </ul>
                     <div class="tab-content" id="ProductTabContent">
-                        <div class="tab-pane fade" id="product-detail-des" role="tabpanel"
-                             aria-labelledby="product-detail-des-tab">
-                            @Html.Raw(Model.Description)
+                        <div class="tab-pane fade show active" id="product-detail-des" role="tabpanel" aria-labelledby="product-detail-des-tab">
+                        @Html.Raw(Model.Description)    
                         </div>
-                        <div class="tab-pane fade active show" id="product-detail-review"
-                             role="tabpanel" aria-labelledby="product-detail-review-tab">
+
+                        <div class="tab-pane fade" id="product-detail-review" role="tabpanel" aria-labelledby="product-detail-review-tab">
                             <br>
                             <div class="be-comment-block" id="product-detail-comments">
                                 <input type="hidden" id="TotalRow" name="TotalRow" value="0">
-                                <h1 class="comments-title">Không có đánh giá</h1>
+                                <h1 class="comments-title">Không có bình luận</h1>
+                                
+                                    <div class="be-comment mb-2">
+                                       
+                                    </div>
+                                
+                                
                             </div>
-
                         </div>
                     </div>
                 </div>
+
             </div>
             <div class="row">
                 <div class="col-12 col-lg-12 mb-32px">
@@ -787,6 +787,89 @@
     </div>
 
 </section>
+@* <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> *@
+<script type="text/javascript">
+    function loadComments() {
+        var productId = '@(Model.Id)';
+        $.ajax({
+            url: '/Products/ShowRateByIdProduct', 
+            type: 'GET',
+            data: { IdPro: productId },
+            success: function (data) {
+                updateComments(data);
+                console.log(data);
+            },
+            error: function () {
+                alert('Lỗi');
+            }
+        });
+    }
+
+    function updateComments(comments) {
+        var commentsContainer = $('#product-detail-comments');
+
+        if (comments && comments.length > 0) {
+            var commentHtml = '';
+
+            comments.forEach(function (comment) {
+                var imageData = arrayBufferToBase64(comment.anhKh);
+                var imageUrl = 'data:image/*;base64,' + imageData;
+
+                // Tạo biến để lưu các biểu tượng sao
+                var starIcons = '';
+                for (var i = 0; i < comment.rating; i++) {
+                    starIcons += '<div class="product-grid-star product-grid-star-active"><i class="mwc-icon-mwc-star"></i></div>';
+                }
+
+                commentHtml += `
+                    <div class="be-comment mb-2">
+                        <div class="be-img-comment">
+                            <a href="#">
+                                <img src="${imageUrl}" alt="" class="be-ava-comment">
+                            </a>
+                        </div>
+                        <div class="be-comment-content">
+                            <span class="be-comment-name">
+                                <a href="#">${comment.tenKH}</a>
+                            </span>
+                            <div class="be-comment-text d-flex flex-column">
+                                <div class="product-grid-rating">
+                                    ${starIcons} <!-- Hiển thị các biểu tượng sao -->
+                                </div>
+                                    <span>${comment.createDate}</span>
+                                <span>${comment.contents}</span>
+                                <span>Size: ${comment.size}</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            commentsContainer.html(commentHtml);
+        } else {
+            commentsContainer.html('<h1 class="comments-title">Không có bình luận</h1>');
+        }
+    }
+
+
+
+
+    // Function to convert byte array to base64 string
+    function arrayBufferToBase64(buffer) {
+        var binary = '';
+        var bytes = new Uint8Array(buffer);
+        var len = bytes.byteLength;
+        for (var i = 0; i < len; i++) {
+            binary += String.fromCharCode(bytes[i]);
+        }
+        return window.btoa(binary);
+    }
+
+</script>
+
+
+
+
 <script type="text/javascript">
 
 

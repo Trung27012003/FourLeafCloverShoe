@@ -13,7 +13,7 @@ namespace FourLeafCloverShoe.Services
         {
             _myDbContext = myDbContext;
         }
-        public async Task<bool> Add(Order obj)
+        public async Task<bool> Add(OrderIterm obj)
         {
             try
             {
@@ -29,7 +29,7 @@ namespace FourLeafCloverShoe.Services
             }
         }
 
-        public async Task<bool> AddMany(List<Order> lstobj)
+        public async Task<bool> AddMany(List<OrderIterm> lstobj)
         {
             try
             {
@@ -64,7 +64,7 @@ namespace FourLeafCloverShoe.Services
             }
         }
 
-        public async Task<bool> DeleteMany(List<Order> lstobj)
+        public async Task<bool> DeleteMany(List<OrderIterm> lstobj)
         {
             try
             {
@@ -79,7 +79,7 @@ namespace FourLeafCloverShoe.Services
             }
         }
 
-        public async Task<Order> GetById(Guid Id)
+        public async Task<OrderIterm> GetById(Guid Id)
         {
             try
             {
@@ -89,16 +89,16 @@ namespace FourLeafCloverShoe.Services
 
                     return obj;
                 }
-                return new Order();
+                return new OrderIterm();
             }
             catch (Exception e)
             {
                 Console.WriteLine(e.Message);
-                return new Order();
+                return new OrderIterm();
             }
         }
 
-        public async Task<List<Order>> Gets()
+        public async Task<List<OrderIterm>> Gets()
         {
             try
             {
@@ -110,22 +110,24 @@ namespace FourLeafCloverShoe.Services
                     .Include(c => c.OrderItems)
                         .ThenInclude(c => c.ProductDetails)
                             .ThenInclude(c => c.Size)
+                    .Include(c=>c.OrderItems)//them lay tu bang rate
+                        .ThenInclude(c=>c.Rate)
                     .ToListAsync();
                 if (obj != null)
                 {
 
                     return obj;
                 }
-                return new List<Order>();
+                return new List<OrderIterm>();
             }
             catch (Exception e)
             {
                 Console.WriteLine(e.Message);
-                return new List<Order>();
+                return new List<OrderIterm>();
             }
         }
 
-        public async Task<bool> Update(Order obj)
+        public async Task<bool> Update(OrderIterm obj)
         {
             try
             {

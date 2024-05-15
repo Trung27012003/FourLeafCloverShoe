@@ -9,6 +9,7 @@
   <ItemGroup>
     <Folder Include="Areas\Admin\Data\" />
     <Folder Include="Areas\Admin\Models\" />
+    <Folder Include="Areas\Identity\Views\" />
     <Folder Include="wwwroot\images\qrcode\" />
     <Folder Include="wwwroot\images\post\" />
   </ItemGroup>

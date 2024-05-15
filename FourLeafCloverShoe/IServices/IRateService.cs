@@ -1,4 +1,5 @@
 ﻿using FourLeafCloverShoe.Share.Models;
+using FourLeafCloverShoe.Share.ViewModels;
 
 namespace FourLeafCloverShoe.IServices
 {
@@ -9,6 +10,9 @@ namespace FourLeafCloverShoe.IServices
         public Task<bool> Update(Rate obj);
         public Task<bool> Delete(Guid Id);
         public Task<Rate> GetById(Guid Id);
+        public Task<List<RateViewModel>> GetByIdProduct(Guid IdPr);
+
         public Task<List<Rate>> Gets();
+        public Task<bool> UpdateDanhGia(Guid id, Guid idhdct, float soSao, string? binhLuan);
     }
 }

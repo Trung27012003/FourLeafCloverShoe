@@ -13,6 +13,9 @@ using FourLeafCloverShoe.Services;
 using FourLeafCloverShoe.Share.Models;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.CodeAnalysis.Options;
+using FourLeafCloverShoe.Data;
+using FourLeafCloverShoe.Share.ViewModels;
+using Microsoft.AspNetCore.Identity;
 
 namespace FourLeafCloverShoe.Controllers
 {
@@ -24,8 +27,11 @@ namespace FourLeafCloverShoe.Controllers
         private readonly ICategoryService _categoryService;
         private readonly IBrandService _brandService;
         private readonly IOrderItemService _orderItemService;
+        private readonly IOrderService _orderService;
         private readonly IWebHostEnvironment _webHostEnvironment;
-        public ProductsController(IProductService productService, IOrderItemService orderItemService, IBrandService brandService, ICategoryService categoryService, IProductDetailService productDetailService, ISizeService sizeService, IWebHostEnvironment webHostEnvironment)
+        private readonly IRateService _rateService;
+        private readonly UserManager<User> _userManager;
+        public ProductsController(IProductService productService, IOrderItemService orderItemService, IBrandService brandService, ICategoryService categoryService, IProductDetailService productDetailService, ISizeService sizeService, IWebHostEnvironment webHostEnvironment, IRateService rateService, IOrderService orderService, UserManager<User> userManager)
         {
             _productService = productService;
             _productDetailService = productDetailService;
@@ -34,6 +40,9 @@ namespace FourLeafCloverShoe.Controllers
             _brandService = brandService;
             _orderItemService = orderItemService;
             _webHostEnvironment = webHostEnvironment;
+            _rateService = rateService;
+            _orderService = orderService;
+            _userManager = userManager;
         }
         public async Task<List<Product>> Filter(string searchString, string sortSelect, string[] size_group, string[] brand_group, string[] category_group, string price_range, List<Product> lstProduct)
         {
@@ -168,7 +177,24 @@ namespace FourLeafCloverShoe.Controllers
             ViewBag.priceMin = priceMin;
             ViewBag.priceMax = priceMax;
             ViewBag.availibleQuantity = availibleQuantity;
-
+            //lấy sao đánh giá để tính tổng dựa theo id product
+            var productServiceGets = await _productService.Gets();
+            var productDetailServiceGets = await _productDetailService.Gets();
+            var orderItemServiceGets = await _orderItemService.Gets();
+            var rateServiceGets = await _rateService.Gets();
+            List<RateViewModel> lstRate = (from sp in productServiceGets
+                                           join ctsp in productDetailServiceGets on sp.Id equals ctsp.ProductId
+                                           join cthd in orderItemServiceGets on ctsp.Id equals cthd.ProductDetailId
+                                           join dg in rateServiceGets on cthd.Id equals dg.OrderItemId
+                                           where sp.Id == productId && dg.Status == 1
+                                           select new RateViewModel
+                                           {
+                                               ID = dg.Id,
+                                               IDPro = sp.Id,
+                                               Rating = dg.Rating,
+                                               Status = dg.Status,
+                                           }).ToList();
+            ViewBag.lstRate = lstRate;
             return View(product);
         }
         [HttpPost]
@@ -225,6 +251,53 @@ namespace FourLeafCloverShoe.Controllers
             return Json(new { productDetailId = productDetail.Id, priceSale = productDetail.PriceSale, quantity = productDetail.Quantity, status = status, imgQrCode = imgQrCode });
         }
 
+        [HttpGet]
+        public async Task<IActionResult> ReviewProducts(Guid idCTHD)
+        {
+            //var revi = (await _orderItemService.Gets()).FirstOrDefault(c => c.Id == idCTHD);
+            return Redirect($"/Identity/Account/Manage/ReviewProducts?idCTHD={idCTHD}");//Dcm mãi ms sang view blazor dc cú vl
+        }
+        [HttpPost]
+        public async Task<IActionResult> RateProducts(Guid id,Guid idCTHD, float rating, string? danhGia, Guid idHD)
+        {
+            var ratePr = await _rateService.UpdateDanhGia(id, idCTHD, rating, danhGia);
+            if (ratePr)
+            {
+                return Redirect($"/Identity/Account/Manage/orderdetail?orderId={idHD}");//chuyển sang trang đơn chi tiết
+            }
+            return Redirect($"/Identity/Account/Manage/orderdetail?orderId={idHD}");
+        }
+        [HttpGet]
+        public async Task<IActionResult> ShowRateByIdProduct(Guid IdPro)
+        {
+            var productServiceGets = await _productService.Gets();
+            var productDetailServiceGets = await _productDetailService.Gets();
+            var orderItemServiceGets = await _orderItemService.Gets();
+            var rateServiceGets = await _rateService.Gets();
+            var orderServiceGets = await _orderService.Gets();
+            var sizeServiceGets = await _sizeService.Gets();
+
+            List<RateViewModel> lstRate = (from sp in productServiceGets
+                                           
+                                           join ctsp in productDetailServiceGets on sp.Id equals ctsp.ProductId
+                                           join cthd in orderItemServiceGets on ctsp.Id equals cthd.ProductDetailId
+                                           join dg in rateServiceGets on cthd.Id equals dg.OrderItemId
+                                           join hd in orderServiceGets on cthd.OrderId equals hd.Id
+                                           join kc in sizeServiceGets on ctsp.SizeId equals kc.Id
+                                           where sp.Id == IdPro && dg.Status == 1
+                                           select new RateViewModel
+                                           {
+                                               ID = dg.Id,
+                                               Rating = dg.Rating,
+                                               Contents = dg.Contents,
+                                               Status = dg.Status,
+                                               CreateDate = dg.CreateDate.GetValueOrDefault().ToString("dd/MM/yyyyy HH:mm:ss"),
+                                               TenKH = _userManager.Users.FirstOrDefault(c => c.Id == hd.UserId).FullName,
+                                               AnhKh = _userManager.Users.FirstOrDefault(c => c.Id == hd.UserId).ProfilePicture,
+                                               Size = kc.Name
+                                           }).ToList();
+            return Json(lstRate);
+        }
 
     }
 }
