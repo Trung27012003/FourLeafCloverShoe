@@ -411,25 +411,27 @@
                     <h1 style="font-size: x-large;">@Model.ProductName</h1>
                     <p class="product-code">@Model.ProductCode</p>
                     <div class="product-top-info">
-                        <div class="product-grid-rating">
-                            @{
-                                var averageRating = lstRate.Average(rate => rate.Rating);
-                                // Hiển thị số sao theo số điểm trung bình
-                                for (var i = 1; i <= 5; i++)
-                                {
-                                    <div class="product-grid-star @(i <= averageRating ? "product-grid-star-active" : "")">
-                                        <i class="mwc-icon-mwc-star"></i>
-                                    </div>
+                        @if (lstRate != null)
+                        {
+                            <div class="product-grid-rating">
+                                @{                   
+                                    var averageRating = lstRate.Average(rate => rate.Rating);
+                                    // Hiển thị số sao theo số điểm trung bình
+                                    for (var i = 1; i <= 5; i++)
+                                    {
+                                        <div class="product-grid-star @(i <= averageRating ? "product-grid-star-active" : "")">
+                                            <i class="mwc-icon-mwc-star"></i>
+                                        </div>
+                                    }
                                 }
-                            }
-                        </div>
-                        <div class="product-top-review">
-                            @{
-                                var count = lstRate.Count(c => c.IDPro == Model.Id);
-                            }
-                            <span class="product-top-review-count">@count</span> Đánh giá
-                        </div>
-                       
+                            </div>
+                            <div class="product-top-review">
+                                @{
+                                    var count = lstRate.Count(c => c.IDPro == Model.Id);
+                                }
+                                <span class="product-top-review-count">@count</span> Đánh giá
+                            </div>
+                       }
                         <div class="product-availibleQuantity">
                             @{
                                 decimal priceMax = ViewBag.priceMax??0;

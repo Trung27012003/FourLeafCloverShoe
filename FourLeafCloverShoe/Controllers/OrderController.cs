@@ -129,6 +129,7 @@ namespace FourLeafCloverShoe.Controllers
                 if (result)
                 {
                     var lstOrderItems = new List<OrderItem>();
+                    var lstRates = new List<Rate>();
                     foreach (var item in lstCartItem)
                     {
                         var orderItems = new OrderItem()
@@ -139,24 +140,31 @@ namespace FourLeafCloverShoe.Controllers
                             Quantity = item.Quantity,
                             Price = item.ProductDetails.PriceSale,
                         };
-                        //tạo đánh giá
-                        Rate rate = new Rate();
-                        rate.Id = Guid.NewGuid();
-                        rate.OrderItemId = orderItems.Id;
-                        //rate.Contents = null;
-                        //rate.Reply = null;
-                        //rate.ImageUrl = null;
-                        //rate.Rating = null;
-                        rate.Status = 0;
-                        _rateService.Add(rate);
                         lstOrderItems.Add(orderItems);
-
+                        //tạo đánh giá
+                        Rate rate = new Rate()
+                        {
+                            Id = Guid.NewGuid(),
+                            OrderItemId = orderItems.Id,
+                            Contents = null,
+                            Reply = null,
+                            ImageUrl = null,
+                            Rating = null,
+                            CreateDate = null,
+                            Status = 0
+                        };
+                        lstRates.Add(rate);
+                      
                     }
                     var resultCreateOrderItems = await _orderItemService.AddMany(lstOrderItems);
                     if (resultCreateOrderItems)
                     {
+                        // Nếu thêm OrderItems thành công, thêm các Rates tương ứng
+                        foreach (var rate in lstRates)
+                        {
+                            await _rateService.Add(rate);
+                        }
                         // tạo đơn hàng thành công
-
                         var cartItems = await _cartItemItemService.GetsByUserId(user.Id);
                         var resultDeleteCartItems = await _cartItemItemService.DeleteMany(cartItems);
                         if (!resultDeleteCartItems) // xoá giỏ hàng
