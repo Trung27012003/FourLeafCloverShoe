@@ -262,15 +262,39 @@ namespace FourLeafCloverShoe.Controllers
             return Redirect($"/Identity/Account/Manage/ReviewProducts?idCTHD={idCTHD}");//Dcm mãi ms sang view blazor dc cú vl
         }
         [HttpPost]
-        public async Task<IActionResult> RateProducts(Guid id, Guid idCTHD, float rating, string? danhGia, Guid idHD)
+        public async Task<IActionResult> RateProducts(Guid id, Guid idCTHD, float rating, string? danhGia, Guid idHD, List<IFormFile> uploadedImages)
         {
-            var ratePr = await _rateService.UpdateDanhGia(id, idCTHD, rating, danhGia);
+            var imageUrls = new List<string>();
+
+            //BÚ C#4
+            foreach (var image in uploadedImages)
+            {
+                if (image != null && image.Length > 0)
+                {
+                    // Định nghĩa đường dẫn và tên tệp ảnh
+                    var filePath = Path.Combine("wwwroot/images/uploads", image.FileName);
+                    using (var stream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await image.CopyToAsync(stream);
+                    }
+
+                    // Lưu đường dẫn ảnh vào danh sách
+                    var imageUrl = $"/images/uploads/{image.FileName}";
+                    imageUrls.Add(imageUrl);
+                }
+            }
+
+            // Tạo chuỗi URL từ danh sách
+            var imageUrlsString = string.Join(";", imageUrls);
+
+            var ratePr = await _rateService.UpdateDanhGia(id, idCTHD, rating, danhGia, imageUrlsString);
             if (ratePr)
             {
-                return Redirect($"/Identity/Account/Manage/orderdetail?orderId={idHD}");//chuyển sang trang đơn chi tiết
+                return Redirect($"/Identity/Account/Manage/orderdetail?orderId={idHD}");// Chuyển sang trang đơn chi tiết
             }
             return Redirect($"/Identity/Account/Manage/orderdetail?orderId={idHD}");
         }
+
         [HttpGet]
         public async Task<IActionResult> ShowRateByIdProduct(Guid IdPro)
         {
@@ -295,6 +319,7 @@ namespace FourLeafCloverShoe.Controllers
                                                Rating = dg.Rating,
                                                Contents = dg.Contents,
                                                Status = dg.Status,
+                                               ImageUrl = dg.ImageUrl,
                                                CreateDate = dg.CreateDate.GetValueOrDefault().ToString("dd/MM/yyyyy HH:mm:ss"),
                                                TenKH = _userManager.Users.FirstOrDefault(c => c.Id == hd.UserId).FullName,
                                                AnhKh = _userManager.Users.FirstOrDefault(c => c.Id == hd.UserId).ProfilePicture,

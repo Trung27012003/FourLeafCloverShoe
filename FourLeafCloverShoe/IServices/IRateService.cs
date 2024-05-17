@@ -13,6 +13,6 @@ namespace FourLeafCloverShoe.IServices
         public Task<List<RateViewModel>> GetByIdProduct(Guid IdPr);
 
         public Task<List<Rate>> Gets();
-        public Task<bool> UpdateDanhGia(Guid id, Guid idhdct, float soSao, string? binhLuan);
+        public Task<bool> UpdateDanhGia(Guid id, Guid idhdct, float soSao, string? binhLuan, string? imageUrl);
     }
 }

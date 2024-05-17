@@ -20,7 +20,7 @@ namespace FourLeafCloverShoe.Share.Models
         // 0 --> chờ thanh toán
         // 1 --> đã thanh toán                                       ----> (user)chờ xác nhận  --> admin duyệt ( nhấn nút : xác nhận đơn)
         // 2 --> chờ xác nhận
-
+        //2-3 sửa dc
 
         // 3 --> chờ lấy hàng                                       ----> (user)chờ lấy hàng   --> admin duyệt ( nhấn nút : giao hàng)
 

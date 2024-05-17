@@ -5,6 +5,7 @@
     var lstRate = ViewBag.lstRate as List<RateViewModel>;
 }
 <link href="~/fileuser/lib/jquery-pagination/simplePagination.css" rel="stylesheet">
+
 <style>
     .input-group.input-spinner {
         display: flex;
@@ -308,6 +309,7 @@
         border: 2px solid red;
     }
 </style>
+
 <section class="product-detail-layout">
     <div class="container-fluid">
         <div class="section-padding">
@@ -414,15 +416,18 @@
                         @if (lstRate != null)
                         {
                             <div class="product-grid-rating">
-                                @{                   
-                                    var averageRating = lstRate.Average(rate => rate.Rating);
+                                @{
+                                    // Tính trung bình và làm tròn đến 1 chữ số thập phân
+                                    var averageRating = Math.Round(Convert.ToDecimal(lstRate.Average(rate => rate.Rating)), 1);
                                     // Hiển thị số sao theo số điểm trung bình
                                     for (var i = 1; i <= 5; i++)
                                     {
                                         <div class="product-grid-star @(i <= averageRating ? "product-grid-star-active" : "")">
                                             <i class="mwc-icon-mwc-star"></i>
                                         </div>
+                                       
                                     }
+                                    <span class="product-top-review-count">@averageRating/5</span>
                                 }
                             </div>
                             <div class="product-top-review">
@@ -759,7 +764,7 @@
                                         <a class="product-grid-info"
                                            href="#"
                                            title="Vớ nam nữ MWC - AT16">
-                                            <div class="product-grid-info-top">
+                                            <div  class="product-grid-info-top">
                                                 <p class="product-grid-title">
                                                     Vớ nam nữ MWC - AT16
                                                 </p>
@@ -789,6 +794,20 @@
     </div>
 
 </section>
+<style>
+    .image-slider {
+        display: flex;
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+    }
+
+        .image-slider img {
+            scroll-snap-align: center;
+            flex: 0 0 auto;
+            margin-right: 10px; /* Khoảng cách giữa các ảnh */
+        }
+
+</style>
 @* <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> *@
 <script type="text/javascript">
     function loadComments() {
@@ -814,8 +833,6 @@
             var commentHtml = '';
 
             comments.forEach(function (comment) {
-                var imageData = arrayBufferToBase64(comment.anhKh);
-                var imageUrl = 'data:image/*;base64,' + imageData;
 
                 // Tạo biến để lưu các biểu tượng sao
                 var starIcons = '';
@@ -823,11 +840,25 @@
                     starIcons += '<div class="product-grid-star product-grid-star-active"><i class="mwc-icon-mwc-star"></i></div>';
                 }
 
+
+                //ánh đánh gia
+                // Tách chuỗi URL ảnh thành mảng
+                var imageUrls = comment.imageUrl ? comment.imageUrl.split(';') : [];
+                // Tạo các slide ảnh
+                var imageSlides = '';
+                imageUrls.forEach(function (url) {
+                    imageSlides += `<img style="width:150px;height:100px;" src="${url}" alt="">`;
+                });
+                var imageSliderHtml = `
+                    <div class="image-slider">
+                        ${imageSlides}
+                    </div>
+                `;
                 commentHtml += `
                     <div class="be-comment mb-2">
                         <div class="be-img-comment">
                             <a href="#">
-                                <img src="${imageUrl}" alt="" class="be-ava-comment">
+                                <img src="${comment.anhKh}" alt="" class="be-ava-comment">
                             </a>
                         </div>
                         <div class="be-comment-content">
@@ -839,8 +870,9 @@
                                     ${starIcons} <!-- Hiển thị các biểu tượng sao -->
                                 </div>
                                     <span>${comment.createDate}</span>
-                                <span>${comment.contents}</span>
+                                <span>${comment.contents || "Người này không để lại lời nhắn gì"}</span>
                                 <span>Size: ${comment.size}</span>
+                                ${imageSliderHtml} <!-- Ảnh đánh giá -->
                             </div>
                         </div>
                     </div>
@@ -851,20 +883,6 @@
         } else {
             commentsContainer.html('<h1 class="comments-title">Không có bình luận</h1>');
         }
-    }
-
-
-
-
-    // Function to convert byte array to base64 string
-    function arrayBufferToBase64(buffer) {
-        var binary = '';
-        var bytes = new Uint8Array(buffer);
-        var len = bytes.byteLength;
-        for (var i = 0; i < len; i++) {
-            binary += String.fromCharCode(bytes[i]);
-        }
-        return window.btoa(binary);
     }
 
 </script>

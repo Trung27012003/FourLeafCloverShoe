@@ -102,7 +102,7 @@ namespace FourLeafCloverShoe.Services
                 return new List<Rate>();
             }
         }
-        public async Task<bool> UpdateDanhGia(Guid id, Guid idhdct, float soSao, string? binhLuan)
+        public async Task<bool> UpdateDanhGia(Guid id, Guid idhdct, float soSao, string? binhLuan, string? imageUrl)
         {
             try
             {
@@ -111,7 +111,7 @@ namespace FourLeafCloverShoe.Services
                 {
                     objFromDb.Contents = binhLuan;
                     objFromDb.Reply = null;
-                    objFromDb.ImageUrl = null;
+                    objFromDb.ImageUrl = imageUrl;
                     objFromDb.Rating = soSao;
                     objFromDb.Status =  1;
                     objFromDb.CreateDate = DateTime.Now;

@@ -125,13 +125,13 @@
                                 <div>
                                     <!--ko if: IsBonus--><!--/ko-->
                                     <!--ko if:Price > 0 && !IsBonus-->
-                                    <span class="order-item-product-old-price" data-bind="text:'đ'+RegularPrice.format(0,3)">đ270,000</span>
-                                    <span class="order-item-product-amount-content order-item-product-new-price">@lstorderIterm.Price?.ToString("N0") đ</span>
+                                    @* <span class="order-item-product-old-price" data-bind="text:'đ'+RegularPrice.format(0,3)">đ270,000</span> *@
+                                    <span style="margin-right:10px" class="order-item-product-amount-content order-item-product-new-price">@lstorderIterm.Price?.ToString("N0") đ</span>
                                     <!--/ko-->
                                     <!--ko if:Price == 0 && !IsBonus--><!--/ko-->
                                 </div>
                             </div>
-                            <form method="post" action="/Products/RateProducts">
+                            <form method="post" action="/Products/RateProducts" enctype="multipart/form-data">
                                 <div id="ratingS">
                                     <input type="radio" id="star5" name="rating" value="5" />
                                     <label class="full" for="star5" title="Tuyệt vời - 5 stars"></label>
@@ -167,12 +167,16 @@
                                     <label for="danhGia" class="form-label">Đánh giá</label>
                                     <textarea name="danhGia" id="danhGia" class="form-control" rows="3"></textarea>
                                 </div>
+                                <div class="mb-3">
+                                    <label for="danhGia" class="form-label">Hình ảnh</label>
+                                    <input type="file" name="uploadedImages" id="uploadedImages" multiple />
+                                </div>
                                 <div>
                                     <div class="order-item-calc-inner">
                                         <input type="hidden" id="id" name="id" value="@lstorderIterm.Rate.Id" />
                                         <input type="hidden" id="idCTHD" name="idCTHD" value="@lstorderIterm.Id" />
                                         <input type="hidden" id="idHD" name="idHD" value="@lstorderIterm.OrderId" />
-                                        <button type="submit" @* id="btnRateProduct"  *@class="btn btn-solid-primary btn--m btn--inline">Đánh giá sản phẩm</button>
+                                        <button type="submit" @* id="btnRateProduct"  *@ class="btn btn-solid-primary btn--m btn--inline">Đánh giá sản phẩm</button>
                                     </div>
                                 </div>
                             </form>
