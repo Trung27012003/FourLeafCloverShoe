@@ -9,6 +9,7 @@ namespace FourLeafCloverShoe.Share.Models
     public class Colors
     {
         public Guid Id { get; set; }
+        public string? ColorName { get; set; }
         public string? ColorCode { get; set; }
         public virtual List<ProductDetail>? ProductDetails { get; set; }
     }

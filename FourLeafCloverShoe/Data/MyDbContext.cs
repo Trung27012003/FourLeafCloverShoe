@@ -33,8 +33,8 @@ namespace FourLeafCloverShoe.Data
                 new IdentityRole { Id = "2FA6148D-B530-421F-878E-CE4D54BFC6AB", Name = "Staff", NormalizedName = "STAFF" }
             );
             builder.Entity<User>().HasData(
-                    new User() { Id = "2FA6148D-B530-421F-878E-CE4D54BFC6AB",Coins=0, Points = 0, UserName = "Guest", AccessFailedCount = 0, RankId = Guid.Parse("2FA0118D-B530-421F-878E-CE4D54BFC6AB"), LockoutEnabled = true, TwoFactorEnabled = false, PhoneNumberConfirmed = false, EmailConfirmed = false, NormalizedUserName = "GUEST" },
-                    new User() { Id = "1FA6148D-B530-421F-878E-CE4D54BFC6AB",Coins=0, Points = 0, Email = "admin@gmail.com" ,UserName = "Admin", PasswordHash = "AQAAAAEAACcQAAAAEBU/ECKQGqvUa243/dkXqtMpJ0yhaEGc9ZnA0+MgtG0aWOrjfJhk6L0/xQc4fuAbtg==", AccessFailedCount = 0, RankId = Guid.Parse("2FA0118D-B530-421F-878E-CE4D54BFC6AB"), LockoutEnabled = true, TwoFactorEnabled = false, PhoneNumberConfirmed = false, EmailConfirmed = true, NormalizedUserName = "ADMIN" } //Adminmeo123@
+                    new User() { Id = "2FA6148D-B530-421F-878E-CE4D54BFC6AB", Coins = 0, Points = 0, UserName = "Guest", AccessFailedCount = 0, RankId = Guid.Parse("2FA0118D-B530-421F-878E-CE4D54BFC6AB"), LockoutEnabled = true, TwoFactorEnabled = false, PhoneNumberConfirmed = false, EmailConfirmed = false, NormalizedUserName = "GUEST" },
+                    new User() { Id = "1FA6148D-B530-421F-878E-CE4D54BFC6AB", Coins = 0, Points = 0, Email = "admin@gmail.com", UserName = "Admin", PasswordHash = "AQAAAAEAACcQAAAAEBU/ECKQGqvUa243/dkXqtMpJ0yhaEGc9ZnA0+MgtG0aWOrjfJhk6L0/xQc4fuAbtg==", AccessFailedCount = 0, RankId = Guid.Parse("2FA0118D-B530-421F-878E-CE4D54BFC6AB"), LockoutEnabled = true, TwoFactorEnabled = false, PhoneNumberConfirmed = false, EmailConfirmed = true, NormalizedUserName = "ADMIN" } //Adminmeo123@
                 );
             builder.Entity<IdentityUserRole<string>>().HasData(
                     new IdentityUserRole<string>() { UserId = "2FA6148D-B530-421F-878E-CE4D54BFC6AB", RoleId = "2FA6148D-B530-421F-878E-CE4D54BFC6AB" },
@@ -49,20 +49,16 @@ namespace FourLeafCloverShoe.Data
             builder.Entity<Brand>().HasData(
                 new Brand() { Id = Guid.NewGuid(), Name = "Nike" },
                 new Brand() { Id = Guid.NewGuid(), Name = "Adidas" },
-                new Brand() { Id = Guid.NewGuid(), Name = "Reebok" },
-                new Brand() { Id = Guid.NewGuid(), Name = "Puma" },
-                new Brand() { Id = Guid.NewGuid(), Name = "New Balance " },
-                new Brand() { Id = Guid.NewGuid(), Name = "Vans" },
-                new Brand() { Id = Guid.NewGuid(), Name = "Converse" },
-                new Brand() { Id = Guid.NewGuid(), Name = "Asics" },
-                new Brand() { Id = Guid.NewGuid(), Name = "Skechers" },
-                new Brand() { Id = Guid.NewGuid(), Name = "Timberland" },
-                new Brand() { Id = Guid.NewGuid(), Name = "Dr. Martens" },
-                new Brand() { Id = Guid.NewGuid(), Name = "Clarks" },
-                new Brand() { Id = Guid.NewGuid(), Name = "Brooks" },
-                new Brand() { Id = Guid.NewGuid(), Name = "Under Armour" },
-                new Brand() { Id = Guid.NewGuid(), Name = "Fila" }
+                new Brand() { Id = Guid.NewGuid(), Name = "Biti's" },
+                new Brand() { Id = Guid.NewGuid(), Name = "Ananas" },
+                new Brand() { Id = Guid.NewGuid(), Name = "Vascara" },
+                new Brand() { Id = Guid.NewGuid(), Name = "Juno" },
+                new Brand() { Id = Guid.NewGuid(), Name = "Thượng Đình" },
+                new Brand() { Id = Guid.NewGuid(), Name = "Laforce" },
+                new Brand() { Id = Guid.NewGuid(), Name = "MWC" },
+                new Brand() { Id = Guid.NewGuid(), Name = "Đông Hải" }
             );
+
             builder.Entity<Share.Models.Size>().HasData(
                 new Size() { Id = Guid.NewGuid(), Name = "38" },
                 new Size() { Id = Guid.NewGuid(), Name = "39" },
@@ -74,22 +70,38 @@ namespace FourLeafCloverShoe.Data
             );
 
             builder.Entity<Category>().HasData(
-                new Category() { Id = Guid.NewGuid(), Name = "Sneakers " },
-                new Category() { Id = Guid.NewGuid(), Name = "Boots  " },
-                new Category() { Id = Guid.NewGuid(), Name = "Sandals  " },
-                new Category() { Id = Guid.NewGuid(), Name = "Loafers  " },
-                new Category() { Id = Guid.NewGuid(), Name = "Slippers  " },
-                new Category() { Id = Guid.NewGuid(), Name = "Dress shoes " },
-                new Category() { Id = Guid.NewGuid(), Name = "Athletic shoes " },
-                new Category() { Id = Guid.NewGuid(), Name = "Espadrilles" },
-                new Category() { Id = Guid.NewGuid(), Name = "High heels" },
-                new Category() { Id = Guid.NewGuid(), Name = "Flats" }
-            );
+            new Category() { Id = Guid.NewGuid(), Name = "Sneakers" },
+            new Category() { Id = Guid.NewGuid(), Name = "Giày cao gót" },
+            new Category() { Id = Guid.NewGuid(), Name = "Giày sandal" },
+            new Category() { Id = Guid.NewGuid(), Name = "Dép" },
+            new Category() { Id = Guid.NewGuid(), Name = "Giày thể thao" },
+            new Category() { Id = Guid.NewGuid(), Name = "Giày lười" },
+            new Category() { Id = Guid.NewGuid(), Name = "Giày boot" },
+            new Category() { Id = Guid.NewGuid(), Name = "Giày da" }
+        );
+
             builder.Entity<PaymentType>().HasData(
-                new PaymentType() { Id = Guid.NewGuid(), Name = "cod" , Status = true},
-                new PaymentType() { Id = Guid.NewGuid(), Name = "momo", Status = true},
-                new PaymentType() { Id = Guid.NewGuid(), Name = "vnpay", Status = true}
+                new PaymentType() { Id = Guid.NewGuid(), Name = "cod", Status = true },
+                new PaymentType() { Id = Guid.NewGuid(), Name = "momo", Status = true },
+                new PaymentType() { Id = Guid.NewGuid(), Name = "vnpay", Status = true }
                 );
+            builder.Entity<Colors>().HasData(
+                new Colors() { Id = Guid.NewGuid(), ColorName = "Đỏ", ColorCode = "#FF0000" },
+                new Colors() { Id = Guid.NewGuid(), ColorName = "Cam", ColorCode = "#FFA500" },
+                new Colors() { Id = Guid.NewGuid(), ColorName = "Vàng", ColorCode = "#FFFF00" },
+                new Colors() { Id = Guid.NewGuid(), ColorName = "Lục", ColorCode = "#008000" },
+                new Colors() { Id = Guid.NewGuid(), ColorName = "Lam", ColorCode = "#0000FF" },
+                new Colors() { Id = Guid.NewGuid(), ColorName = "Chàm", ColorCode = "#4B0082" },
+                new Colors() { Id = Guid.NewGuid(), ColorName = "Tím", ColorCode = "#800080" },
+                new Colors() { Id = Guid.NewGuid(), ColorName = "Hồng", ColorCode = "#FFC0CB" },
+                new Colors() { Id = Guid.NewGuid(), ColorName = "Nâu", ColorCode = "#A52A2A" },
+                new Colors() { Id = Guid.NewGuid(), ColorName = "Xám", ColorCode = "#808080" },
+                new Colors() { Id = Guid.NewGuid(), ColorName = "Đen", ColorCode = "#000000" },
+                new Colors() { Id = Guid.NewGuid(), ColorName = "Trắng", ColorCode = "#FFFFFF" },
+                new Colors() { Id = Guid.NewGuid(), ColorName = "Ngọc lam", ColorCode = "#40E0D0" },
+                new Colors() { Id = Guid.NewGuid(), ColorName = "Hồng đào", ColorCode = "#FFDAB9" },
+                new Colors() { Id = Guid.NewGuid(), ColorName = "Tím hoa cà", ColorCode = "#E6E6FA" }
+            );
         }
         public DbSet<Colors> Colors { get; set; }
         public DbSet<PaymentDetail> PaymentDetails { get; set; }
