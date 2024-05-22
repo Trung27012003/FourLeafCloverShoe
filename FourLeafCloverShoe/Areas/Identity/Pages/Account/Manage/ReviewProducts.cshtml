@@ -2,6 +2,7 @@
 @model FourLeafCloverShoe.Areas.Identity.Pages.Account.Manage.OrderItemModel
 @{
     var lstorderIterm = ViewData["OrderIterm"] as OrderItem;
+    var errorMessage = TempData["ErrorMessage"] as string;
 }
 <style>
     @@import url(//netdna.bootstrapcdn.com/font-awesome/3.2.1/css/font-awesome.css);
@@ -75,7 +76,12 @@
             <div class="order-item-header">
                 <div class="order-item-header-left">
                     <a class="order-item-status-link" href="">
-
+                        @if (!string.IsNullOrEmpty(errorMessage))
+                        {
+                            <div id="errorMessage" class="alert alert-danger" role="alert">
+                                @errorMessage
+                            </div>
+                        }
 
                     </a>
                 </div>
@@ -198,3 +204,8 @@
     </div>
 
 </div>
+<script>
+    setTimeout(function () {
+        document.getElementById("errorMessage").style.display = "none";
+    }, 1000); // Thời gian tính bằng mili giây (ở đây là 1 giây)
+</script>

@@ -33,10 +33,12 @@ namespace FourLeafCloverShoe.Data
                 new IdentityRole { Id = "2FA6148D-B530-421F-878E-CE4D54BFC6AB", Name = "Staff", NormalizedName = "STAFF" }
             );
             builder.Entity<User>().HasData(
-                    new User() { Id = "2FA6148D-B530-421F-878E-CE4D54BFC6AB",Coins=0, Points = 0, UserName = "Guest", AccessFailedCount = 0, RankId = Guid.Parse("2FA0118D-B530-421F-878E-CE4D54BFC6AB"), LockoutEnabled = true, TwoFactorEnabled = false, PhoneNumberConfirmed = false, EmailConfirmed = false, NormalizedUserName = "GUEST" }
+                    new User() { Id = "2FA6148D-B530-421F-878E-CE4D54BFC6AB",Coins=0, Points = 0, UserName = "Guest", AccessFailedCount = 0, RankId = Guid.Parse("2FA0118D-B530-421F-878E-CE4D54BFC6AB"), LockoutEnabled = true, TwoFactorEnabled = false, PhoneNumberConfirmed = false, EmailConfirmed = false, NormalizedUserName = "GUEST" },
+                    new User() { Id = "1FA6148D-B530-421F-878E-CE4D54BFC6AB",Coins=0, Points = 0, Email = "admin@gmail.com" ,UserName = "Admin", PasswordHash = "AQAAAAEAACcQAAAAEBU/ECKQGqvUa243/dkXqtMpJ0yhaEGc9ZnA0+MgtG0aWOrjfJhk6L0/xQc4fuAbtg==", AccessFailedCount = 0, RankId = Guid.Parse("2FA0118D-B530-421F-878E-CE4D54BFC6AB"), LockoutEnabled = true, TwoFactorEnabled = false, PhoneNumberConfirmed = false, EmailConfirmed = true, NormalizedUserName = "ADMIN" } //Adminmeo123@
                 );
             builder.Entity<IdentityUserRole<string>>().HasData(
-                    new IdentityUserRole<string>() { UserId = "2FA6148D-B530-421F-878E-CE4D54BFC6AB", RoleId = "2FA6148D-B530-421F-878E-CE4D54BFC6AB" }
+                    new IdentityUserRole<string>() { UserId = "2FA6148D-B530-421F-878E-CE4D54BFC6AB", RoleId = "2FA6148D-B530-421F-878E-CE4D54BFC6AB" },
+                    new IdentityUserRole<string>() { UserId = "1FA6148D-B530-421F-878E-CE4D54BFC6AB", RoleId = "2FA6148D-B530-421F-878E-CE1D54BFC6AB" }
             );
             builder.Entity<Ranks>().HasData(
                 new Ranks() { Id = Guid.Parse("2FA0118D-B530-421F-878E-CE4D54BFC6AB"), Name = "Bạc", PointsMin = 0, PoinsMax = 1000000 },
@@ -83,7 +85,15 @@ namespace FourLeafCloverShoe.Data
                 new Category() { Id = Guid.NewGuid(), Name = "High heels" },
                 new Category() { Id = Guid.NewGuid(), Name = "Flats" }
             );
+            builder.Entity<PaymentType>().HasData(
+                new PaymentType() { Id = Guid.NewGuid(), Name = "cod" , Status = true},
+                new PaymentType() { Id = Guid.NewGuid(), Name = "momo", Status = true},
+                new PaymentType() { Id = Guid.NewGuid(), Name = "vnpay", Status = true}
+                );
         }
+        public DbSet<Colors> Colors { get; set; }
+        public DbSet<PaymentDetail> PaymentDetails { get; set; }
+        public DbSet<PaymentType> PaymentTypes { get; set; }
         public DbSet<Address> Address { get; set; }
         public DbSet<Brand> Brands { get; set; }
         public DbSet<Cart> Carts { get; set; }

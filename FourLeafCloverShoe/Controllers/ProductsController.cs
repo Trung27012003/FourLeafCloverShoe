@@ -286,13 +286,25 @@ namespace FourLeafCloverShoe.Controllers
 
             // Tạo chuỗi URL từ danh sách
             var imageUrlsString = string.Join(";", imageUrls);
-
-            var ratePr = await _rateService.UpdateDanhGia(id, idCTHD, rating, danhGia, imageUrlsString);
-            if (ratePr)
+            if (danhGia != null && danhGia.Length > 200)
             {
-                return Redirect($"/Identity/Account/Manage/orderdetail?orderId={idHD}");// Chuyển sang trang đơn chi tiết
+                //ModelState.AddModelError("danhGia", "Đánh giá không được vượt quá 200 ký tự.");
+                TempData["ErrorMessage"] = "Đánh giá không được vượt quá 200 ký tự.";
             }
-            return Redirect($"/Identity/Account/Manage/orderdetail?orderId={idHD}");
+            if (rating == 0)
+            {
+                TempData["ErrorMessage"] = "Bạn có thể cho shop 5* được không :(";
+            }
+            else
+            {
+                var ratePr = await _rateService.UpdateDanhGia(id, idCTHD, rating, danhGia, imageUrlsString);
+                if (ratePr)
+                {
+                    return Redirect($"/Identity/Account/Manage/orderdetail?orderId={idHD}");// Chuyển sang trang đơn chi tiết
+                }
+            }
+           
+            return Redirect($"/Identity/Account/Manage/ReviewProducts?idCTHD={idCTHD}");
         }
 
         [HttpGet]
