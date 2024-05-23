@@ -76,6 +76,7 @@ namespace FourLeafCloverShoe.Services
                    .Include(c => c.Products)
                         .ThenInclude(c => c.ProductImages)
                    .Include(c => c.Size)
+                   .Include(c => c.Colors)
 
                    .ToListAsync();
                 var obj = lstobj.FirstOrDefault(c => c.Id == Id);
@@ -101,6 +102,7 @@ namespace FourLeafCloverShoe.Services
                    .Include(c => c.Products)
                    .ThenInclude(c => c.ProductImages)
                    .Include(c => c.Size)
+                   .Include(c => c.Colors)
                    .ToListAsync();
                 var obj = lstobj.Where(c => c.ProductId == ProductId).ToList();
                 if (obj != null)
@@ -148,6 +150,7 @@ namespace FourLeafCloverShoe.Services
                 if (obj != null)
                 {
                     objFromDb.SizeId = obj.SizeId;
+                    objFromDb.ColorId = obj.ColorId;
                     objFromDb.SKU = obj.SKU;
                     objFromDb.Quantity = obj.Quantity;
                     objFromDb.PriceSale = obj.PriceSale;

@@ -32,7 +32,11 @@ namespace FourLeafCloverShoe.Controllers
         private readonly IWebHostEnvironment _webHostEnvironment;
         private readonly IRateService _rateService;
         private readonly UserManager<User> _userManager;
-        public ProductsController(IProductService productService, IOrderItemService orderItemService, IBrandService brandService, ICategoryService categoryService, IProductDetailService productDetailService, ISizeService sizeService, IWebHostEnvironment webHostEnvironment, IRateService rateService, IOrderService orderService, UserManager<User> userManager)
+        private readonly IColorsService _colorsService;
+
+        public ProductsController(IProductService productService, IOrderItemService orderItemService, IBrandService brandService, ICategoryService categoryService, IProductDetailService productDetailService, ISizeService sizeService, IWebHostEnvironment webHostEnvironment, IRateService rateService, IOrderService orderService, UserManager<User> userManager,
+            IColorsService colorsService
+            )
         {
             _productService = productService;
             _productDetailService = productDetailService;
@@ -44,7 +48,9 @@ namespace FourLeafCloverShoe.Controllers
             _rateService = rateService;
             _orderService = orderService;
             _userManager = userManager;
+            _colorsService = colorsService;
         }
+
         public async Task<List<Product>> Filter(string searchString, string sortSelect, string[] size_group, string[] brand_group, string[] category_group, string price_range, List<Product> lstProduct)
         {
             if (!String.IsNullOrWhiteSpace(searchString))
@@ -70,12 +76,15 @@ namespace FourLeafCloverShoe.Controllers
                     case "duoi100":
                         lstProduct = lstProduct.FindAll(c => c.ProductDetails.Any(p => p.PriceSale <= 100000));
                         break;
+
                     case "100-200":
                         lstProduct = lstProduct.FindAll(c => c.ProductDetails.Any(p => p.PriceSale >= 100000 && p.PriceSale <= 200000));
                         break;
+
                     case "200-300":
                         lstProduct = lstProduct.FindAll(c => c.ProductDetails.Any(p => p.PriceSale >= 200000 && p.PriceSale <= 300000));
                         break;
+
                     case "tren300":
                         lstProduct = lstProduct.FindAll(c => c.ProductDetails.Any(p => p.PriceSale >= 300000));
                         break;
@@ -91,25 +100,32 @@ namespace FourLeafCloverShoe.Controllers
                     case "PRICEASC":
                         lstProduct = lstProduct.OrderBy(c => c.ProductDetails.Min(p => p.PriceSale)).ToList();
                         break;
+
                     case "PRICEDESC":
                         lstProduct = lstProduct.OrderByDescending(c => c.ProductDetails.Max(p => p.PriceSale)).ToList();
                         break;
+
                     case "NAMEAZ":
                         lstProduct = lstProduct.OrderBy(c => c.ProductName).ToList();
                         break;
+
                     case "NAMEZA":
                         lstProduct = lstProduct.OrderByDescending(c => c.ProductName).ToList();
                         break;
+
                     case "DATENEW":
                         lstProduct = lstProduct.OrderByDescending(c => c.CreateAt).ToList();
                         break;
+
                     case "DATEOLD":
                         lstProduct = lstProduct.OrderBy(c => c.CreateAt).ToList();
                         break;
+
                     case "BESTSALE":
                         var lstOrderItem = await _orderItemService.Gets();
                         lstProduct = lstProduct.OrderByDescending(c => lstOrderItem.Where(p => p.ProductDetails.ProductId == c.Id).Sum(p => p.Quantity)).ToList();
                         break;
+
                     default:
                         break;
                 }
@@ -117,9 +133,10 @@ namespace FourLeafCloverShoe.Controllers
             return lstProduct;
         }
 
-        public async Task<IActionResult> Index(int? page,string searchString, string sortSelect, string[] size_group, string[] brand_group, string[] category_group, string price_range)
+        public async Task<IActionResult> Index(int? page, string searchString, string sortSelect, string[] size_group, string[] brand_group, string[] category_group, string price_range)
         {
-            if (page == null) page = 1;
+            if (page == null)
+                page = 1;
             int pageSize = 24;
             int pageNumber = (page ?? 1);
 
@@ -168,17 +185,21 @@ namespace FourLeafCloverShoe.Controllers
 
         public async Task<IActionResult> ProductDetail(Guid productId)
         {
-
             var product = await _productService.GetById(productId);
             var lstProductDetail = await _productDetailService.GetByProductId(product.Id);
+
             var sizes = await _sizeService.Gets();
+            var colors = await _colorsService.Gets();
 
             var lstSize = sizes.Where(size => lstProductDetail.Any(detail => detail.SizeId == size.Id)).OrderBy(c => c.Name).ToList();
+            var lstColors = colors.Where(color => lstProductDetail.Any(detail => detail.ColorId == color.Id)).OrderBy(c => c.ColorName).ToList();
+
 
             var priceMin = lstProductDetail.Where(c => c.Status == 1).Min(c => c.PriceSale);
             var priceMax = lstProductDetail.Where(c => c.Status == 1).Max(c => c.PriceSale);
             var availibleQuantity = lstProductDetail.Where(c => c.Status == 1).Sum(c => c.Quantity);
             ViewBag.lstSize = lstSize;
+            ViewBag.lstColors = lstColors;
             ViewBag.priceMin = priceMin;
             ViewBag.priceMax = priceMax;
             ViewBag.availibleQuantity = availibleQuantity;
@@ -202,14 +223,13 @@ namespace FourLeafCloverShoe.Controllers
             ViewBag.lstRate = lstRate;
             return View(product);
         }
+
         [HttpPost]
-        public async Task<IActionResult> getdatabysizeid(string sizeId, string productId)
+        public async Task<IActionResult> getdatabysizeid(string sizeId, string productId,string colorId)
         {
-
-
             var product = await _productService.GetById(Guid.Parse(productId));
             var lstProductDetail = await _productDetailService.GetByProductId(product.Id);
-            var productDetail = lstProductDetail.FirstOrDefault(c => c.SizeId == Guid.Parse(sizeId));
+            var productDetail = lstProductDetail.FirstOrDefault(c => c.SizeId == Guid.Parse(sizeId)&& c.ColorId == Guid.Parse(colorId));
             var status = productDetail.Status;
 
             if (productDetail.Products.Status == true && status == 1)
@@ -221,8 +241,58 @@ namespace FourLeafCloverShoe.Controllers
                 status = 0;
             }
 
+
+            return Json(new { productDetailId = productDetail.Id, priceSale = productDetail.PriceSale, quantity = productDetail.Quantity, status = status, imgQrCode = GenerateQRCodeAsync(productDetail.Id) });
+        }
+        [HttpPost]
+        public async Task<IActionResult> getavailableoptions(string productId, string? sizeId = null, string? colorId = null)
+        {
+            // Kiểm tra tính hợp lệ của productId
+            if (!Guid.TryParse(productId, out Guid parsedProductId))
+            {
+                return BadRequest("Mã sản phẩm không hợp lệ");
+            }
+
+            // Lấy thông tin sản phẩm
+            var product = await _productService.GetById(parsedProductId);
+            if (product == null || product.Status!=true)
+            {
+                return NotFound("Không tìm thấy sản phẩm hoặc sản phẩm không hoạt động");
+            }
+            
+
+            // Lấy danh sách chi tiết sản phẩm
+            var productDetails =( await _productDetailService.GetByProductId(product.Id));
+
+            // Lọc dựa trên size và color đã chọn (nếu có)
+            Guid? parsedSizeId = null;
+            Guid? parsedColorId = null;
+            if (Guid.TryParse(sizeId, out Guid parsedSizeGuid))
+            {
+                parsedSizeId = parsedSizeGuid;
+                productDetails = productDetails.Where(pd => pd.SizeId == parsedSizeId).ToList();
+            }
+            if (Guid.TryParse(colorId, out Guid parsedColorGuid))
+            {
+                parsedColorId = parsedColorGuid;
+                productDetails = productDetails.Where(pd => pd.ColorId == parsedColorId).ToList();
+            }
+
+            // Danh sách các size và color khả dụng dựa trên bộ lọc
+            var availableSizes = productDetails.Select(pd => pd.SizeId).Distinct().ToList();
+            var availableColors = productDetails.Select(pd => pd.ColorId).Distinct().ToList();
+            return Json(new
+            {
+                sizes = availableSizes,
+                colors = availableColors
+            });
+
+
+        }
+        public string GenerateQRCodeAsync(Guid productDetailId)
+        {
             var writer = new ZXing.QrCode.QRCodeWriter();
-            var resultBit = writer.encode(productDetail.Id.ToString(), BarcodeFormat.QR_CODE, 100, 100);
+            var resultBit = writer.encode(productDetailId.ToString(), BarcodeFormat.QR_CODE, 100, 100);
             var matrix = resultBit;
             int scale = 1;
             var result = new Bitmap(matrix.Width * scale, matrix.Height * scale);
@@ -250,10 +320,9 @@ namespace FourLeafCloverShoe.Controllers
             {
                 System.IO.File.Delete(file);
             }
-            result.Save(webRootPath + $"\\images\\qrcode\\QRCode{productDetail.Id}.png");
-            var imgQrCode = $"\\images\\qrcode\\QRCode{productDetail.Id}.png";
-
-            return Json(new { productDetailId = productDetail.Id, priceSale = productDetail.PriceSale, quantity = productDetail.Quantity, status = status, imgQrCode = imgQrCode });
+            result.Save(webRootPath + $"\\images\\qrcode\\QRCode{productDetailId}.png");
+            var imgQrCode = $"\\images\\qrcode\\QRCode{productDetailId}.png";
+            return imgQrCode;
         }
         [HttpGet]
         public async Task<IActionResult> ReviewProducts(Guid idCTHD)
@@ -261,6 +330,7 @@ namespace FourLeafCloverShoe.Controllers
             //var revi = (await _orderItemService.Gets()).FirstOrDefault(c => c.Id == idCTHD);
             return Redirect($"/Identity/Account/Manage/ReviewProducts?idCTHD={idCTHD}");//Dcm mãi ms sang view blazor dc cú vl
         }
+
         [HttpPost]
         public async Task<IActionResult> RateProducts(Guid id, Guid idCTHD, float rating, string? danhGia, Guid idHD, List<IFormFile> uploadedImages)
         {
@@ -303,7 +373,7 @@ namespace FourLeafCloverShoe.Controllers
                     return Redirect($"/Identity/Account/Manage/orderdetail?orderId={idHD}");// Chuyển sang trang đơn chi tiết
                 }
             }
-           
+
             return Redirect($"/Identity/Account/Manage/ReviewProducts?idCTHD={idCTHD}");
         }
 
@@ -339,6 +409,5 @@ namespace FourLeafCloverShoe.Controllers
                                            }).ToList();
             return Json(lstRate);
         }
-
     }
 }

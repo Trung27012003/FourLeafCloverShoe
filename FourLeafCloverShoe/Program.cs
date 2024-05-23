@@ -51,6 +51,7 @@ builder.Services.AddScoped<ISizeService, SizeService>();
 builder.Services.AddScoped<IUserVoucherService, UserVoucherService>();
 builder.Services.AddScoped<IVoucherService, VoucherService>();
 builder.Services.AddScoped<IPaymentService, PaymentService>();
+builder.Services.AddScoped<IColorsService, ColorsService>();
 builder.Services.AddScoped<IPaymentDetailService, PaymentDetailService>();
 
 
