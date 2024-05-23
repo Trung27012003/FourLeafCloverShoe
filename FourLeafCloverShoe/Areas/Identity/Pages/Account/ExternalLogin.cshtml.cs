@@ -108,117 +108,159 @@ namespace FourLeafCloverShoe.Areas.Identity.Pages.Account
             returnUrl = returnUrl ?? Url.Content("~/");
             if (remoteError != null)
             {
-                ErrorMessage = $"Error from external provider: {remoteError}";
-                return RedirectToPage("./Login", new { ReturnUrl = returnUrl });
-            }
-            var info = await _signInManager.GetExternalLoginInfoAsync();
-            if (info == null)
-            {
-                ErrorMessage = "Error loading external login information.";
+                ErrorMessage = $"Lỗi từ nhà cung cấp bên ngoài: {remoteError}";
                 return RedirectToPage("./Login", new { ReturnUrl = returnUrl });
             }
 
-            // Sign in the user with this external login provider if the user already has a login.
+            var info = await _signInManager.GetExternalLoginInfoAsync();
+            if (info == null)
+            {
+                ErrorMessage = "Lỗi khi tải thông tin đăng nhập.";
+                return RedirectToPage("./Login", new { ReturnUrl = returnUrl });
+            }
+
+            // Đăng nhập bằng external login provider nếu người dùng đã có tài khoản
             var result = await _signInManager.ExternalLoginSignInAsync(info.LoginProvider, info.ProviderKey, isPersistent: false, bypassTwoFactor: true);
             if (result.Succeeded)
             {
                 _logger.LogInformation("{Name} logged in with {LoginProvider} provider.", info.Principal.Identity.Name, info.LoginProvider);
                 return LocalRedirect(returnUrl);
             }
+
             if (result.IsLockedOut)
             {
                 return RedirectToPage("./Lockout");
             }
-            else
+            else // Nếu chưa có tài khoản, đăng ký và đăng nhập luôn
             {
-                // If the user does not have an account, then ask the user to create an account.
-                ReturnUrl = returnUrl;
-                ProviderDisplayName = info.ProviderDisplayName;
-                if (info.Principal.HasClaim(c => c.Type == ClaimTypes.Email))
+                var email = info.Principal.FindFirstValue(ClaimTypes.Email);
+                if (email != null)
                 {
-                    Input = new InputModel
+                    var user = new User
                     {
-                        Email = info.Principal.FindFirstValue(ClaimTypes.Email)
+                        UserName = new MailAddress(email).User,
+                        Email = email,
+                        Coins = 0,
+                        FullName = info.Principal.FindFirstValue(ClaimTypes.Name),
+                        RankId = Guid.Parse("2FA0118D-B530-421F-878E-CE4D54BFC6AB"),
+                        Points = 0
                     };
+
+                    // Lấy ảnh đại diện (nếu có)
+                    var profilePictureUrl = info.Principal.FindFirstValue("picture");
+                    if (!string.IsNullOrEmpty(profilePictureUrl))
+                    {
+                        using var webClient = new WebClient();
+                        user.ProfilePicture = webClient.DownloadData(profilePictureUrl);
+                    }
+
+                    var createResult = await _userManager.CreateAsync(user);
+                    if (createResult.Succeeded)
+                    {
+                        createResult = await _userManager.AddLoginAsync(user, info);
+                        if (createResult.Succeeded)
+                        {
+                            // Tạo giỏ hàng
+                            await _cartService.Add(new Cart() { Id = Guid.NewGuid(), UserId = user.Id });
+                            // Thêm role
+                            await _userManager.AddToRoleAsync(user, "User");
+                            // Xác nhận email
+                            await _userManager.ConfirmEmailAsync(user, await _userManager.GenerateEmailConfirmationTokenAsync(user));
+                            // Đăng nhập
+                            await _signInManager.SignInAsync(user, isPersistent: false, info.LoginProvider);
+                            return LocalRedirect(returnUrl);
+                        }
+                    }
+                    // Xử lý nếu tạo người dùng hoặc thêm login thất bại
                 }
-                return Page();
+                // Xử lý nếu không có email
+                return RedirectToPage("./Login", new { ReturnUrl = returnUrl });
             }
         }
+
 
         public async Task<IActionResult> OnPostConfirmationAsync(string returnUrl = null)
         {
             returnUrl = returnUrl ?? Url.Content("~/");
-            // Get the information about the user from the external login provider
+
+            // Lấy thông tin từ external login provider
             var info = await _signInManager.GetExternalLoginInfoAsync();
             if (info == null)
             {
-                ErrorMessage = "Error loading external login information during confirmation.";
+                ErrorMessage = "Lỗi khi tải thông tin đăng nhập từ nhà cung cấp bên ngoài.";
                 return RedirectToPage("./Login", new { ReturnUrl = returnUrl });
             }
-            
+
             if (ModelState.IsValid)
             {
-                var user = new User()
-                {
-                    UserName = new MailAddress(Input.Email).User,
-                    Email = Input.Email,
-                    Coins = 0,
-                    FullName = info.Principal.FindFirstValue(ClaimTypes.Name),
-                    RankId = Guid.Parse("2FA0118D-B530-421F-878E-CE4D54BFC6AB"),
-                    Points = 0
-                };
-                var profilePictureUrl = info.Principal.FindFirstValue(ClaimTypes.Uri);
-                if (!string.IsNullOrEmpty(profilePictureUrl))
-                {
-                    using var webClient = new WebClient();
-                    user.ProfilePicture = webClient.DownloadData(profilePictureUrl);
-                }
-                var result = await _userManager.CreateAsync(user);
+                // Tìm người dùng bằng email
+                var existingUser = await _userManager.FindByEmailAsync(Input.Email);
 
-
-                await _userStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
-                await _emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
-
-                if (result.Succeeded)
+                if (existingUser == null) // Nếu người dùng chưa tồn tại
                 {
-                    result = await _userManager.AddLoginAsync(user, info);
-                    if (result.Succeeded)
+                    // Tạo người dùng mới
+                    var user = new User
                     {
-                        _logger.LogInformation("User created an account using {Name} provider.", info.LoginProvider);
+                        UserName = new MailAddress(Input.Email).User,
+                        Email = Input.Email,
+                        Coins = 0,
+                        FullName = info.Principal.FindFirstValue(ClaimTypes.Name),
+                        RankId = Guid.Parse("2FA0118D-B530-421F-878E-CE4D54BFC6AB"),
+                        Points = 0
+                    };
 
-                        var userId = await _userManager.GetUserIdAsync(user);
+                    // Lấy ảnh đại diện (nếu có)
+                    var profilePictureUrl = info.Principal.FindFirstValue("picture"); // Google sử dụng ClaimTypes.Uri
+                    if (!string.IsNullOrEmpty(profilePictureUrl))
+                    {
+                        using var webClient = new WebClient();
+                        user.ProfilePicture = webClient.DownloadData(profilePictureUrl);
+                    }
 
-                        // tạo cart
-                        var createCartResult = await _cartService.Add(new Cart() { Id = Guid.NewGuid(), UserId = userId });
-
-                        // add role
-                        await _userManager.AddToRoleAsync(user, "User");
-
-                        var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-                        code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
-                        var callbackUrl = Url.Page(
-                            "/Account/ConfirmEmail",
-                            pageHandler: null,
-                            values: new { area = "Identity", userId = userId, code = code },
-                            protocol: Request.Scheme);
-
-                        await _emailSender.SendEmailAsync(Input.Email, "Confirm your email",
-                            $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
-
-                        // If account confirmation is required, we need to show the link if we don't have a real email sender
-                        if (_userManager.Options.SignIn.RequireConfirmedAccount)
+                    var result = await _userManager.CreateAsync(user);
+                    if (!result.Succeeded)
+                    {
+                        foreach (var error in result.Errors)
                         {
-                            return RedirectToPage("./RegisterConfirmation", new { Email = Input.Email });
+                            ModelState.AddModelError(string.Empty, error.Description);
                         }
+                        return Page(); // Trả về trang với lỗi nếu tạo người dùng thất bại
+                    }
 
-                        await _signInManager.SignInAsync(user, isPersistent: false, info.LoginProvider);
-                        return LocalRedirect(returnUrl);
+                    // Thêm login (external provider) cho người dùng
+                    result = await _userManager.AddLoginAsync(user, info);
+                    if (!result.Succeeded)
+                    {
+                        ErrorMessage = $"Có lỗi xảy ra, vui lòng thử lại sau!";
+                    }
+
+                    existingUser = user; // Gán existingUser bằng user mới tạo
+                }
+                else // Nếu người dùng đã tồn tại
+                {
+                    // Thêm login mới cho người dùng đã tồn tại
+                    var result = await _userManager.AddLoginAsync(existingUser, info);
+                    if (!result.Succeeded)
+                    {
+                        ErrorMessage = $"Có lỗi xảy ra, vui lòng thử lại sau!";
                     }
                 }
-                foreach (var error in result.Errors)
-                {
-                    ModelState.AddModelError(string.Empty, error.Description);
-                }
+                _logger.LogInformation("Người dùng đã tạo tài khoản bằng {Name} provider.", info.LoginProvider);
+
+                var userId = existingUser.Id; // Sử dụng ID của existingUser
+
+                // Tạo giỏ hàng
+                var createCartResult = await _cartService.Add(new Cart() { Id = Guid.NewGuid(), UserId = userId });
+
+                // Thêm vai trò
+                await _userManager.AddToRoleAsync(existingUser, "User");
+
+                // Tự động xác nhận email
+                await _userManager.ConfirmEmailAsync(existingUser, await _userManager.GenerateEmailConfirmationTokenAsync(existingUser));
+
+                // Đăng nhập người dùng
+                await _signInManager.SignInAsync(existingUser, isPersistent: false, info.LoginProvider);
+                return LocalRedirect(returnUrl);
             }
 
             ProviderDisplayName = info.ProviderDisplayName;
