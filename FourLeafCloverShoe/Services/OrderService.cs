@@ -167,45 +167,6 @@ namespace FourLeafCloverShoe.Services
 
         public bool UpdateOrderStatus(Guid idOrder, int? Status, Guid? IdStaff)
         {
-            //var update = reposHoaDon.GetAll().FirstOrDefault(p => p.ID == idHoaDon);
-            //List<ChiTietHoaDon> chitiethoadon = reposChiTietHoaDon.GetAll().Where(p => p.IDHoaDon == idHoaDon).ToList();
-            //if (update != null)
-            //{
-            //    if (trangThai == 5)
-            //    {
-            //        foreach (var item in chitiethoadon)
-            //        {
-            //            var CTsanPham = repsCTSanPham.GetAll().FirstOrDefault(p => p.ID == item.IDCTSP);
-            //            CTsanPham.SoLuong += item.SoLuong;
-            //            repsCTSanPham.Update(CTsanPham);
-            //        }
-            //    }
-            //    if (trangThai == 6)
-            //    {
-            //        var lstlstd = context.LichSuTichDiems.Where(c => c.IDHoaDon == idHoaDon).ToList();
-            //        if (lstlstd.Count != 0)
-            //        {
-            //            var td = lstlstd.Where(c => c.TrangThai == 1).FirstOrDefault();
-            //            if (td != null)
-            //            {
-            //                var kh = context.KhachHangs.Where(c => c.IDKhachHang == td.IDKhachHang).FirstOrDefault();
-            //                kh.DiemTich += td.Diem;
-            //                context.KhachHangs.Update(kh);
-            //                context.SaveChanges();
-            //            }
-            //        }
-            //        update.NgayThanhToan = update.NgayThanhToan == null ? DateTime.Now : update.NgayThanhToan;
-            //        update.NgayNhanHang = update.NgayNhanHang == null ? DateTime.Now : update.NgayNhanHang;
-            //    }
-            //    update.TrangThaiGiaoHang = trangThai;
-            //    update.IDNhanVien = idNhanVien;
-            //    reposHoaDon.Update(update);
-            //    return true;
-            //}
-            //else
-            //{
-            //    return false;
-            //}
             return true;
         }
     }

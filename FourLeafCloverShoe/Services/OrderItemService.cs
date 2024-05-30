@@ -100,6 +100,7 @@ namespace FourLeafCloverShoe.Services
 
         public async Task<List<OrderDetailViewModel>> GetByIdOrder(Guid IdOrder)
         {
+            var get = _myDbContext.OrderItems.FindAsync(IdOrder);
             var lstOrderDetail = await(from a in _myDbContext.OrderItems
                                     where a.OrderId == IdOrder
                                     join b in _myDbContext.Orders on a.OrderId equals b.Id
@@ -138,7 +139,7 @@ namespace FourLeafCloverShoe.Services
                                         ProductName = g.ProductName,
                                         ImageUrl = _myDbContext.ProductImages.First(c => c.ProductId == g.Id).ImageUrl,
                                         VoucherType = b.VoucherId == null ? null : (_myDbContext.Vouchers.FirstOrDefault(c => c.Id == b.VoucherId)).VoucherType,
-                                        VoucherValue = b.VoucherId == null ? null : (_myDbContext.Vouchers.FirstOrDefault(c => c.Id == b.VoucherId)).VoucherValue,
+                                        VoucherValue = b.VoucherId == null ? 0 : (_myDbContext.Vouchers.FirstOrDefault(c => c.Id == b.VoucherId)).VoucherValue,
                                         FullName = b.UserId == null ? null : (_myDbContext.Users.FirstOrDefault(c => c.Id == b.UserId)).FullName,
                                         StatusRate = c != null ? c.Status : 0
 
