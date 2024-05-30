@@ -386,7 +386,7 @@ namespace FourLeafCloverShoe.Controllers
             var rateServiceGets = await _rateService.Gets();
             var orderServiceGets = await _orderService.Gets();
             var sizeServiceGets = await _sizeService.Gets();
-
+            var colorServiceGets = await _colorsService.Gets();
             List<RateViewModel> lstRate = (from sp in productServiceGets
 
                                            join ctsp in productDetailServiceGets on sp.Id equals ctsp.ProductId
@@ -394,6 +394,7 @@ namespace FourLeafCloverShoe.Controllers
                                            join dg in rateServiceGets on cthd.Id equals dg.OrderItemId
                                            join hd in orderServiceGets on cthd.OrderId equals hd.Id
                                            join kc in sizeServiceGets on ctsp.SizeId equals kc.Id
+                                           join ms in colorServiceGets on ctsp.ColorId equals ms.Id
                                            where sp.Id == IdPro && dg.Status == 1
                                            select new RateViewModel
                                            {
@@ -404,8 +405,9 @@ namespace FourLeafCloverShoe.Controllers
                                                ImageUrl = dg.ImageUrl,
                                                CreateDate = dg.CreateDate.GetValueOrDefault().ToString("dd/MM/yyyyy HH:mm:ss"),
                                                TenKH = _userManager.Users.FirstOrDefault(c => c.Id == hd.UserId).FullName,
-                                               AnhKh = _userManager.Users.FirstOrDefault(c => c.Id == hd.UserId).ProfilePicture,
-                                               Size = kc.Name
+                                               AnhKh = Convert.ToBase64String(_userManager.Users.FirstOrDefault(c => c.Id == hd.UserId).ProfilePicture),
+                                               Size = kc.Name,
+                                               Color = ms.ColorName
                                            }).ToList();
             return Json(lstRate);
         }

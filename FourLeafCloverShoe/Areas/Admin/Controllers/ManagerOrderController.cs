@@ -1,5 +1,6 @@
 ﻿using FourLeafCloverShoe.IServices;
 using Microsoft.AspNetCore.Mvc;
+using System.Globalization;
 using System.Linq;
 using X.PagedList;
 
@@ -24,29 +25,53 @@ namespace FourLeafCloverShoe.Areas.Admin.Controllers
         public async Task<IActionResult> IndexAsync(int? page, int?[] status, string searchText, DateTime? startDate, DateTime? endDate)
         {
             if (page == null) page = 1;
-            int pageSize = 10;
+            int pageSize = 2;
             int pageNumber = (page ?? 1);
+
+            // Lưu trữ giá trị bộ lọc vào ViewBag để sử dụng trong View
             ViewBag.SelectedStatuses = status;
             ViewBag.searchText = searchText;
             ViewBag.startDate = startDate;
             ViewBag.endDate = endDate;
+
             var lst = await _iorderService.Gets();
             var lstOrder = lst.Where(c => c.Id != null);
-            if (status != null && status.Length >0)
+
+            // Lọc theo searchText 
+            if (!string.IsNullOrEmpty(searchText))
             {
-                lstOrder = lstOrder.Where(c => status.Contains(c.OrderStatus)).ToList();
+                lstOrder = lstOrder.Where(c => c.OrderCode.ToLower().Contains(searchText.ToLower()));
             }
-            if (searchText != null)
+
+            // Lọc theo status 
+            if (status != null && status.Length > 0)
             {
-                lstOrder =  lstOrder.Where(c => c.OrderCode.ToLower().Contains(searchText.ToLower()));
+                lstOrder = lstOrder.Where(c => status.Contains(c.OrderStatus));
             }
-            if (startDate != null && endDate != null)
+
+            // Lọc theo ngày 
+            if (startDate != null || endDate != null)
             {
-                lstOrder = lstOrder.Where(c => c.CreateDate >= startDate && c.CreateDate <= endDate);
+                // Nếu chỉ có startDate
+                if (startDate != null && endDate == null)
+                {
+                    lstOrder = lstOrder.Where(c => c.CreateDate >= startDate);
+                }
+                // Nếu chỉ có endDate
+                else if (startDate == null && endDate != null)
+                {
+                    lstOrder = lstOrder.Where(c => c.CreateDate <= endDate);
+                }
+                // Nếu có cả startDate và endDate
+                else if (startDate != null && endDate != null)
+                {
+                    lstOrder = lstOrder.Where(c => c.CreateDate >= startDate && c.CreateDate <= endDate);
+                }
             }
             return View(lstOrder.ToPagedList(pageNumber, pageSize));
         }
-       
+
+
         public async Task<IActionResult> OrderDetail(Guid orderId)
         {
             var lstOrderIterm = await _iorderItemService.GetByIdOrder(orderId);

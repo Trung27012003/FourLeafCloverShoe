@@ -3,11 +3,14 @@
 @{
     ViewData["Title"] = "Manganer order";
     int?[] selectStatus = ViewBag.SelectedStatuses;
+    Layout = "~/Areas/Admin/Shared/_Layout.cshtml";
 }
-@section css {
+@* section css {
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    
-}
+    @* <link rel="stylesheet" href="~/fileadmin/assets/css/plugins/flatpickr.min.css">
+    <link rel="stylesheet" href="~/fileadmin/assets/css/plugins/datepicker-bs5.min.css"> 
+} *@
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 <style>
     body {
         background-color: #f8f9fa;
@@ -43,7 +46,7 @@
                 <h4>Hóa đơn</h4>
                 <div class="form-group">
                     <label for="start-time">Bắt đầu</label>
-                    <input type="text" class="form-control" id="start" name="startDate" value="">
+                    <input type="text" class="form-control" id="start" name="startDate">
                 </div>
                 <div class="form-group">
                     <label for="end-time">Kết thúc</label>
@@ -51,20 +54,19 @@
                 </div>
                 <h5>Trạng thái</h5>
             
-                <ul class="invoice-status cb">
-                    <li class="tt"><input name="status" value="-1" type="checkbox" @(selectStatus != null && (selectStatus).Contains(-1) ? "checked" : "")> Đơn chờ</li>
-                    <li class="tt"><input name="status" value="0" type="checkbox" @(selectStatus != null && (selectStatus).Contains(0) ? "checked" : "")> Chờ thanh toán</li>
-                    <li class="tt"><input name="status" value="1" type="checkbox" @(selectStatus != null && (selectStatus).Contains(1) ? "checked" : "")> Đã thanh toán</li>
-                    <li class="tt"><input name="status" value="2" type="checkbox" @(selectStatus != null && (selectStatus).Contains(2) ? "checked" : "")> Chờ xác nhận</li>
-                    <li class="tt"><input name="status" value="3" type="checkbox" @(selectStatus != null && (selectStatus).Contains(3) ? "checked" : "")> Chờ lấy hàng</li>
-                    <li class="tt"><input name="status" value="4" type="checkbox" @(selectStatus != null && (selectStatus).Contains(4) ? "checked" : "")> Đang giao hàng</li>
-                    <li class="tt"><input name="status" value="6" type="checkbox" @(selectStatus != null && (selectStatus).Contains(6) ? "checked" : "")> Giao hàng thất bại</li>
-                    <li class="tt"><input name="status" value="8" type="checkbox" @(selectStatus != null && (selectStatus).Contains(8) ? "checked" : "")> Giao hàng thành công</li>
-                    <li class="tt"><input name="status" value="9" type="checkbox" @(selectStatus != null && (selectStatus).Contains(9) ? "checked" : "")> Thanh toán tại quầy</li>
-                    <li class="tt"><input name="status" value="10" type="checkbox" @(selectStatus != null && (selectStatus).Contains(10) ? "checked" : "")> Yêu cầu đổi trả</li>
+                <ul class="invoice-status">
+                    <li><input name="status" value="-1" type="checkbox" @(selectStatus != null && (selectStatus).Contains(-1) ? "checked" : "")> Đơn chờ</li>
+                    <li><input name="status" value="0" type="checkbox" @(selectStatus != null && (selectStatus).Contains(0) ? "checked" : "")> Chờ thanh toán</li>
+                    <li><input name="status" value="1" type="checkbox" @(selectStatus != null && (selectStatus).Contains(1) ? "checked" : "")> Đã thanh toán</li>
+                    <li><input name="status" value="2" type="checkbox" @(selectStatus != null && (selectStatus).Contains(2) ? "checked" : "")> Chờ xác nhận</li>
+                    <li><input name="status" value="3" type="checkbox" @(selectStatus != null && (selectStatus).Contains(3) ? "checked" : "")> Chờ lấy hàng</li>
+                    <li><input name="status" value="4" type="checkbox" @(selectStatus != null && (selectStatus).Contains(4) ? "checked" : "")> Đang giao hàng</li>
+                    <li><input name="status" value="6" type="checkbox" @(selectStatus != null && (selectStatus).Contains(6) ? "checked" : "")> Giao hàng thất bại</li>
+                    <li><input name="status" value="8" type="checkbox" @(selectStatus != null && (selectStatus).Contains(8) ? "checked" : "")> Giao hàng thành công</li>
+                    <li><input name="status" value="9" type="checkbox" @(selectStatus != null && (selectStatus).Contains(9) ? "checked" : "")> Thanh toán tại quầy</li>
+                    <li><input name="status" value="10" type="checkbox" @(selectStatus != null && (selectStatus).Contains(10) ? "checked" : "")> Yêu cầu đổi trả</li>
                 </ul>
-
-                <button type="submit" class="btn btn-dark">Lọc</button>
+                <button style="width:249px" type="submit" class="btn btn-dark">Lọc</button>
             </form>
         </div>
 
@@ -148,24 +150,24 @@
                     <!-- Phân trang -->
                     <ul class="pagination">
                         <li class="page-item @(Model.IsFirstPage ? "disabled" : "")">
-                            <a class="page-link" href="@Url.Action("Index", new { page = 1 })">Đầu</a>
+                            <a class="page-link" href="@Url.Action("Index", new { page = 1,status = ViewBag.SelectedStatuses,searchText = ViewBag.searchText,startDate = ViewBag.startDate,endDate = ViewBag.endDate })">Đầu</a>
                         </li>
                         <li class="page-item @(Model.HasPreviousPage ? "" : "disabled")">
-                            <a class="page-link" href="@Url.Action("Index", new { page = Model.PageNumber - 1 })">Trước</a>
+                            <a class="page-link" href="@Url.Action("Index", new { page = Model.PageNumber - 1,status = ViewBag.SelectedStatuses,searchText = ViewBag.searchText,startDate = ViewBag.startDate,endDate = ViewBag.endDate })">Trước</a>
                         </li>
 
                         @for (int i = 1; i <= Model.PageCount; i++)
                         {
                             <li class="page-item @(i == Model.PageNumber ? "active" : "")">
-                                <a class="page-link" href="@Url.Action("Index", new { page = i })">@i</a>
+                                <a class="page-link" href="@Url.Action("Index", new { page = i,status = ViewBag.SelectedStatuses,searchText = ViewBag.searchText,startDate = ViewBag.startDate,endDate = ViewBag.endDate })">@i</a>
                             </li>
                         }
 
                         <li class="page-item @(Model.HasNextPage ? "" : "disabled")">
-                            <a class="page-link" href="@Url.Action("Index", new { page = Model.PageNumber + 1 })">Tiếp</a>
+                            <a class="page-link" href="@Url.Action("Index", new { page = Model.PageNumber + 1,status = ViewBag.SelectedStatuses,searchText = ViewBag.searchText,startDate = ViewBag.startDate,endDate = ViewBag.endDate })">Tiếp</a>
                         </li>
                         <li class="page-item @(Model.IsLastPage ? "disabled" : "")">
-                            <a class="page-link" href="@Url.Action("Index", new { page = Model.PageCount })">Cuối</a>
+                            <a class="page-link" href="@Url.Action("Index", new { page = Model.PageCount,status = ViewBag.SelectedStatuses,searchText = ViewBag.searchText,startDate = ViewBag.startDate,endDate = ViewBag.endDate })">Cuối</a>
                         </li>
                     </ul>
                 </nav>
@@ -173,17 +175,9 @@
         </div>
     </div>
 </div>
-@section scripts {
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
 
-}
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
 
 <script type="text/javascript">
-    $(document).ready(function () {
-        $('#start').datepicker({
-            format: 'dd/mm/yyyy',
-            startDate: 'today'
-        });
-    });
+   
 </script>

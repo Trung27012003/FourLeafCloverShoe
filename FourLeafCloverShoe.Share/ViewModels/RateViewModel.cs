@@ -14,9 +14,10 @@ namespace FourLeafCloverShoe.Share.ViewModels
         public float? Rating { get; set; }
         public int? Status { get; set; }
         public string Size { get; set; }
+        public string Color { get; set; }
         public string TenKH { get; set; }
         public string ImageUrl { get; set; }
         public string? CreateDate { get; set; }
-        public byte[] AnhKh { get; set; }
+        public string AnhKh { get; set; }
     }
 }
