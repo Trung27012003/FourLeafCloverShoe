@@ -1,4 +1,5 @@
-﻿@using Microsoft.AspNetCore.Identity
+﻿@using FourLeafCloverShoe.Services
+@using Microsoft.AspNetCore.Identity
 @using FourLeafCloverShoe.Share.Models
 
 @inject SignInManager<User> SignInManager
@@ -35,7 +36,11 @@
             </div>
         </a>
         <div class="profile-sidebar--info">
-            <div class="profile-sidebar--info-name"></div>
+            @{
+                var user = await UserManager.GetUserAsync(User);
+            }
+            <div class="profile-sidebar--info-name">@user.FullName</div>
+            <div class="profile-sidebar--info-name">Xu : @user.Coins?.ToString("N0") xu</div>
             <div>
                 <a class="profile-sidebar--info-btn" asp-area="Identity" asp-page="/Account/Manage/Index">
                     <svg width="12" height="12" viewBox="0 0 12 12" xmlns="http://www.w3.org/2000/svg"

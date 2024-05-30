@@ -20,13 +20,13 @@ namespace FourLeafCloverShoe.Share.Models
         // 0 --> chờ thanh toán
         // 1 --> đã thanh toán                                       ----> (user)chờ xác nhận  --> admin duyệt ( nhấn nút : xác nhận đơn)
         // 2 --> chờ xác nhận
-
+        //0-2-3 sửa dc
 
         // 3 --> chờ lấy hàng                                       ----> (user)chờ lấy hàng   --> admin duyệt ( nhấn nút : giao hàng)
 
 
         // 4 --> đang giao hàng                                      ----> (user)đang giao   --> admin duyệt yêu cầu huỷ
-        // 5  --> khách yêu cầu huỷ (trong khi giao hàng)
+        // 5  --> khách yêu cầu huỷ (trong khi )
         // 6--> giao hàng thất bại   
         // 7 --> yêu cầu huỷ đơn thất bại
 
@@ -64,5 +64,6 @@ namespace FourLeafCloverShoe.Share.Models
         public virtual Voucher? Vouchers { get; set; }
 
         public virtual List<OrderItem>? OrderItems { get; set; }
+        public virtual List<PaymentDetail>? PaymentDetails { get; set; }
     }
 }

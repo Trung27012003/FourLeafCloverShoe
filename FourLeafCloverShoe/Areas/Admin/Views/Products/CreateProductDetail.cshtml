@@ -25,20 +25,34 @@
                                         <label class="btn btn-sm btn-light-primary" for="@item.Text">@item.Text</label>
                                     </div>
                                 }
-                                
                             </div>
                         </div>
                         <span asp-validation-for="SizeId" class="text-danger"></span>
                     </div>
                     <div class="form-group">
+                        <label class="form-label">Màu sắc</label>
+                        <div class="card-body">
+                            <div class="row g-2">
+                                @foreach (var item in ViewBag.ListColorsitems as List<SelectListItem>)
+                                {
+                                    <div class="col-auto">
+                                        <input asp-for="ColorId" type="radio" class="btn-check" id="@item.Text" value="@item.Value">
+                                        <label class="btn btn-sm btn-light-primary" for="@item.Text">@item.Text</label>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                        <span asp-validation-for="ColorId" class="text-danger"></span>
+                    </div>
+                    <div class="form-group">
                         <label class="form-label">Số lượng sản phẩm</label>
-                        <input asp-for="Quantity" type="number" class="form-control" >
+                        <input asp-for="Quantity" type="number" class="form-control" min="0" >
                         <input asp-for="ProductId" value="@ViewBag.productId" class="form-control" hidden>
                         <span asp-validation-for="Quantity" class="text-danger"></span>
                     </div>
                     <div class="form-group">
                         <label class="form-label">Giá bán sản phẩm</label>
-                        <input asp-for="PriceSale" type="number" class="form-control" >
+                        <input asp-for="PriceSale" type="number" class="form-control" min="0" >
                         <span asp-validation-for="PriceSale" class="text-danger"></span>
                     </div>
 
@@ -47,7 +61,7 @@
                         <div class="card-body">
                             <div class="row g-2">
                                 <div class="col-auto">
-                                    <input type="radio" asp-for="Status" class="btn-check" id="btnrdolite11" value="1">
+                                    <input type="radio" asp-for="Status" class="btn-check" id="btnrdolite11" value="1" checked>
                                     <label class="btn btn-sm btn-light-success" for="btnrdolite11">Bán ngay</label>
                                 </div>
                                 <div class="col-auto">

@@ -24,10 +24,11 @@ namespace FourLeafCloverShoe.Controllers
         private readonly IUserVoucherService _userVoucherService;
         private readonly IVoucherService _voucherService;
         private readonly IProductDetailService _productDetailService;
+        private readonly IRateService _rateService;
         private readonly IHubContext<Hubs> _hubContext;
 
 
-        public OrderController(IHubContext<Hubs> hubContext, IProductDetailService productDetailService, UserManager<User> userManager,IVoucherService voucherService,IUserVoucherService userVoucherService , IOrderService orderService, IOrderItemService orderItemService, ICartItemItemService cartItemItemService)
+        public OrderController(IHubContext<Hubs> hubContext, IProductDetailService productDetailService, UserManager<User> userManager,IVoucherService voucherService,IUserVoucherService userVoucherService , IOrderService orderService, IOrderItemService orderItemService, ICartItemItemService cartItemItemService, IRateService rateService)
         {
             _userManager = userManager;
             _orderItemService = orderItemService;
@@ -37,6 +38,7 @@ namespace FourLeafCloverShoe.Controllers
             _voucherService = voucherService;
             _productDetailService = productDetailService;
             _hubContext = hubContext;
+            _rateService = rateService;
 
         }
         public static string GenerateInvoiceCode(string paymentType)
@@ -127,22 +129,42 @@ namespace FourLeafCloverShoe.Controllers
                 if (result)
                 {
                     var lstOrderItems = new List<OrderItem>();
+                    var lstRates = new List<Rate>();
                     foreach (var item in lstCartItem)
                     {
                         var orderItems = new OrderItem()
                         {
+                            Id = Guid.NewGuid(),//them
                             OrderId = order.Id,
                             ProductDetailId = item.ProductDetailId,
                             Quantity = item.Quantity,
                             Price = item.ProductDetails.PriceSale,
                         };
                         lstOrderItems.Add(orderItems);
+                        //tạo đánh giá
+                        Rate rate = new Rate()
+                        {
+                            Id = Guid.NewGuid(),
+                            OrderItemId = orderItems.Id,
+                            Contents = null,
+                            Reply = null,
+                            ImageUrl = null,
+                            Rating = null,
+                            CreateDate = null,
+                            Status = 0
+                        };
+                        lstRates.Add(rate);
+                      
                     }
                     var resultCreateOrderItems = await _orderItemService.AddMany(lstOrderItems);
                     if (resultCreateOrderItems)
                     {
+                        // Nếu thêm OrderItems thành công, thêm các Rates tương ứng
+                        foreach (var rate in lstRates)
+                        {
+                            await _rateService.Add(rate);
+                        }
                         // tạo đơn hàng thành công
-
                         var cartItems = await _cartItemItemService.GetsByUserId(user.Id);
                         var resultDeleteCartItems = await _cartItemItemService.DeleteMany(cartItems);
                         if (!resultDeleteCartItems) // xoá giỏ hàng
@@ -217,10 +239,7 @@ namespace FourLeafCloverShoe.Controllers
             else
             {
                 var lstCartItem  = SessionServices.GetCartItems(HttpContext.Session, "Cart");
-                for (int i = lstCartItem.Count - 1; i >= 0; i--)
-                {
-                    lstCartItem.RemoveAt(i);
-                }
+                
                 SessionServices.SetCartItems(HttpContext.Session, "Cart", lstCartItem);
                 order.OrderCode = GenerateInvoiceCode(order.PaymentType);
                 order.PaymentType = order.PaymentType;
@@ -258,6 +277,10 @@ namespace FourLeafCloverShoe.Controllers
                         lstOrderItems.Add(orderItems);
                     }
                     var resultCreateOrderItems = await _orderItemService.AddMany(lstOrderItems);
+                    for (int i = lstCartItem.Count - 1; i >= 0; i--)
+                    {
+                        lstCartItem.RemoveAt(i);
+                    }
                     if (resultCreateOrderItems)
                     {
                         
@@ -625,5 +648,6 @@ namespace FourLeafCloverShoe.Controllers
             }
             return "";
         }
+        
     }
 }
