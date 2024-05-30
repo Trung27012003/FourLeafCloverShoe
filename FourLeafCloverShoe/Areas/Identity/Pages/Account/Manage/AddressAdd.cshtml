@@ -130,26 +130,43 @@
         $('#profile-form').on('submit', function (e) {
             var isValid = true;
             var errorMessage = '';
-
+            var isValid1 = true;
+            var errorMessage1 = '';
+            var isValid2 = true;
+            var errorMessage2 = '';
             // Kiểm tra tên người nhận
             var recipientName = $('#RecipientName').val().trim();
             if (recipientName === '') {
                 isValid = false;
-                errorMessage += 'Tên người nhận không được để trống.<br>';
+                errorMessage += 'Tên người nhận không được để trống.';
             }
 
             // Kiểm tra số điện thoại
             var recipientPhone = $('#RecipientPhone').val().trim();
             var phonePattern = /^0\d{9}$/; // Số điện thoại bắt đầu bằng 0 và có 10 chữ số
-            if (!phonePattern.test(recipientPhone)) {
-                isValid = false;
-                errorMessage += 'Số điện thoại không hợp lệ. Số điện thoại phải có 10 chữ số và bắt đầu bằng 0.<br>';
+            if(recipientPhone === ''){
+                 isValid1 = false;
+                errorMessage1 += 'Số điện thoại không được để trống.';
             }
-
+            else if (!phonePattern.test(recipientPhone)) {
+                isValid1 = false;
+                errorMessage1 += 'Số điện thoại phải là số. Số điện thoại phải có 10 chữ số và bắt đầu bằng 0.';
+            }
+            var Description = $('#Description').val().trim();
+            if (Description === '') {
+                isValid2 = false;
+                errorMessage2 += 'Nhập địa chỉ chi tiết.';
+            }
             // Nếu không hợp lệ, ngăn chặn việc submit form và hiển thị thông báo lỗi
             if (!isValid) {
                 e.preventDefault();
                 alert(errorMessage);
+            }else if(!isValid1){
+                 e.preventDefault();
+                alert(errorMessage1);
+            } else if (!isValid2) {
+                e.preventDefault();
+                alert(errorMessage2);
             }
         });
 
