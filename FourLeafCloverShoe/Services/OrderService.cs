@@ -112,6 +112,7 @@ namespace FourLeafCloverShoe.Services
                             .ThenInclude(c => c.Size)
                     .Include(c=>c.OrderItems)//them lay tu bang rate
                         .ThenInclude(c=>c.Rate)
+                    .Include(c=>c.Users)
                     .ToListAsync();
                 if (obj != null)
                 {
