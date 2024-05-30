@@ -120,6 +120,7 @@ namespace FourLeafCloverShoe.Data
         public DbSet<Ranks> Ranks { get; set; }
         public DbSet<Rate> Rates { get; set; }
         public DbSet<Size> Sizes { get; set; }
+        public DbSet<Material> materials { get; set; }
         public DbSet<Voucher> Vouchers { get; set; }
         public DbSet<UserVoucher> UserVouchers { get; set; }
 

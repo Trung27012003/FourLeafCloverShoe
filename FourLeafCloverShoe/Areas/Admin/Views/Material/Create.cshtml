@@ -1,8 +1,8 @@
-﻿@model FourLeafCloverShoe.Share.Models.Size
+﻿@model FourLeafCloverShoe.Share.Models.Material
 
 @{
     ViewBag.Title = "Thêm mới";
-    ViewBag.pTitle = "Kích cỡ";
+    ViewBag.pTitle = "Chất Liệu";
 }
 @Html.Partial("~/Areas/Admin/Shared/_ErrorMessage.cshtml")
 <div class="row">
@@ -13,14 +13,14 @@
                 <div class="card-body">
                     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
                     <div class="form-group">
-                        <label class="form-label">Kích cỡ</label>
+                        <label class="form-label">Chất Liệu</label>
                         <input asp-for="Name" type="text" class="form-control" placeholder="Nhập kích cỡ">
                         <span asp-validation-for="Name" class="text-danger"></span>
                     </div>
                     <div class="col-sm-12">
-                            <div class="card-body text-end btn-page">
-                                <button type="submit" class="btn btn-primary mb-0">Thêm mới</button>
-                            </div>
+                        <div class="card-body text-end btn-page">
+                            <button type="submit" class="btn btn-primary mb-0">Thêm mới</button>
+                        </div>
                     </div>
             </form>
         </div>

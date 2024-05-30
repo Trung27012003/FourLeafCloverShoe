@@ -1,10 +1,12 @@
-﻿@model IEnumerable<FourLeafCloverShoe.Share.Models.Ranks>
+﻿@model IEnumerable<FourLeafCloverShoe.Share.Models.Material>
+
 
 @{
-    ViewData["Title"] = "Index";
-    Layout = "~/Areas/Admin/Shared/_Layout.cshtml";
+    ViewBag.Title = "Danh sách";
+    ViewBag.pTitle = "Chất Liệu";
 }
 @Html.Partial("~/Areas/Admin/Shared/SuccessMessage.cshtml")
+
 
 <div class="row">
     <!-- [ sample-page ] start -->
@@ -20,10 +22,7 @@
 
                             <tr>
                                 <th>STT</th>
-                                <th>Rank</th>
-                                <th>PointsMin</th>
-                                <th>PointsMax</th>
-                                <th>Description</th>
+                                <th>Chất Liệu</th>
                                 <th>Chức năng</th>
 
                             </tr>
@@ -42,9 +41,6 @@
                                         }
                                     </td>
                                     <td>@item.Name</td>
-                                    <td>@item.PointsMin</td>
-                                    <td>@item.PoinsMax</td>
-                                    <td>@item.Description</td>
                                     <td class="text-center">
                                         <div>
                                             <ul class="list-inline me-auto mb-0">
@@ -71,4 +67,3 @@
     </div>
     <!-- [ sample-page ] end -->
 </div>
-

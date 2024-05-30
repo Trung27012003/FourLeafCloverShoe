@@ -1,44 +1,45 @@
 ﻿using FourLeafCloverShoe.IServices;
-using FourLeafCloverShoe.Services;
 using FourLeafCloverShoe.Share.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FourLeafCloverShoe.Areas.Admin.Controllers
 {
     [Area("Admin")]
-    public class CategoryController : Controller
+    public class MaterialController : Controller
     {
-        private readonly ICategoryService _categoryService;
+       
+        private     IMaterialService  _imaterialService;
 
-        public CategoryController(ICategoryService categoryService)
+        public MaterialController(IMaterialService materialService)
         {
-            _categoryService = categoryService;
+            _imaterialService = materialService;
         }
-        public async Task<IActionResult> IndexAsync()
+
+        public async Task<IActionResult> Index()
         {
-            return View(await _categoryService.Gets());
+            return View((await _imaterialService.Gets()).OrderBy(c => c.Name));
         }
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
             return View();
         }
         [HttpPost]
-        public async Task<IActionResult> CreateAsync(Category category)
+        public async Task<IActionResult> Create(Material s)
         {
-            var categories = await _categoryService.Gets();
-            if (categories.Any(c => c.Name.Trim().ToLower() == category.Name.Trim().ToLower()))
+            var size = await _imaterialService.Gets();
+            if (size.Any(c => c.Name == s.Name))
             {
-                TempData["ErrorMessage"] = "Loại này đã có";
+                TempData["ErrorMessage"] = "Chất Liệu đã có";
                 return View();
             }
-            else if (category.Name == null)
+            else if (s.Name == null)
             {
                 TempData["ErrorMessage"] = "Không được để trống";
                 return View();
             }
             else
             {
-                var result = await _categoryService.Add(category);
+                var result = await _imaterialService.Add(s);
                 if (result)
                 {
                     TempData["SuccessMessage"] = "Thêm thành công";
@@ -47,17 +48,18 @@ namespace FourLeafCloverShoe.Areas.Admin.Controllers
             }
             return RedirectToAction("Index");
         }
-        public async Task<IActionResult> EditAsync(Guid Id)
+        public async Task<IActionResult> Edit(Guid Id)
         {
-            return View(await _categoryService.GetById(Id));
+
+            return View(await _imaterialService.GetById(Id));
         }
         [HttpPost]
-        public async Task<IActionResult> Edit(Category obj)
+        public async Task<IActionResult> Edit(Guid Id, Size obj)
         {
-            var cate = await _categoryService.Gets();
-            if (cate.Any(c => c.Name == obj.Name))
+            var size = await _imaterialService.Gets();
+            if (size.Any(c => c.Name == obj.Name))
             {
-                TempData["ErrorMessage"] = "Loại này đã có";
+                TempData["ErrorMessage"] = "Chất Liệu đã có";
                 return View();
             }
             else if (obj.Name == null)
@@ -67,9 +69,9 @@ namespace FourLeafCloverShoe.Areas.Admin.Controllers
             }
             else
             {
-                var s = await _categoryService.GetById(obj.Id);
+                var s = await _imaterialService.GetById(Id);
                 s.Name = obj.Name;
-                var result = await _categoryService.Update(s);
+                var result = await _imaterialService.Update(s);
                 if (result)
                 {
                     TempData["SuccessMessage"] = "Cập nhật thành công";
@@ -80,8 +82,8 @@ namespace FourLeafCloverShoe.Areas.Admin.Controllers
         }
         public async Task<IActionResult> Delete(Guid Id)
         {
-            var result = await _categoryService.Delete(Id);
-            return RedirectToAction("Index", "Category") ;
+            var result = await _imaterialService.Delete(Id);
+            return RedirectToAction("Index");
         }
     }
 }
