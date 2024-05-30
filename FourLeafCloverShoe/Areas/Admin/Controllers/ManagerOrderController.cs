@@ -25,7 +25,7 @@ namespace FourLeafCloverShoe.Areas.Admin.Controllers
         public async Task<IActionResult> IndexAsync(int? page, int?[] status, string searchText, DateTime? startDate, DateTime? endDate)
         {
             if (page == null) page = 1;
-            int pageSize = 2;
+            int pageSize = 1;
             int pageNumber = (page ?? 1);
 
             // Lưu trữ giá trị bộ lọc vào ViewBag để sử dụng trong View
@@ -36,7 +36,6 @@ namespace FourLeafCloverShoe.Areas.Admin.Controllers
 
             var lst = await _iorderService.Gets();
             var lstOrder = lst.Where(c => c.Id != null);
-
             // Lọc theo searchText 
             if (!string.IsNullOrEmpty(searchText))
             {
@@ -77,10 +76,6 @@ namespace FourLeafCloverShoe.Areas.Admin.Controllers
             var lstOrderIterm = await _iorderItemService.GetByIdOrder(orderId);
             return View(lstOrderIterm);
         }
-        public async Task<IActionResult> ChangeStatus(Guid orderId)
-        {
-            var lstOrderIterm = await _iorderItemService.GetByIdOrder(orderId);
-            return View(lstOrderIterm);
-        }
+        
     }
 }

@@ -26,7 +26,7 @@ namespace FourLeafCloverShoe.Share.Models
 
 
         // 4 --> đang giao hàng                                      ----> (user)đang giao   --> admin duyệt yêu cầu huỷ
-        // 5  --> khách yêu cầu huỷ (trong khi giao hàng)
+        // 5  --> khách yêu cầu huỷ (trong khi )
         // 6--> giao hàng thất bại   
         // 7 --> yêu cầu huỷ đơn thất bại
 
