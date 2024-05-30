@@ -422,6 +422,7 @@
                     <div class="product-top-info">
                         @if (lstRate != null)
                         {
+                            
                             <div class="product-grid-rating">
                                 @{
                                     // Tính trung bình và làm tròn đến 1 chữ số thập phân
@@ -877,7 +878,7 @@
                     <div class="be-comment mb-2">
                         <div class="be-img-comment">
                             <a href="#">
-                                <img src="${comment.anhKh}" alt="" class="be-ava-comment">
+                               <img src="data:image/jpeg;base64,${comment.anhKh}" alt="" class="be-ava-comment">
                             </a>
                         </div>
                         <div class="be-comment-content">
@@ -891,6 +892,7 @@
                                     <span>${comment.createDate}</span>
                                 <span>${comment.contents || "Người này không để lại lời nhắn gì"}</span>
                                 <span>Size: ${comment.size}</span>
+                                <span>Color: ${comment.color}</span>
                                 ${imageSliderHtml} <!-- Ảnh đánh giá -->
                             </div>
                         </div>
