@@ -239,7 +239,10 @@ namespace FourLeafCloverShoe.Controllers
             else
             {
                 var lstCartItem  = SessionServices.GetCartItems(HttpContext.Session, "Cart");
-                
+                for (int i = lstCartItem.Count - 1; i >= 0; i--)
+                {
+                    lstCartItem.RemoveAt(i);
+                }
                 SessionServices.SetCartItems(HttpContext.Session, "Cart", lstCartItem);
                 order.OrderCode = GenerateInvoiceCode(order.PaymentType);
                 order.PaymentType = order.PaymentType;
@@ -277,10 +280,6 @@ namespace FourLeafCloverShoe.Controllers
                         lstOrderItems.Add(orderItems);
                     }
                     var resultCreateOrderItems = await _orderItemService.AddMany(lstOrderItems);
-                    for (int i = lstCartItem.Count - 1; i >= 0; i--)
-                    {
-                        lstCartItem.RemoveAt(i);
-                    }
                     if (resultCreateOrderItems)
                     {
                         
