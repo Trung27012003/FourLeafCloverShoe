@@ -1,7 +1,6 @@
 ﻿using FourLeafCloverShoe.Data;
 using FourLeafCloverShoe.IServices;
 using FourLeafCloverShoe.Share.Models;
-using FourLeafCloverShoe.Share.ViewModels;
 using Microsoft.EntityFrameworkCore;
 
 namespace FourLeafCloverShoe.Services
@@ -98,6 +97,7 @@ namespace FourLeafCloverShoe.Services
             }
         }
 
+<<<<<<< HEAD
         public async Task<List<OrderDetailViewModel>> GetByIdOrder(Guid IdOrder)
         {
             var lstOrderDetail = await(from a in _myDbContext.OrderItems
@@ -146,6 +146,8 @@ namespace FourLeafCloverShoe.Services
             return lstOrderDetail;
         }
 
+=======
+>>>>>>> parent of ba960dd (Merge remote-tracking branch 'origin/Mèo-béo' into hung)
         public async Task<List<OrderItem>> Gets()
         {
             try
@@ -156,8 +158,6 @@ namespace FourLeafCloverShoe.Services
                             .ThenInclude(c=>c.ProductImages)
                     .Include(c=>c.ProductDetails)
                         .ThenInclude(c=>c.Size)
-                    .Include(c=>c.Rate)
-                    
                     .ToListAsync();
                 if (obj != null)
                 {

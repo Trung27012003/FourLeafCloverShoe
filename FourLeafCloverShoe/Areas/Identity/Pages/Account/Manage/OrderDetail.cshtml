@@ -186,17 +186,6 @@
                                         <!--ko if:Price == 0 && !IsBonus--><!--/ko-->
                                     </div>
                                 </div>
-                               
-                                    @if (product.Orders.OrderStatus == 8 && product.Rate.Status == 0)
-                                    {
-                                        <div>
-                                            <div class="order-item-calc-inner">
-                                            <a href="/Products/ReviewProducts?idCTHD=@product.Rate.OrderItemId" class="btn btn-solid-primary btn--m btn--inline">Đánh giá sản phẩm</a>
-                                            </div>
-                                        </div>
-                                    }
-                                    
-                                
                             </span>
                             <div class="order-item-line"></div>
                         }

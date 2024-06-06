@@ -1,5 +1,4 @@
 ﻿using FourLeafCloverShoe.Share.Models;
-using FourLeafCloverShoe.Share.ViewModels;
 
 namespace FourLeafCloverShoe.IServices
 {
@@ -11,7 +10,6 @@ namespace FourLeafCloverShoe.IServices
         public Task<bool> Delete(Guid Id);
         public Task<bool> DeleteMany(List<OrderItem> lstobj);
         public Task<OrderItem> GetById(Guid Id);
-        public Task<List<OrderDetailViewModel>> GetByIdOrder(Guid IdOrder);
         public Task<List<OrderItem>> Gets();
     }
 }

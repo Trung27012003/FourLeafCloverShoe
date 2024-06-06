@@ -11,15 +11,12 @@ namespace FourLeafCloverShoe.Areas.Identity.Pages.Account.Manage
     {
         private readonly UserManager<User> _userManager;
         private readonly IOrderService _orderService;
-        private readonly IRateService _rateService;
         public Order Order { get; set; }
-        public Rate Rate { get; set; }
-        public OrderDetailModel(UserManager<User> userManager, IOrderService orderService, IRateService rateService)
+        public OrderDetailModel(UserManager<User> userManager, IOrderService orderService)
         {
 
             _userManager = userManager;
             _orderService = orderService;
-            _rateService = rateService;
         }
         public async Task<IActionResult> OnGetAsync(Guid orderId)
         {
@@ -54,7 +51,6 @@ namespace FourLeafCloverShoe.Areas.Identity.Pages.Account.Manage
             await _orderService.Update(order);
             return Redirect($"/Identity/Account/Manage/orderdetail?orderId={order.Id}");
         }
-        
 
 
     }

@@ -1,9 +1,7 @@
 ﻿using FourLeafCloverShoe.Data;
 using FourLeafCloverShoe.IServices;
 using FourLeafCloverShoe.Share.Models;
-using FourLeafCloverShoe.Share.ViewModels;
 using Microsoft.EntityFrameworkCore;
-using Org.BouncyCastle.Crypto;
 
 namespace FourLeafCloverShoe.Services
 {
@@ -102,32 +100,7 @@ namespace FourLeafCloverShoe.Services
                 return new List<Rate>();
             }
         }
-        public async Task<bool> UpdateDanhGia(Guid id, Guid idhdct, float soSao, string? binhLuan, string? imageUrl)
-        {
-            try
-            {
-                var objFromDb = await GetById(id);
-                if (objFromDb != null)
-                {
-                    objFromDb.Contents = binhLuan;
-                    objFromDb.Reply = null;
-                    objFromDb.ImageUrl = imageUrl;
-                    objFromDb.Rating = soSao;
-                    objFromDb.Status =  1;
-                    objFromDb.CreateDate = DateTime.Now;
-                    objFromDb.OrderItemId = idhdct;
-                    _myDbContext.Rates.Update(objFromDb);
-                    await _myDbContext.SaveChangesAsync();
-                    return true;
-                }
-                return false;
-            }
-            catch (Exception)
-            {
 
-                throw;
-            }
-        }
         public async Task<bool> Update(Rate obj)
         {
             try
@@ -151,27 +124,6 @@ namespace FourLeafCloverShoe.Services
                 Console.WriteLine(e.Message);
                 return false;
             }
-        }
-
-        public async Task<List<RateViewModel>> GetByIdProduct(Guid IdPr)
-        {
-            var query = await(from sp in _myDbContext.Products.Where(p => p.Id == IdPr)
-                              join ctsp in _myDbContext.ProductDetails on sp.Id equals ctsp.ProductId
-                              join cthd in _myDbContext.OrderItems on ctsp.Id equals cthd.ProductDetailId
-                              join dg in _myDbContext.Rates.Where(p => p.Status == 1) on cthd.Id equals dg.OrderItemId
-                              join hd in _myDbContext.Orders on cthd.OrderId equals hd.Id
-                              join kc in _myDbContext.Sizes on ctsp.SizeId equals kc.Id
-                              select new RateViewModel()
-                              {
-                                  ID = dg.Id,
-                                  Rating = dg.Rating,
-                                  Contents = dg.Contents,
-                                  Status = dg.Status,
-                                  //TenKH = _myDbContext.Users.FirstOrDefault(p => p.Id == hd.UserId).FullName,
-                                  Size = kc.Name,
-                                  
-                              }).ToListAsync();
-            return query;
         }
     }
 }

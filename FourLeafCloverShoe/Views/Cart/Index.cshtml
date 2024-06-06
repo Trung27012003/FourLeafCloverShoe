@@ -115,7 +115,7 @@
 
                                         </a>
                                         <div class="elementor-menu-cart__product-name product-name" data-title="Product">
-                                            <span class="cart-item-name">@item.ProductDetails.Products.ProductName</span>
+                                            <span class="cart-item-name">Product Name 12</span>
                                             <ul class="variation">
                                                 <li class="variation-Kchc">
                                                     <span class="item-variation-name">SKU:</span>
@@ -336,7 +336,7 @@
                 <strong style="color:#ee4d2d">THÔNG TIN VẬN CHUYỂN</strong>
             </div>
         </div>
-        <input id="ProvinceName" hidden />
+        <input id="ProvinceName" hidden/>
         <input id="DistrictName" hidden />
         <input id="WardName" hidden />
         <div class="row g-3 mt-3" id="info-input" style="display: inline-flex">
@@ -366,8 +366,7 @@
         </div>
     }
     <div class="info-input row" style="display: none">
-        @if (ViewBag.lstAddress != null)
-        {
+        @if(ViewBag.lstAddress!=null){
             @foreach (var item in ViewBag.lstAddress as List<Address>)
             {
 
@@ -456,7 +455,7 @@
     var coutProduct = 1; // chua
     $(document).ready(function () {
         $("#btnDatHang").click(function () {
-            if (ShippingFee == 0) {
+           if (ShippingFee == 0) {
                 showToast("Vui lòng kiểm tra lại địa chỉ nhận hàng!", false);
             }
             else if (total <= 0) {
@@ -508,13 +507,13 @@
 
                     else if ($("#RecipientPhone").val() == "") {
                         showToast("Vui lòng kiểm tra lại số điện thoại nhận hàng!", false);
-                    } else {
+                    }else{
                         $('#modalHDSIZE').modal('show');
 
                     }
 
                 }
-                else {
+                else{
                     $('#modalHDSIZE').modal('show');
                 }
             }
@@ -523,7 +522,7 @@
     function checkOut(type) {
         if (ShippingFee > 0 && total > 0 && TotalAmout >= 0) {
             if (confirm("Bạn có chắc chắn muốn chọn phương thức thanh toán " + type + " không?")) {
-                PaymentType = type;
+              PaymentType = type;
                 $.ajax({
                     type: "POST",
                     url: "/Order/CheckOut",
@@ -779,7 +778,7 @@
                     getTotalAmount();
                 },
                 error: function (reponse) {
-                    console.log("line 778", reponse.responseText);
+                    console.log("line 778",reponse.responseText);
                 }
             });
         } else {
@@ -821,7 +820,7 @@
                         getTotalAmount();
                     },
                     error: function (reponse) {
-                        console.log("line 820", reponse.responseText);
+                        console.log("line 820",reponse.responseText);
                     }
                 });
             }
@@ -849,7 +848,7 @@
                         getTotalAmount();
                     },
                     error: function (reponse) {
-                        console.log("line 848", reponse.responseText);
+                        console.log("line 848",reponse.responseText);
                     }
                 });
             }
@@ -963,26 +962,24 @@
         });
     }
 
-    // Tăng số lượng sản phẩm trong giỏ hàng
     function CongSL(idProductDetail) {
-        var $quantityInput = $('#quantity-input-' + idProductDetail);
-        var newQuantity = parseInt($quantityInput.val()) + 1;
+        var quantityInput = document.getElementById('quantity-input-' + idProductDetail);
+        var newQuantity = parseInt(quantityInput.value) + 1;
         UpdateSLInCart(idProductDetail, newQuantity);
     }
 
-    // Giảm số lượng sản phẩm trong giỏ hàng
     function TruSL(idProductDetail) {
-        var $quantityInput = $('#quantity-input-' + idProductDetail);
-        var newQuantity = parseInt($quantityInput.val()) - 1;
+        var quantityInput = document.getElementById('quantity-input-' + idProductDetail);
+        var newQuantity = parseInt(quantityInput.value) - 1;
         if (newQuantity < 1) {
-            return; // Không cho số lượng nhỏ hơn 1
+            // Số lượng không thể nhỏ hơn 1
+            return;
         }
         UpdateSLInCart(idProductDetail, newQuantity);
     }
 
-    // Cập nhật số lượng sản phẩm trong giỏ hàng
     function UpdateSLInCart(idProductDetail, newQuantity) {
-        var priceValue = parseInt($('#price-item-' + idProductDetail).text()); // Lấy giá trị số từ textContent
+        var priceValue = document.getElementById('price-item-' + idProductDetail).textContent;
 
         $.ajax({
             type: "POST",
@@ -995,26 +992,27 @@
                 if (result.status == true) {
                     var totalPrice = priceValue * newQuantity;
                     var formattedTotalPrice = totalPrice.toLocaleString('en-US', { minimumFractionDigits: 0 });
-                    $('#cart-item-total-' + idProductDetail).text(formattedTotalPrice + " đ");
-                    resetCountponse(); 
-                    coinsUsed = 0;     
-                    total = result.total; 
-                    getcartAjax();     
-                    getTotalAmount();  
+                    document.getElementById('cart-item-total-' + idProductDetail).textContent = formattedTotalPrice + " đ";
+                    resetCountponse();
+                    coinsUsed = 0;
+                    total = result.total;
+                    getcartAjax();
+                    getTotalAmount();
                 } else {
-                    $('#quantity-input-' + idProductDetail).val(result.oldQuantity);
+
+                    document.getElementById('quantity-input-' + idProductDetail).value = result.oldQuantity;
                     showToast(result.message, result.status);
                 }
             },
             error: function (error) {
+
                 location.reload();
             }
         });
     }
 
-    // Cập nhật số lượng khi người dùng nhập trực tiếp
     function updateQuantity(idProductDetail) {
-        var newQuantity = parseInt($('#quantity-input-' + idProductDetail).val());
+        var newQuantity = document.getElementById('quantity-input-' + idProductDetail).value;
         UpdateSLInCart(idProductDetail, newQuantity);
     }
 

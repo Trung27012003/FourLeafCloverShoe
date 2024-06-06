@@ -957,8 +957,7 @@
 
                     if (term.length > 0) {
                         var found = false;
-                        data.forEach(function (result) {
-                            // $.each(data, function (index, result) {
+                        $.each(data, function (index, result) {
                             if (result.text.toLowerCase().includes(term.toLowerCase())) {
                                 var resultElement = $('<li></li>').addClass('dropdown-item form-control');
                                 var productItem = $('<div></div>').addClass('media-body ms-3');

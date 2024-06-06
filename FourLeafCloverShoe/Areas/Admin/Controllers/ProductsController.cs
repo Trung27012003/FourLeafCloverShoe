@@ -21,7 +21,6 @@ namespace FourLeafCloverShoe.Areas.Admin.Controllers
         private readonly IProductImageService _productImageService;
         private readonly ICategoryService _categoryService;
         private readonly IProductDetailService _productDetailService;
-        private readonly IColorsService _colorsService;
         private readonly IWebHostEnvironment _webHostEnvironment;
         private List<IFormFile> _lstIFormFile;
 
@@ -31,9 +30,7 @@ namespace FourLeafCloverShoe.Areas.Admin.Controllers
                                     IProductImageService productImageService,
                                     IProductDetailService productDetailService,
                                     ICategoryService categoryService,
-                                    IWebHostEnvironment webHostEnvironment,
-                                    IColorsService colorsService
-                                    )
+                                    IWebHostEnvironment webHostEnvironment)
         {
             _productService = productService;
             _sizeService = sizeService;
@@ -41,7 +38,6 @@ namespace FourLeafCloverShoe.Areas.Admin.Controllers
             _productImageService = productImageService;
             _categoryService = categoryService;
             _productDetailService = productDetailService;
-            _colorsService = colorsService;
             _lstIFormFile = new List<IFormFile>();
             _webHostEnvironment = webHostEnvironment;
         }
@@ -56,7 +52,7 @@ namespace FourLeafCloverShoe.Areas.Admin.Controllers
             List<SelectListItem> ListCategoryitems = new List<SelectListItem>();
             foreach (var obj in (await _categoryService.Gets()))
             {
-
+                
                 ListCategoryitems.Add(new SelectListItem()
                 {
                     Text = obj.Name,
@@ -82,7 +78,7 @@ namespace FourLeafCloverShoe.Areas.Admin.Controllers
         {
             //var listTags = tags.Split(',').ToList(); // thêm vào chuỗi string 
 
-
+           
             List<SelectListItem> ListCategoryitems = new List<SelectListItem>();
             // Giả sử myList là danh sách dữ liệu của bạn
             foreach (var obj in (await _categoryService.Gets()))
@@ -124,7 +120,7 @@ namespace FourLeafCloverShoe.Areas.Admin.Controllers
                     ModelState.AddModelError("", "Vui lòng thêm ảnh.");
                     return View(product);
                 }
-
+                
                 product.CreateAt = DateTime.Now;
                 product.Description = product.Description;
                 product.ProductCode = GetInitials(product.ProductName) + DateTime.Now.ToString("yyMMddHHmmss");
@@ -306,35 +302,22 @@ namespace FourLeafCloverShoe.Areas.Admin.Controllers
         public async Task<IActionResult> CreateProductDetail(Guid productId)
         {
             List<SelectListItem> ListSizeitems = new List<SelectListItem>();
-            List<SelectListItem> ListColorsitems = new List<SelectListItem>();
             var productDetails = await _productDetailService.GetByProductId(productId);
 
             foreach (var obj in (await _sizeService.Gets()).OrderBy(c => c.Name))
             {
-                //if (productDetails.FirstOrDefault(p => p.SizeId == obj.Id) == null)
-                //{
+                if (productDetails.FirstOrDefault(p => p.SizeId == obj.Id) == null)
+                {
                     ListSizeitems.Add(new SelectListItem()
                     {
                         Text = obj.Name,
                         Value = obj.Id.ToString()
                     });
-                //}
-            }
-            foreach (var obj in (await _colorsService.Gets()).OrderBy(c => c.ColorName))
-            {
-                //if (productDetails.FirstOrDefault(p => p.ColorId == obj.Id) == null)
-                //{
-                    ListColorsitems.Add(new SelectListItem()
-                    {
-                        Text = obj.ColorName,
-                        Value = obj.Id.ToString()
-                    });
-                //}
+                }
             }
 
             ViewBag.productId = productId;
             ViewBag.ListSizeitems = ListSizeitems;
-            ViewBag.ListColorsitems = ListColorsitems;
             return View();
         }
 
@@ -342,33 +325,21 @@ namespace FourLeafCloverShoe.Areas.Admin.Controllers
         public async Task<IActionResult> CreateProductDetail(ProductDetail productDetail)
         {
             List<SelectListItem> ListSizeitems = new List<SelectListItem>();
-            List<SelectListItem> ListColorsitems = new List<SelectListItem>();
             foreach (var obj in ((await _sizeService.Gets()).OrderBy(c => c.Name)))
             {
                 ListSizeitems.Add(new SelectListItem()
                 {
                     Text = obj.Name,
-                    Value = obj.Id.ToString(),
-                    
-                });
-            }
-            foreach (var obj in (await _colorsService.Gets()).OrderBy(c => c.ColorName))
-            {
-                ListColorsitems.Add(new SelectListItem()
-                {
-                    Text = obj.ColorName,
                     Value = obj.Id.ToString()
                 });
             }
             ViewBag.ListSizeitems = ListSizeitems;
-            ViewBag.ListColorsitems = ListColorsitems;
             if (ModelState.IsValid)
             {
                 var product = await _productService.GetById(productDetail.ProductId);
                 var size = await _sizeService.GetById(productDetail.SizeId);
-                var colors = await _colorsService.GetById(productDetail.ColorId);
                 productDetail.CreateAt = DateTime.Now;
-                productDetail.SKU = product.ProductCode + "-" + size.Name.Trim().Replace(" ", "_").ToUpper() + colors.ColorName.Trim().Replace(" ", "_").ToUpper();
+                productDetail.SKU = product.ProductCode + "-" + size.Name.Trim().Replace(" ", "_").ToUpper();
                 productDetail.Status = productDetail.Status;
                 var result = await _productDetailService.Add(productDetail);
                 if (result)
@@ -387,34 +358,18 @@ namespace FourLeafCloverShoe.Areas.Admin.Controllers
             List<SelectListItem> ListSizeitems = new List<SelectListItem>();
             foreach (var obj in (await _sizeService.Gets()).OrderBy(c => c.Name))
             {
-                //if (productDetails.FirstOrDefault(p => p.SizeId == obj.Id) == null || obj.Id == productDetail.SizeId)
-                //{
+                if (productDetails.FirstOrDefault(p => p.SizeId == obj.Id) == null || obj.Id == productDetail.SizeId)
+                {
                     ListSizeitems.Add(new SelectListItem()
                     {
                         Text = obj.Name,
                         Value = obj.Id.ToString(),
                         Selected = obj.Id == productDetail.SizeId
                     });
-                //}
+                }
             }
 
             ViewBag.ListSizeitems = ListSizeitems;
-
-            List<SelectListItem> ListColorsitems = new List<SelectListItem>();
-            foreach (var obj in (await _colorsService.Gets()).OrderBy(c => c.ColorName))
-            {
-                //if (productDetails.FirstOrDefault(p => p.SizeId == obj.Id) == null || obj.Id == productDetail.SizeId)
-                //{
-                    ListColorsitems.Add(new SelectListItem()
-                    {
-                        Text = obj.ColorName,
-                        Value = obj.Id.ToString(),
-                        Selected = obj.Id == productDetail.ColorId
-                    });
-                //}
-            }
-
-            ViewBag.ListColorsitems = ListColorsitems;
             ViewBag.productId = productDetail.ProductId;
 
             return View(productDetail);

@@ -15,7 +15,6 @@ namespace FourLeafCloverShoe.Share.Models
         public string? Reply { get; set; }
         public string? ImageUrl { get; set; }
         public float? Rating { get; set; }
-        public DateTime? CreateDate { get; set; }
         public int? Status { get; set; }
         [ForeignKey("OrderItemId")]
         // Thêm thuộc tính navigation để thiết lập quan hệ 1-1

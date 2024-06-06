@@ -110,9 +110,6 @@ namespace FourLeafCloverShoe.Services
                     .Include(c => c.OrderItems)
                         .ThenInclude(c => c.ProductDetails)
                             .ThenInclude(c => c.Size)
-                    .Include(c=>c.OrderItems)//them lay tu bang rate
-                        .ThenInclude(c=>c.Rate)
-                    .Include(c=>c.Users)
                     .ToListAsync();
                 if (obj != null)
                 {
@@ -164,6 +161,7 @@ namespace FourLeafCloverShoe.Services
                 return false;
             }
         }
+<<<<<<< HEAD
 
         public bool UpdateOrderStatus(Guid idOrder, int? Status, Guid? IdStaff)
         {
@@ -208,5 +206,7 @@ namespace FourLeafCloverShoe.Services
             //}
             return true;
         }
+=======
+>>>>>>> parent of ba960dd (Merge remote-tracking branch 'origin/Mèo-béo' into hung)
     }
 }

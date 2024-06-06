@@ -47,7 +47,7 @@
             @if (Model.ListOrder.Count() > 0)
             {
                 <div data-bind="foreach:PurchaseItems">
-                    @foreach (var item in Model.ListOrder.OrderByDescending(c=>c.CreateDate))
+                    @foreach (var item in Model.ListOrder)
                 {
 
                         <div class="order-item">
